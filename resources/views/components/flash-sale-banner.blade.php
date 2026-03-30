@@ -3,102 +3,134 @@
 @endphp
 
 @if($flashSale)
-{{-- Full-width banner, dark themed, countdown + products --}}
-<section class="bg-gray-950 border-b border-zinc-900 overflow-hidden">
+<div x-data="{
+        open: false,
+        dismissed: sessionStorage.getItem('flash_dismissed_{{ $flashSale->id }}') === '1',
+        dismiss() {
+            this.dismissed = true;
+            sessionStorage.setItem('flash_dismissed_{{ $flashSale->id }}', '1');
+        }
+     }"
+     x-show="!dismissed"
+     x-cloak
+     class="bg-gray-950 border-b border-zinc-800">
 
-    {{-- Top bar: label + countdown --}}
-    <div class="max-w-6xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4"
-        x-data="flashCountdown({{ $flashSale->ends_at->timestamp }})"
-        x-init="start()">
+    {{-- Compact Bar --}}
+    <div class="max-w-6xl mx-auto px-4 sm:px-6"
+         x-data="flashCountdown({{ $flashSale->ends_at->timestamp }})"
+         x-init="start()">
 
-        <div class="flex items-center gap-3">
-            {{-- Lightning bolt icon --}}
-            <div class="w-8 h-8 bg-amber-400 rounded-lg flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4 text-gray-950" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                </svg>
-            </div>
-            <div>
-                <p class="text-white text-sm font-semibold">{{ $flashSale->name }}</p>
-                <p class="text-zinc-500 text-xs">Penawaran terbatas, jangan sampai terlewat!</p>
-            </div>
-        </div>
+        <div class="flex items-center gap-3 h-11">
 
-        {{-- Countdown --}}
-        <div class="flex items-center gap-2 shrink-0">
-            <span class="text-zinc-500 text-xs mr-1">Berakhir dalam:</span>
-            <template x-if="!expired">
-                <div class="flex items-center gap-1.5">
-                    <div class="bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-center min-w-[44px]">
-                        <p class="text-white text-sm font-semibold font-mono" x-text="hours"></p>
-                        <p class="text-zinc-600 text-[10px]">Jam</p>
-                    </div>
-                    <span class="text-zinc-600 font-bold">:</span>
-                    <div class="bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-center min-w-[44px]">
-                        <p class="text-white text-sm font-semibold font-mono" x-text="minutes"></p>
-                        <p class="text-zinc-600 text-[10px]">Menit</p>
-                    </div>
-                    <span class="text-zinc-600 font-bold">:</span>
-                    <div class="bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-center min-w-[44px]">
-                        <p class="text-white text-sm font-semibold font-mono" x-text="seconds"></p>
-                        <p class="text-zinc-600 text-[10px]">Detik</p>
-                    </div>
+            {{-- Toggle expand --}}
+            <button @click="open = !open"
+                class="flex items-center gap-2.5 flex-1 min-w-0 text-left group">
+
+                {{-- Lightning icon --}}
+                <div class="w-5 h-5 bg-amber-400 rounded flex items-center justify-center shrink-0">
+                    <svg class="w-3 h-3 text-gray-950" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
                 </div>
-            </template>
-            <template x-if="expired">
-                <span class="text-red-400 text-sm font-medium">Flash Sale Berakhir</span>
-            </template>
+
+                {{-- Name --}}
+                <span class="text-white text-xs font-semibold truncate">{{ $flashSale->name }}</span>
+
+                {{-- Separator --}}
+                <span class="text-zinc-700 shrink-0 hidden sm:block">·</span>
+
+                {{-- Countdown --}}
+                <template x-if="!expired">
+                    <div class="items-center gap-1 shrink-0 hidden sm:flex">
+                        <span class="text-zinc-500 text-xs">Berakhir</span>
+                        <span class="text-amber-400 text-xs font-mono font-semibold tabular-nums"
+                              x-text="hours + ':' + minutes + ':' + seconds"></span>
+                    </div>
+                </template>
+                <template x-if="expired">
+                    <span class="text-red-400 text-xs font-medium shrink-0">Berakhir</span>
+                </template>
+
+                {{-- Mobile countdown --}}
+                <template x-if="!expired">
+                    <span class="text-amber-400 text-xs font-mono font-semibold tabular-nums shrink-0 sm:hidden"
+                          x-text="hours + ':' + minutes + ':' + seconds"></span>
+                </template>
+
+                {{-- Chevron --}}
+                <svg class="w-3.5 h-3.5 text-zinc-500 shrink-0 transition-transform duration-200 ml-1"
+                     :class="open ? 'rotate-180' : ''"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+
+            {{-- Lihat semua label --}}
+            <span class="text-zinc-600 text-xs shrink-0 hidden sm:block"
+                  x-text="open ? 'Tutup' : '{{ $flashSale->items->count() }} produk'"></span>
+
+            {{-- Dismiss button --}}
+            <button @click.stop="dismiss()"
+                class="text-zinc-600 hover:text-zinc-300 transition shrink-0 ml-1 p-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+
         </div>
     </div>
 
-    {{-- Product strip --}}
+    {{-- Dropdown Product Strip --}}
     @if($flashSale->items->isNotEmpty())
-    <div class="border-t border-zinc-900">
-        <div class="max-w-6xl mx-auto px-6 py-4">
-            <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+    <div x-show="open"
+         x-collapse
+         class="border-t border-zinc-900">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3">
+            <div class="flex gap-2.5 overflow-x-auto pb-1"
+                 style="scrollbar-width: none; -ms-overflow-style: none;">
                 @foreach($flashSale->items as $item)
-                @if($item->product?->is_active)
-                <a href="{{ route('shop.show', $item->product->slug) }}"
-                    class="flex-shrink-0 flex items-center gap-3 bg-zinc-900 border border-zinc-800 hover:border-zinc-600 rounded-xl p-3 transition w-56 group">
+                    @if($item->product?->is_active)
+                    <a href="{{ route('shop.show', $item->product->slug) }}"
+                       class="flex-shrink-0 flex items-center gap-2.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-600 rounded-xl px-3 py-2 transition group w-48">
 
-                    {{-- Product image --}}
-                    <div class="w-12 h-12 rounded-lg overflow-hidden bg-zinc-800 shrink-0">
-                        @if($item->product->image)
-                            <img src="{{ Storage::url($item->product->image) }}"
-                                alt="{{ $item->product->name }}"
-                                class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                        @endif
-                    </div>
-
-                    <div class="min-w-0">
-                        <p class="text-white text-xs font-medium truncate">{{ $item->product->name }}</p>
-                        <p class="text-amber-400 text-sm font-semibold">
-                            Rp {{ number_format($item->flash_price, 0, ',', '.') }}
-                        </p>
-                        <p class="text-zinc-500 text-xs line-through">
-                            Rp {{ number_format($item->product->price, 0, ',', '.') }}
-                        </p>
-                    </div>
-
-                    {{-- Discount badge --}}
-                    <div class="ml-auto shrink-0">
-                        <span class="bg-amber-400 text-gray-950 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-                            @if($item->discount_type === 'percent')
-                                -{{ $item->discount_value }}%
-                            @else
-                                -Rp{{ number_format($item->discount_value/1000, 0) }}rb
+                        {{-- Image --}}
+                        <div class="w-10 h-10 rounded-lg overflow-hidden bg-zinc-800 shrink-0">
+                            @if($item->product->image)
+                                <img src="{{ Storage::url($item->product->image) }}"
+                                     alt="{{ $item->product->name }}"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                             @endif
-                        </span>
-                    </div>
-                </a>
-                @endif
+                        </div>
+
+                        {{-- Info --}}
+                        <div class="min-w-0 flex-1">
+                            <p class="text-white text-xs font-medium truncate leading-tight">{{ $item->product->name }}</p>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <span class="text-amber-400 text-xs font-semibold">
+                                    Rp {{ number_format($item->flash_price, 0, ',', '.') }}
+                                </span>
+                                <span class="bg-amber-400/20 text-amber-400 text-[10px] font-bold px-1 rounded">
+                                    @if($item->discount_type === 'percent')
+                                        -{{ $item->discount_value }}%
+                                    @else
+                                        -Rp{{ number_format($item->discount_value / 1000, 0) }}rb
+                                    @endif
+                                </span>
+                            </div>
+                            <p class="text-zinc-600 text-[10px] line-through leading-tight">
+                                Rp {{ number_format($item->product->price, 0, ',', '.') }}
+                            </p>
+                        </div>
+
+                    </a>
+                    @endif
                 @endforeach
             </div>
         </div>
     </div>
     @endif
 
-</section>
+</div>
 
 @push('scripts')
 <script>
@@ -112,8 +144,7 @@ function flashCountdown(endTimestamp) {
             this.timer = setInterval(() => this.tick(), 1000);
         },
         tick() {
-            const now = Math.floor(Date.now() / 1000);
-            const diff = endTimestamp - now;
+            const diff = endTimestamp - Math.floor(Date.now() / 1000);
             if (diff <= 0) {
                 this.expired = true;
                 clearInterval(this.timer);
