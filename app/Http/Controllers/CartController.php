@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Notification;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -57,6 +58,15 @@ class CartController extends Controller
         }
 
         session()->put('cart', $cart);
+
+        Notification::send(
+            auth()->id(),
+            'cart',
+            'Produk Ditambahkan ke Keranjang',
+            $product->name . ' berhasil ditambahkan ke keranjang belanjamu.',
+            route('cart.index')
+        );
+
         return response()->json(['success' => true, 'cartCount' => collect(session('cart'))->sum('quantity')]);
     }
 

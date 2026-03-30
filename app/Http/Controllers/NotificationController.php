@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
+use App\Models\Order;
 
 class NotificationController extends Controller
 {
@@ -12,12 +13,17 @@ class NotificationController extends Controller
             ->latest()
             ->paginate(20);
 
+        $pendingOrders = Order::where('user_id', auth()->id())
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
         // Tandai semua sebagai dibaca
         Notification::where('user_id', auth()->id())
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 
-        return view('notifications.index', compact('notifications'));
+        return view('notifications.index', compact('notifications', 'pendingOrders'));
     }
 
     public function markRead(Notification $notification)

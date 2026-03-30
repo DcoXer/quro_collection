@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\NewOrderNotification;
 use App\Mail\OrderConfirmation;
+use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Voucher;
 use App\Services\CartService;
@@ -85,6 +86,14 @@ class CheckoutController extends Controller
         session()->forget(['cart', 'voucher']);
 
         $this->sendOrderEmails($order);
+
+        Notification::send(
+            $order->user_id,
+            'order',
+            'Pesanan Berhasil Dibuat',
+            'Pesanan ' . $order->invoice_number . ' menunggu pembayaran. Selesaikan sebelum kehabisan stok!',
+            route('checkout.payment', $order->invoice_number)
+        );
 
         return $this->redirectToPayment($order);
     }
