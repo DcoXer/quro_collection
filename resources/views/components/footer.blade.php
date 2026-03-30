@@ -145,6 +145,7 @@
                         <li><a href="{{ route('home') }}" class="text-sm text-gray-400 hover:text-white transition">Beranda</a></li>
                         <li><a href="{{ route('shop.index') }}" class="text-sm text-gray-400 hover:text-white transition">Shop</a></li>
                         <li><a href="{{ route('about') }}" class="text-sm text-gray-400 hover:text-white transition">Tentang Kami</a></li>
+                        <li><a href="{{ route('privacy') }}" class="text-sm text-gray-400 hover:text-white transition">Kebijakan Privasi</a></li>
                         @auth
                             <li><a href="{{ route('cart.index') }}" class="text-sm text-gray-400 hover:text-white transition">Keranjang</a></li>
                             <li><a href="{{ route('orders.index') }}" class="text-sm text-gray-400 hover:text-white transition">Pesanan Saya</a></li>
