@@ -8,11 +8,38 @@
         </div>
 
         @if($orders->isEmpty())
-            <div class="text-center py-20">
-                <p class="text-gray-300 text-5xl mb-4">🛍</p>
-                <p class="text-gray-500 mb-2">Belum ada pesanan</p>
-                <a href="{{ route('shop.index') }}"
-                    class="text-sm text-gray-900 underline underline-offset-2">Mulai belanja</a>
+            <div class="flex flex-col items-center justify-center py-20 text-center">
+
+                {{-- Icon area --}}
+                <div class="relative mb-8">
+                    <div class="w-24 h-24 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center">
+                        <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                    </div>
+                    {{-- Decorative ring --}}
+                    <div class="absolute inset-0 w-24 h-24 rounded-full border border-dashed border-gray-200 scale-125"></div>
+                </div>
+
+                <p class="text-xs tracking-widest uppercase text-gray-300 mb-3">Riwayat Pesanan</p>
+                <h2 style="font-family: 'Playfair Display', serif;"
+                    class="text-2xl font-semibold text-gray-900 mb-3">Belum Ada Pesanan</h2>
+                <p class="text-sm text-gray-400 leading-relaxed max-w-xs mb-8">
+                    Kamu belum pernah melakukan pembelian. Temukan koleksi terbaik kami dan mulai belanja sekarang.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center gap-3">
+                    <a href="{{ route('shop.index') }}"
+                        class="bg-gray-900 text-white px-8 py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
+                        Mulai Belanja
+                    </a>
+                    <a href="{{ route('home') }}"
+                        class="text-sm text-gray-400 hover:text-gray-700 transition">
+                        Kembali ke Beranda
+                    </a>
+                </div>
+
             </div>
         @else
             <div class="space-y-3">

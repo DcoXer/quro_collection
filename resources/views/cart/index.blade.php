@@ -14,20 +14,37 @@
 
     @if(empty($cart))
         {{-- Empty State --}}
-        <div class="flex flex-col items-center justify-center py-24 text-center">
-            <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
-                <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                </svg>
+        <div class="flex flex-col items-center justify-center py-20 text-center">
+
+            {{-- Icon area --}}
+            <div class="relative mb-8">
+                <div class="w-24 h-24 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center">
+                    <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3"
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                </div>
+                {{-- Decorative ring --}}
+                <div class="absolute inset-0 w-24 h-24 rounded-full border border-dashed border-gray-200 scale-125"></div>
             </div>
+
+            <p class="text-xs tracking-widest uppercase text-gray-300 mb-3">Keranjang</p>
             <h2 style="font-family: 'Playfair Display', serif;"
-                class="text-xl font-semibold text-gray-900 mb-2">Keranjang Kosong</h2>
-            <p class="text-sm text-gray-400 mb-8 max-w-xs">Belum ada produk di keranjang kamu. Yuk mulai belanja!</p>
-            <a href="{{ route('shop.index') }}"
-                class="bg-gray-900 text-white px-8 py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
-                Mulai Belanja
-            </a>
+                class="text-2xl font-semibold text-gray-900 mb-3">Keranjang Masih Kosong</h2>
+            <p class="text-sm text-gray-400 leading-relaxed max-w-xs mb-8">
+                Belum ada produk di keranjang kamu. Temukan koleksi terbaik kami dan mulai belanja sekarang.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center gap-3">
+                <a href="{{ route('shop.index') }}"
+                    class="bg-gray-900 text-white px-8 py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
+                    Mulai Belanja
+                </a>
+                <a href="{{ route('wishlist.index') }}"
+                    class="text-sm text-gray-400 hover:text-gray-700 transition">
+                    Lihat Wishlist
+                </a>
+            </div>
         </div>
 
     @else
