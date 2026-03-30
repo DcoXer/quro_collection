@@ -90,8 +90,9 @@
                             @endif
                             <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
                             <span class="absolute bottom-0.5 right-0.5 bg-amber-400 text-gray-950 text-[8px] font-bold px-1 rounded">
-                                @if($item->discount_type === 'percent')-{{ $item->discount_value }}%
-                                @else-Rp{{ number_format($item->discount_value/1000,0) }}rb@endif
+                                {{ $item->discount_type === 'percent'
+                                    ? '-'.$item->discount_value.'%'
+                                    : '-Rp'.number_format($item->discount_value/1000,0).'rb' }}
                             </span>
                         </a>
                         @endif
