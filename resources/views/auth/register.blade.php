@@ -65,7 +65,8 @@
                 <p class="text-sm text-gray-400">Daftar dan mulai berbelanja sekarang</p>
             </div>
 
-            <form method="POST" action="{{ route('register') }}" class="space-y-4">
+            <form method="POST" action="{{ route('register') }}" class="space-y-4"
+                x-data="{ agreed: false }">
                 @csrf
 
                 <div>
@@ -100,8 +101,31 @@
                     @error('password_confirmation')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
 
-                <button type="submit"
-                    class="w-full bg-gray-900 text-white py-3.5 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
+                {{-- Privacy Policy Agreement --}}
+                <label class="flex items-start gap-3 cursor-pointer select-none">
+                    <div class="relative mt-0.5 shrink-0">
+                        <input type="checkbox" x-model="agreed" class="sr-only peer">
+                        <div class="w-5 h-5 rounded-md border-2 border-gray-300 peer-checked:border-gray-900 peer-checked:bg-gray-900 transition flex items-center justify-center">
+                            <svg x-show="agreed" x-cloak class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <span class="text-sm text-gray-500 leading-snug">
+                        Saya telah membaca dan menyetujui
+                        <a href="{{ route('privacy') }}" target="_blank"
+                            class="text-gray-900 font-medium underline underline-offset-2 hover:text-gray-600 transition">
+                            Kebijakan Privasi
+                        </a>
+                        Quro Collection.
+                    </span>
+                </label>
+
+                <button type="submit" :disabled="!agreed"
+                    :class="agreed
+                        ? 'bg-gray-900 text-white hover:bg-gray-700 cursor-pointer'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
+                    class="w-full py-3.5 rounded-xl text-sm font-medium transition">
                     Daftar Sekarang
                 </button>
 
