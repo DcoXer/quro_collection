@@ -51,13 +51,20 @@
                         <span class="text-zinc-400 text-sm mr-1">Berakhir dalam:</span>
                         <template x-if="!expired">
                             <div class="flex items-center gap-1.5">
-                                @foreach([['hours','Jam'],['minutes','Menit'],['seconds','Detik']] as [$unit,$label])
                                 <div class="bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-center min-w-[52px]">
-                                    <p class="text-white text-lg font-bold font-mono tabular-nums" x-text="{{ $unit }}"></p>
-                                    <p class="text-zinc-500 text-[10px]">{{ $label }}</p>
+                                    <p class="text-white text-lg font-bold font-mono tabular-nums" x-text="hours"></p>
+                                    <p class="text-zinc-500 text-[10px]">Jam</p>
                                 </div>
-                                @if(!$loop->last)<span class="text-zinc-600 font-bold text-lg">:</span>@endif
-                                @endforeach
+                                <span class="text-zinc-600 font-bold text-lg">:</span>
+                                <div class="bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-center min-w-[52px]">
+                                    <p class="text-white text-lg font-bold font-mono tabular-nums" x-text="minutes"></p>
+                                    <p class="text-zinc-500 text-[10px]">Menit</p>
+                                </div>
+                                <span class="text-zinc-600 font-bold text-lg">:</span>
+                                <div class="bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-center min-w-[52px]">
+                                    <p class="text-white text-lg font-bold font-mono tabular-nums" x-text="seconds"></p>
+                                    <p class="text-zinc-500 text-[10px]">Detik</p>
+                                </div>
                             </div>
                         </template>
                         <template x-if="expired">
