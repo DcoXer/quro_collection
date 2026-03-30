@@ -1,7 +1,8 @@
 <footer class="mt-24">
 
-    {{-- CTA Banner --}}
+    {{-- CTA Banner — Flash Sale jika aktif, slideshow jika tidak --}}
     @php
+        $footerFlashSale = \App\Models\FlashSale::active()->with(['items.product'])->first();
         $footerSlides = [
             ['type' => 'image', 'src' => asset('images/produk.jpeg')],
             ['type' => 'video', 'src' => asset('videos/produk.mp4')],
@@ -13,6 +14,126 @@
         ];
     @endphp
 
+    @if($footerFlashSale)
+
+    {{-- Flash Sale Banner --}}
+    <div class="relative overflow-hidden bg-gray-900"
+         x-data="footerFlashCountdown({{ $footerFlashSale->ends_at->timestamp }})"
+         x-init="start()">
+
+        {{-- Background: gambar produk pertama --}}
+        @if($footerFlashSale->items->first()?->product?->image)
+        <div class="absolute inset-0 bg-cover bg-center opacity-20"
+             style="background-image: url('{{ Storage::url($footerFlashSale->items->first()->product->image) }}')"></div>
+        @endif
+        <div class="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/80 to-gray-900/40"></div>
+
+        <div class="relative z-10 max-w-6xl mx-auto px-6 py-14">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-10">
+
+                {{-- Left: label + name + countdown --}}
+                <div>
+                    {{-- Badge --}}
+                    <div class="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 rounded-full px-3 py-1 mb-4">
+                        <svg class="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
+                        <span class="text-amber-400 text-xs font-semibold tracking-wide uppercase">Flash Sale</span>
+                    </div>
+
+                    <h3 style="font-family: 'Playfair Display', serif;"
+                        class="text-3xl md:text-4xl font-semibold text-white leading-snug mb-4">
+                        {{ $footerFlashSale->name }}
+                    </h3>
+
+                    {{-- Countdown --}}
+                    <div class="flex items-center gap-2">
+                        <span class="text-zinc-400 text-sm mr-1">Berakhir dalam:</span>
+                        <template x-if="!expired">
+                            <div class="flex items-center gap-1.5">
+                                @foreach([['hours','Jam'],['minutes','Menit'],['seconds','Detik']] as [$unit,$label])
+                                <div class="bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-center min-w-[52px]">
+                                    <p class="text-white text-lg font-bold font-mono tabular-nums" x-text="{{ $unit }}"></p>
+                                    <p class="text-zinc-500 text-[10px]">{{ $label }}</p>
+                                </div>
+                                @if(!$loop->last)<span class="text-zinc-600 font-bold text-lg">:</span>@endif
+                                @endforeach
+                            </div>
+                        </template>
+                        <template x-if="expired">
+                            <span class="text-red-400 text-sm font-medium">Flash Sale Berakhir</span>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Right: produk + CTA --}}
+                <div class="flex flex-col items-start md:items-end gap-5 shrink-0">
+
+                    {{-- Product previews --}}
+                    @if($footerFlashSale->items->isNotEmpty())
+                    <div class="flex gap-2.5">
+                        @foreach($footerFlashSale->items->take(4) as $item)
+                        @if($item->product?->is_active)
+                        <a href="{{ route('shop.show', $item->product->slug) }}"
+                           class="group relative w-14 h-14 rounded-xl overflow-hidden border border-white/10 hover:border-amber-400/50 transition">
+                            @if($item->product->image)
+                            <img src="{{ Storage::url($item->product->image) }}"
+                                 alt="{{ $item->product->name }}"
+                                 class="w-full h-full object-cover group-hover:scale-110 transition duration-300">
+                            @endif
+                            <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
+                            <span class="absolute bottom-0.5 right-0.5 bg-amber-400 text-gray-950 text-[8px] font-bold px-1 rounded">
+                                @if($item->discount_type === 'percent')-{{ $item->discount_value }}%
+                                @else-Rp{{ number_format($item->discount_value/1000,0) }}rb@endif
+                            </span>
+                        </a>
+                        @endif
+                        @endforeach
+                        @if($footerFlashSale->items->count() > 4)
+                        <div class="w-14 h-14 rounded-xl border border-white/10 bg-black/20 flex items-center justify-center">
+                            <span class="text-zinc-400 text-xs font-medium">+{{ $footerFlashSale->items->count() - 4 }}</span>
+                        </div>
+                        @endif
+                    </div>
+                    @endif
+
+                    {{-- CTA --}}
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('shop.index') }}"
+                            class="bg-amber-400 text-gray-950 text-sm font-semibold px-6 py-3 rounded-xl hover:bg-amber-300 transition">
+                            Belanja Sekarang
+                        </a>
+                        <a href="https://wa.me/6283108267397" target="_blank"
+                            class="border border-white/20 text-white text-sm px-6 py-3 rounded-xl hover:border-white/50 hover:bg-white/5 transition">
+                            WhatsApp
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function footerFlashCountdown(endTimestamp) {
+        return {
+            hours: '00', minutes: '00', seconds: '00',
+            expired: false, timer: null,
+            start() { this.tick(); this.timer = setInterval(() => this.tick(), 1000); },
+            tick() {
+                const diff = endTimestamp - Math.floor(Date.now() / 1000);
+                if (diff <= 0) { this.expired = true; clearInterval(this.timer); return; }
+                this.hours   = String(Math.floor(diff / 3600)).padStart(2, '0');
+                this.minutes = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+                this.seconds = String(diff % 60).padStart(2, '0');
+            }
+        };
+    }
+    </script>
+
+    @else
+
+    {{-- Original CTA Slideshow --}}
     <div class="relative overflow-hidden bg-gray-900"
         x-data="{
             current: 0,
@@ -36,7 +157,6 @@
         }"
         x-init="handleSlide()">
 
-        {{-- Static Slides --}}
         @foreach($footerSlides as $i => $slide)
             <div class="absolute inset-0 transition-opacity duration-700"
                 :class="current === {{ $i }} ? 'opacity-100 z-10' : 'opacity-0 z-0'">
@@ -51,10 +171,8 @@
             </div>
         @endforeach
 
-        {{-- Overlay --}}
         <div class="absolute inset-0 bg-gradient-to-r from-gray-900/85 via-gray-900/55 to-gray-900/20 z-20"></div>
 
-        {{-- Dots --}}
         <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-30">
             @foreach($footerSlides as $i => $slide)
                 <button @click="current = {{ $i }}; handleSlide()"
@@ -63,7 +181,6 @@
             @endforeach
         </div>
 
-        {{-- Content --}}
         <div class="relative z-30 max-w-6xl mx-auto px-6 py-14 flex flex-col md:flex-row items-center justify-between gap-8">
             <div>
                 <p class="text-xs tracking-widest uppercase text-gray-300 mb-2">Quro Collection</p>
@@ -85,6 +202,8 @@
         </div>
 
     </div>
+
+    @endif
 
     {{-- Main Footer --}}
     <div class="bg-gray-950">
