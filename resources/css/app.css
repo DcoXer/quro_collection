@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+    scroll-behavior: smooth;
+    text-rendering: optimizeSpeed;
+    -webkiit-scrollbar-width: none;
+    scrollbar-width: none;
+}
+.modal-scroll::-webkit-scrollbar {
+    display: none;
+}
+.modal-scroll {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find c:laragonwwwqurocollection/database/migrations -type f -name *.php)",
+      "Bash(find c:laragonwwwqurocollection -type f -name *.env*)",
+      "Bash(php artisan:*)",
+      "Bash(xargs grep:*)",
+      "Bash(composer show:*)",
+      "Bash(php artisan tinker --execute=\":*)"
+    ]
+  }
+}

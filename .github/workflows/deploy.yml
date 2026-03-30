@@ -1,0 +1,77 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, curl, zip, mysql, gd, intl, bcmath
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install PHP dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
+      - name: Install NPM dependencies & build assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+
+            cd /var/www/qurocollection
+
+            echo "==> Pulling latest code..."
+            git pull origin main
+
+            echo "==> Installing PHP dependencies..."
+            composer install --no-dev --optimize-autoloader --no-interaction
+
+            echo "==> Installing NPM & building assets..."
+            npm ci
+            npm run build
+
+            echo "==> Running migrations..."
+            php artisan migrate --force
+
+            echo "==> Clearing & caching config..."
+            php artisan config:clear
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan event:cache
+
+            echo "==> Restarting queue worker..."
+            php artisan queue:restart
+
+            echo "==> Setting permissions..."
+            sudo chown -R www-data:www-data storage bootstrap/cache
+            sudo chmod -R 775 storage bootstrap/cache
+
+            echo "✅ Deploy selesai!"
