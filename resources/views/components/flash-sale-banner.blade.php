@@ -3,16 +3,7 @@
 @endphp
 
 @if($flashSale)
-<div x-data="{
-        open: false,
-        dismissed: sessionStorage.getItem('flash_dismissed_{{ $flashSale->id }}') === '1',
-        dismiss() {
-            this.dismissed = true;
-            sessionStorage.setItem('flash_dismissed_{{ $flashSale->id }}', '1');
-        }
-     }"
-     x-show="!dismissed"
-     x-cloak
+<div x-data="{ open: false }"
      class="bg-gray-950 border-b border-zinc-800">
 
     {{-- Compact Bar --}}
@@ -57,23 +48,18 @@
                           x-text="hours + ':' + minutes + ':' + seconds"></span>
                 </template>
 
-                {{-- Chevron --}}
-                <svg class="w-3.5 h-3.5 text-zinc-500 shrink-0 transition-transform duration-200 ml-1"
+            </button>
+
+            {{-- Produk count label --}}
+            <span class="text-zinc-600 text-xs shrink-0 hidden sm:block">{{ $flashSale->items->count() }} produk</span>
+
+            {{-- Dropdown toggle button --}}
+            <button @click.stop="open = !open"
+                class="text-zinc-500 hover:text-white transition shrink-0 p-1">
+                <svg class="w-4 h-4 transition-transform duration-200"
                      :class="open ? 'rotate-180' : ''"
                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-            </button>
-
-            {{-- Lihat semua label --}}
-            <span class="text-zinc-600 text-xs shrink-0 hidden sm:block"
-                  x-text="open ? 'Tutup' : '{{ $flashSale->items->count() }} produk'"></span>
-
-            {{-- Dismiss button --}}
-            <button @click.stop="dismiss()"
-                class="text-zinc-600 hover:text-zinc-300 transition shrink-0 ml-1 p-1">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
 
