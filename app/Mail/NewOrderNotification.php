@@ -25,7 +25,7 @@ class NewOrderNotification extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.new-order-notification',
+            view: 'emails.new-order-notification',
         );
     }
 }

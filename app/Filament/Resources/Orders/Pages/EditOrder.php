@@ -3,12 +3,14 @@
 namespace App\Filament\Resources\Orders\Pages;
 
 use App\Filament\Resources\Orders\OrderResource;
+use App\Mail\OrderStatusMail;
 use App\Models\Notification;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Services\CartService;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class EditOrder extends EditRecord
 {
@@ -51,6 +53,10 @@ class EditOrder extends EditRecord
                     $messages[$order->status],
                     route('orders.show', $order->invoice_number)
                 );
+
+                // Kirim email ke customer
+                Mail::to($order->user->email)
+                    ->queue(new OrderStatusMail($order, $previousStatus));
             }
         }
     }

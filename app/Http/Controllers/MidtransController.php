@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\OrderStatusMail;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Product;
@@ -11,6 +12,7 @@ use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class MidtransController extends Controller
 {
@@ -100,6 +102,10 @@ class MidtransController extends Controller
                     $messages[$newStatus],
                     route('orders.show', $order->invoice_number)
                 );
+
+                // Kirim email ke customer
+                Mail::to($order->user->email)
+                    ->queue(new OrderStatusMail($order, $order->getOriginal('status')));
             }
         });
 
