@@ -1,4 +1,10 @@
 <x-app-layout>
+    @php
+        $flashItem = \App\Models\FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())
+            ->where('product_id', $product->id)
+            ->with('flashSale')
+            ->first();
+    @endphp
     @push('seo')
     <title>{{ $product->meta_title ?? $product->name }} — Quro Collection</title>
     <meta name="description" content="{{ $product->meta_description ?? Str::limit($product->description, 160) }}">
@@ -96,9 +102,35 @@
                     {{ $product->name }}
                 </h1>
 
+                @if($flashItem)
+                <div class="mb-4">
+                    <div class="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-1.5 mb-2">
+                        <svg class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
+                        <span class="text-amber-700 text-xs font-semibold">Flash Sale!</span>
+                    </div>
+                    <div class="flex items-baseline gap-3">
+                        <p class="text-2xl text-gray-900 font-semibold" id="display-price">
+                            Rp {{ number_format($flashItem->flash_price, 0, ',', '.') }}
+                        </p>
+                        <p class="text-base text-gray-400 line-through">
+                            Rp {{ number_format($product->price, 0, ',', '.') }}
+                        </p>
+                        <span class="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-lg">
+                            @if($flashItem->discount_type === 'percent')
+                                -{{ $flashItem->discount_value }}%
+                            @else
+                                Hemat Rp {{ number_format($flashItem->discount_value, 0, ',', '.') }}
+                            @endif
+                        </span>
+                    </div>
+                </div>
+                @else
                 <p class="text-2xl text-gray-900 font-medium mb-4" id="display-price">
                     Rp {{ number_format($product->price, 0, ',', '.') }}
                 </p>
+                @endif
 
                 @if($product->description)
                     <p class="text-gray-500 text-sm leading-relaxed mb-6">

@@ -21,6 +21,8 @@
 <body class="bg-white text-gray-900 antialiased" style="font-family: 'Inter', sans-serif;">
     {{-- Navigation --}}
     @include('layouts.navigation')
+    {{-- Flash Sale Banner --}}
+    <x-flash-sale-banner />
     {{-- Page Content --}}
     <main>
         {{ $slot }}

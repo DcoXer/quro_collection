@@ -1,3 +1,8 @@
+@php
+    $flashProductIds = \App\Models\FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())
+        ->pluck('product_id')
+        ->toArray();
+@endphp
 @if($categories->isEmpty())
     <div class="text-center py-20 text-gray-400">
         <p class="text-lg">Produk tidak ditemukan.</p>
@@ -54,6 +59,18 @@
                                     @endforeach
 
                                 </div>
+
+                                {{-- Flash Sale Badge --}}
+                                @if(in_array($product->id, $flashProductIds))
+                                <div class="absolute top-2 left-2 z-10">
+                                    <span class="inline-flex items-center gap-1 bg-amber-400 text-gray-950 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                                        <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                                        </svg>
+                                        Flash
+                                    </span>
+                                </div>
+                                @endif
 
                                 {{-- Prev/Next --}}
                                 @if($product->media->count() > 0 || $product->image)
