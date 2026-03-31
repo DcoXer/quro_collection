@@ -18,7 +18,51 @@
     @stack('styles')
     @stack('seo')
 </head>
-<body class="bg-white text-gray-900 antialiased" style="font-family: 'Inter', sans-serif;">
+{{-- Page transition bar --}}
+<div id="page-bar" style="
+    position:fixed;top:0;left:0;z-index:9999;
+    height:2px;width:0%;
+    background:linear-gradient(90deg,#111827,#6b7280);
+    transition:width .25s ease,opacity .3s ease;
+    opacity:0;pointer-events:none;
+"></div>
+
+<body class="bg-white text-gray-900 antialiased" style="font-family: 'Inter', sans-serif; opacity:0; transition: opacity .18s ease;">
+<script>
+(function(){
+    var bar = document.getElementById('page-bar');
+    var body = document.body;
+    var timer;
+
+    // Fade in page on load
+    function pageIn() {
+        body.style.opacity = '1';
+        bar.style.width = '100%';
+        bar.style.opacity = '1';
+        clearTimeout(timer);
+        timer = setTimeout(function(){ bar.style.opacity = '0'; bar.style.width = '0%'; }, 350);
+    }
+
+    // Start bar on link click
+    document.addEventListener('click', function(e){
+        var a = e.target.closest('a');
+        if (!a || !a.href) return;
+        var url = a.href;
+        // Skip: external, hash-only, js:, target=_blank, download
+        if (a.target === '_blank' || a.download || url.startsWith('javascript') || url.startsWith('mailto') || url.startsWith('tel')) return;
+        var isSameOrigin = url.startsWith(location.origin) || url.startsWith('/');
+        var isHashOnly = a.getAttribute('href') && a.getAttribute('href').startsWith('#');
+        if (!isSameOrigin || isHashOnly) return;
+
+        bar.style.transition = 'width .6s cubic-bezier(.4,0,.2,1), opacity .3s ease';
+        bar.style.opacity = '1';
+        bar.style.width = '75%';
+    });
+
+    window.addEventListener('pageshow', pageIn);
+    document.addEventListener('DOMContentLoaded', pageIn);
+})();
+</script>
     {{-- Navigation --}}
     @include('layouts.navigation')
     {{-- Flash Sale Banner --}}

@@ -38,12 +38,29 @@ class ShopController extends Controller
     {
         abort_if(!$product->is_active, 404);
 
+        // Track recently viewed (session, max 8, exclude current)
+        $viewed = session()->get('recently_viewed', []);
+        $viewed = array_filter($viewed, fn($id) => $id !== $product->id);
+        array_unshift($viewed, $product->id);
+        session()->put('recently_viewed', array_slice($viewed, 0, 8));
+
         $related = Product::with('category')
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->where('is_active', true)
             ->limit(4)
             ->get();
+
+        // Recently viewed: exclude current product, max 4
+        $recentIds = array_values(array_filter(
+            session()->get('recently_viewed', []),
+            fn($id) => $id !== $product->id
+        ));
+        $recentlyViewed = count($recentIds)
+            ? Product::with('category')->whereIn('id', array_slice($recentIds, 0, 4))
+                ->where('is_active', true)->get()
+                ->sortBy(fn($p) => array_search($p->id, $recentIds))->values()
+            : collect();
 
         $reviews      = $product->reviews()->with('user')->get();
         $avgRating    = $product->averageRating();
@@ -53,7 +70,7 @@ class ShopController extends Controller
             ? Wishlist::where('user_id', auth()->id())->where('product_id', $product->id)->exists()
             : false;
 
-        return view('shop.show', compact('product', 'related', 'reviews', 'avgRating', 'reviewCount', 'inWishlist'));
+        return view('shop.show', compact('product', 'related', 'recentlyViewed', 'reviews', 'avgRating', 'reviewCount', 'inWishlist'));
     }
 
     public function quickView(Product $product)

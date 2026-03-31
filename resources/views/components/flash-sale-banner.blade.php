@@ -90,19 +90,15 @@
 
                         {{-- Info --}}
                         <div class="min-w-0 flex-1">
-                            <p class="text-white text-xs font-medium truncate leading-tight">{{ $item->product->name }}</p>
-                            <div class="flex items-center gap-1.5 mt-0.5">
-                                <span class="text-amber-400 text-xs font-semibold">
-                                    Rp {{ number_format($item->flash_price, 0, ',', '.') }}
-                                </span>
-                                <span class="bg-amber-400/20 text-amber-400 text-[10px] font-bold px-1 rounded">
-                                    @if($item->discount_type === 'percent')
-                                        -{{ $item->discount_value }}%
-                                    @else
-                                        -Rp{{ number_format($item->discount_value / 1000, 0) }}rb
-                                    @endif
+                            <div class="flex items-center gap-1 mb-0.5">
+                                <p class="text-white text-xs font-medium truncate leading-tight flex-1">{{ $item->product->name }}</p>
+                                <span class="bg-amber-400/20 text-amber-400 text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0">
+                                    {{ $item->discount_type === 'percent' ? '-'.$item->discount_value.'%' : '-Rp'.number_format($item->discount_value/1000,0).'rb' }}
                                 </span>
                             </div>
+                            <p class="text-amber-400 text-xs font-semibold leading-tight">
+                                Rp {{ number_format($item->flash_price, 0, ',', '.') }}
+                            </p>
                             <p class="text-zinc-600 text-[10px] line-through leading-tight">
                                 Rp {{ number_format($item->product->price, 0, ',', '.') }}
                             </p>

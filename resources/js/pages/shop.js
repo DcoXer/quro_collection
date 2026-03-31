@@ -52,6 +52,18 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+// ─── Skeleton ────────────────────────────────────────────────────────────────
+function productSkeletonHTML(count = 8) {
+    const card = `
+        <div class="skeleton-card">
+            <div class="skeleton-img skeleton-pulse"></div>
+            <div class="skeleton-line skeleton-pulse" style="width:45%;height:10px;margin-top:10px"></div>
+            <div class="skeleton-line skeleton-pulse" style="width:80%;height:13px;margin-top:6px"></div>
+            <div class="skeleton-line skeleton-pulse" style="width:55%;height:12px;margin-top:6px"></div>
+        </div>`;
+    return `<div class="skeleton-grid">${card.repeat(count)}</div>`;
+}
+
 // ─── Product Search ───────────────────────────────────────────────────────────
 let searchTimer;
 
@@ -60,6 +72,10 @@ window.fetchProducts = function () {
     document.getElementById('reset-filter').classList.toggle('hidden', !search);
 
     clearTimeout(searchTimer);
+
+    // Show skeleton immediately
+    document.getElementById('product-grid').innerHTML = productSkeletonHTML(8);
+
     searchTimer = setTimeout(async () => {
         const params = new URLSearchParams();
         if (search) params.set('search', search);
@@ -69,7 +85,7 @@ window.fetchProducts = function () {
         });
         const html = await res.text();
         document.getElementById('product-grid').innerHTML = html;
-    }, 200);
+    }, 300);
 };
 
 document.addEventListener('DOMContentLoaded', function () {
