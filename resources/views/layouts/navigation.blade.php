@@ -242,57 +242,47 @@
     {{-- close nav, drawer goes outside --}}
 </nav>
 
-    {{-- Mobile Drawer Backdrop --}}
-    <div @click="mobileOpen = false"
-        :style="'transition:opacity 250ms ease;opacity:' + (mobileOpen ? '1' : '0') + ';pointer-events:' + (mobileOpen ? 'auto' : 'none')"
-        class="md:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
-        style="top:57px"></div>
-
-    {{-- Mobile Drawer --}}
-    <div :style="'transition:transform 300ms cubic-bezier(0.4,0,0.2,1);transform:translateX(' + (mobileOpen ? '0' : '-100%') + ')'"
-        class="md:hidden fixed left-0 w-4/5 max-w-xs bg-white z-50 flex flex-col shadow-2xl overflow-y-auto"
-        style="top:57px;bottom:0">
+    {{-- Mobile Menu — dropdown below nav, no fixed positioning issues --}}
+    <div x-show="mobileOpen"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 -translate-y-2"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 -translate-y-2"
+        class="md:hidden border-t border-gray-100 bg-white">
 
         @auth
-        {{-- User Card --}}
-        <div class="px-5 py-5 border-b border-gray-100">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 bg-gray-900 rounded-2xl flex items-center justify-center shrink-0">
-                    <span class="text-white text-base font-semibold">
-                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                    </span>
-                </div>
-                <div class="min-w-0">
-                    <p class="text-sm font-semibold text-gray-900 truncate">{{ auth()->user()->name }}</p>
-                    <p class="text-xs text-gray-400 truncate">{{ auth()->user()->email }}</p>
-                </div>
+        {{-- User strip --}}
+        <div class="px-5 py-4 flex items-center gap-3 bg-gray-50 border-b border-gray-100">
+            <div class="w-9 h-9 bg-gray-900 rounded-xl flex items-center justify-center shrink-0">
+                <span class="text-white text-sm font-semibold">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+            </div>
+            <div class="min-w-0">
+                <p class="text-sm font-semibold text-gray-900 truncate">{{ auth()->user()->name }}</p>
+                <p class="text-xs text-gray-400 truncate">{{ auth()->user()->email }}</p>
             </div>
         </div>
         @endauth
 
-        {{-- Nav Links --}}
-        <div class="flex-1 px-3 py-4 space-y-0.5">
+        <div class="px-4 py-3 space-y-0.5">
 
-            {{-- Shop --}}
             <a href="{{ route('shop.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition
-                {{ request()->routeIs('shop.*') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition
+                {{ request()->routeIs('shop.*') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50' }}"
                 @click="mobileOpen = false">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                 </svg>
                 Belanja
             </a>
 
-            {{-- Kategori --}}
             @if($categories->isNotEmpty())
             <div x-data="{ catOpen: false }">
                 <button @click="catOpen = !catOpen"
-                    class="flex items-center gap-3 w-full px-4 py-3 rounded-2xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
+                    class="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M4 6h16M4 10h16M4 14h8M4 18h8"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 10h16M4 14h8M4 18h8"/>
                     </svg>
                     Kategori
                     <svg class="w-3.5 h-3.5 ml-auto text-gray-400 transition-transform duration-200" :class="catOpen ? 'rotate-180' : ''"
@@ -300,14 +290,10 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                     </svg>
                 </button>
-                <div x-show="catOpen"
-                    x-transition:enter="transition-all duration-200"
-                    x-transition:enter-start="opacity-0 -translate-y-1"
-                    x-transition:enter-end="opacity-100 translate-y-0"
-                    class="ml-4 pl-4 border-l border-gray-100 mt-1 space-y-0.5">
+                <div x-show="catOpen" class="ml-10 space-y-0.5 pb-1">
                     @foreach($categories as $cat)
                         <a href="{{ route('shop.category', $cat) }}"
-                            class="flex items-center px-3 py-2.5 rounded-xl text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition"
+                            class="block px-3 py-2 rounded-xl text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition"
                             @click="mobileOpen = false">
                             {{ $cat->name }}
                         </a>
@@ -316,28 +302,24 @@
             </div>
             @endif
 
-            {{-- Tentang Kami --}}
             <a href="{{ route('about') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition
-                {{ request()->routeIs('about') ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}"
+                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition
+                {{ request()->routeIs('about') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50' }}"
                 @click="mobileOpen = false">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 Tentang Kami
             </a>
 
             @auth
-            <div class="h-px bg-gray-100 my-3 mx-1"></div>
+            <div class="h-px bg-gray-100 my-2"></div>
 
-            {{-- Cart --}}
             <a href="{{ route('cart.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition"
+                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
                 @click="mobileOpen = false">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
                 Keranjang
                 @php $cartCount = collect(session('cart', []))->sum('quantity'); @endphp
@@ -346,13 +328,11 @@
                 @endif
             </a>
 
-            {{-- Notifikasi --}}
             <a href="{{ route('notifications.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition"
+                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
                 @click="mobileOpen = false">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                 </svg>
                 Notifikasi
                 @if($unreadCount > 0)
@@ -360,13 +340,11 @@
                 @endif
             </a>
 
-            {{-- Wishlist --}}
             <a href="{{ route('wishlist.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition"
+                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
                 @click="mobileOpen = false">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                 </svg>
                 Wishlist
                 @if(($wishlistCount ?? 0) > 0)
@@ -374,41 +352,32 @@
                 @endif
             </a>
 
-            {{-- Pesanan --}}
             <a href="{{ route('orders.index') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition"
+                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
                 @click="mobileOpen = false">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
                 Pesanan Saya
             </a>
 
-            {{-- Profile --}}
             <a href="{{ route('profile.edit') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition"
+                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
                 @click="mobileOpen = false">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
                 Profile
             </a>
-            @endauth
 
-        </div>
+            <div class="h-px bg-gray-100 my-2"></div>
 
-        {{-- Bottom: Auth actions --}}
-        <div class="px-4 pb-6 pt-2 border-t border-gray-100">
-            @auth
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit"
-                    class="flex items-center gap-3 w-full px-4 py-3 rounded-2xl text-sm font-medium text-red-400 hover:bg-red-50 hover:text-red-600 transition">
+                    class="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-50 hover:text-red-600 transition">
                     <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                     </svg>
                     Logout
                 </button>
@@ -416,21 +385,18 @@
             @endauth
 
             @guest
-            <div class="flex flex-col gap-2">
+            <div class="h-px bg-gray-100 my-2"></div>
+            <div class="flex gap-2 pb-1">
                 <a href="{{ route('login') }}"
-                    class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-2xl text-sm font-medium border border-gray-200 text-gray-700 hover:border-gray-900 hover:text-gray-900 transition"
-                    @click="mobileOpen = false">
-                    Masuk
-                </a>
+                    class="flex-1 text-center px-3 py-2.5 rounded-xl text-sm font-medium border border-gray-200 text-gray-700 hover:border-gray-900 hover:text-gray-900 transition"
+                    @click="mobileOpen = false">Masuk</a>
                 <a href="{{ route('register') }}"
-                    class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-2xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-700 transition"
-                    @click="mobileOpen = false">
-                    Daftar Sekarang
-                </a>
+                    class="flex-1 text-center px-3 py-2.5 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-700 transition"
+                    @click="mobileOpen = false">Daftar</a>
             </div>
             @endguest
-        </div>
 
+        </div>
     </div>
 
 </div> {{-- end x-data wrapper --}}
