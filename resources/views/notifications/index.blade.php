@@ -10,9 +10,9 @@
         </a>
 
         <div class="mb-6">
-            <p class="text-xs tracking-widest uppercase text-gray-400 mb-1">Notifikasi</p>
+            <p class="text-xs tracking-widest uppercase text-gray-400 mb-1">{{ auth()->user()->name }}</p>
             <h1 style="font-family: 'Playfair Display', serif;"
-                class="text-xl font-semibold text-gray-900">Semua Notifikasi</h1>
+                class="text-xl font-semibold text-gray-900">My Notifications</h1>
         </div>
 
         {{-- Banner: Pesanan Menunggu Pembayaran --}}
@@ -47,7 +47,7 @@
         @endif
 
         {{-- Notifikasi List --}}
-        @if($notifications->isEmpty())
+        @if($notifications->isEmpty() && $pendingOrders->isEmpty())
             <div class="flex flex-col items-center justify-center py-20 text-center">
 
                 {{-- Icon area --}}

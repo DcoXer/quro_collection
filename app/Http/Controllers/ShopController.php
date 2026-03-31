@@ -93,8 +93,8 @@ class ShopController extends Controller
             ]),
             'variants' => $product->variants->map(fn($v) => [
                 'size'            => $v->size,
-                'price'           => $v->price,
-                'price_formatted' => 'Rp ' . number_format($v->price, 0, ',', '.'),
+                'effective_price' => $v->effective_price,
+                'price_formatted' => 'Rp ' . number_format($v->effective_price, 0, ',', '.'),
                 'stock'           => $v->stock,
             ]),
         ]);

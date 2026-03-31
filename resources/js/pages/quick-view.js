@@ -45,29 +45,13 @@ window.openQuickView = async function (apiUrl, detailUrl) {
     if (sizesEl) {
         sizesEl.innerHTML = '';
 
-        ['S', 'M', 'L', 'XL'].forEach(size => {
-            const btn          = document.createElement('button');
-            btn.type           = 'button';
-            btn.textContent    = size;
-            btn.dataset.price  = p.price;
-            btn.dataset.size   = size;
-
-            if (p.stock > 0) {
-                btn.className = 'size-btn px-4 py-2 border border-gray-200 rounded-lg text-sm hover:border-gray-900 transition';
-                btn.onclick   = () => qvSelectSize(btn);
-            } else {
-                btn.className = 'px-4 py-2 border border-gray-100 rounded-lg text-sm text-gray-300 cursor-not-allowed';
-                btn.disabled  = true;
-            }
-            sizesEl.appendChild(btn);
-        });
-
         p.variants.forEach(v => {
             const btn          = document.createElement('button');
             btn.type           = 'button';
             btn.textContent    = v.size;
-            btn.dataset.price  = v.price;
+            btn.dataset.price  = v.effective_price;
             btn.dataset.size   = v.size;
+            btn.dataset.stock  = v.stock;
 
             if (v.stock > 0) {
                 btn.className = 'size-btn px-4 py-2 border border-gray-200 rounded-lg text-sm hover:border-gray-900 transition';
