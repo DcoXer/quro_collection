@@ -138,7 +138,7 @@
                     <a href="{{ route('shop.category', $category) }}"
                         class="group inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition">
                         <span class="relative">
-                            Lihat semua {{ $category->name }}
+                            Lihat semua Koleksi
                             <span class="absolute left-0 -bottom-px h-px w-0 bg-gray-900 group-hover:w-full transition-all duration-300"></span>
                         </span>
                         <svg class="w-3.5 h-3.5 -translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300"
