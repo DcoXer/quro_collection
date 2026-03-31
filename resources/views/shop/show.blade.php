@@ -22,6 +22,94 @@
     <meta name="twitter:image" content="{{ Storage::url($product->image) }}">
     @endif
     @endpush
+
+    @push('jsonld')
+    @php
+        $totalStock = $product->variants->sum('stock');
+        $availability = $totalStock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
+        $imageUrl = $product->image ? Storage::url($product->image) : asset('images/logo/apple-touch-icon.png');
+    @endphp
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Product",
+                "@id": "{{ route('shop.show', $product) }}/#product",
+                "name": "{{ addslashes($product->name) }}",
+                "description": "{{ addslashes(Str::limit($product->description, 500)) }}",
+                "image": "{{ $imageUrl }}",
+                "url": "{{ route('shop.show', $product) }}",
+                "brand": {
+                    "@type": "Brand",
+                    "name": "Quro Collection"
+                },
+                "category": "{{ $product->category?->name }}",
+                "offers": {
+                    "@type": "Offer",
+                    "url": "{{ route('shop.show', $product) }}",
+                    "priceCurrency": "IDR",
+                    "price": "{{ $flashItem ? $flashItem->flash_price : $product->price }}",
+                    "availability": "{{ $availability }}",
+                    "itemCondition": "https://schema.org/NewCondition",
+                    "seller": {
+                        "@type": "Organization",
+                        "name": "Quro Collection"
+                    }
+                }
+                @if($reviewCount > 0)
+                ,
+                "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "{{ $avgRating }}",
+                    "reviewCount": "{{ $reviewCount }}",
+                    "bestRating": "5",
+                    "worstRating": "1"
+                }
+                @endif
+            },
+            {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Home",
+                        "item": "{{ url('/') }}"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "Shop",
+                        "item": "{{ route('shop.index') }}"
+                    },
+                    @if($product->category)
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "{{ $product->category->name }}",
+                        "item": "{{ route('shop.category', $product->category) }}"
+                    },
+                    {
+                        "@type": "ListItem",
+                        "position": 4,
+                        "name": "{{ addslashes($product->name) }}",
+                        "item": "{{ route('shop.show', $product) }}"
+                    }
+                    @else
+                    {
+                        "@type": "ListItem",
+                        "position": 3,
+                        "name": "{{ addslashes($product->name) }}",
+                        "item": "{{ route('shop.show', $product) }}"
+                    }
+                    @endif
+                ]
+            }
+        ]
+    }
+    </script>
+    @endpush
     
     @vite(['resources/css/pages/product-show.css'])
 
