@@ -2,8 +2,9 @@
     $categories = \App\Models\Category::orderBy('name')->get();
 @endphp
 
-<nav class="border-b border-gray-100 sticky top-0 bg-white/95 backdrop-blur-sm z-50"
-    x-data="{ mobileOpen: false, catOpen: false }">
+<div x-data="{ mobileOpen: false, catOpen: false }">
+
+<nav class="border-b border-gray-100 sticky top-0 bg-white/95 backdrop-blur-sm z-50">
 
     <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
 
@@ -238,15 +239,19 @@
 
     </div>
 
+    {{-- close nav, drawer goes outside --}}
+</nav>
+
     {{-- Mobile Drawer Backdrop --}}
     <div @click="mobileOpen = false"
         :style="'transition:opacity 250ms ease;opacity:' + (mobileOpen ? '1' : '0') + ';pointer-events:' + (mobileOpen ? 'auto' : 'none')"
-        class="md:hidden fixed top-full left-0 right-0 bottom-0 bg-black/30 backdrop-blur-sm z-40"></div>
+        class="md:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+        style="top:57px"></div>
 
     {{-- Mobile Drawer --}}
     <div :style="'transition:transform 300ms cubic-bezier(0.4,0,0.2,1);transform:translateX(' + (mobileOpen ? '0' : '-100%') + ')'"
-        class="md:hidden fixed top-full left-0 w-4/5 max-w-xs bg-white z-50 flex flex-col shadow-2xl overflow-y-auto"
-        style="bottom:0;height:calc(100vh - 57px)">
+        class="md:hidden fixed left-0 w-4/5 max-w-xs bg-white z-50 flex flex-col shadow-2xl overflow-y-auto"
+        style="top:57px;bottom:0">
 
         @auth
         {{-- User Card --}}
@@ -428,4 +433,4 @@
 
     </div>
 
-</nav>
+</div> {{-- end x-data wrapper --}}
