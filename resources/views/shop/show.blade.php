@@ -405,7 +405,7 @@
     @endif
 
     {{-- ───── Ulasan ───── --}}
-    <div class="mt-16">
+    <div class="mt-16 max-w-5xl mx-auto px-6 pb-16">
 
         {{-- Header --}}
         <div class="flex items-center gap-4 mb-8">
