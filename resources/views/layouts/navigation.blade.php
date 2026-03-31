@@ -251,12 +251,9 @@
 
     {{-- Mobile Drawer --}}
     <div x-show="mobileOpen"
-        x-transition:enter="transition-transform duration-300 ease-out"
-        x-transition:enter-start="-translate-x-full"
-        x-transition:enter-end="translate-x-0"
-        x-transition:leave="transition-transform duration-200 ease-in"
-        x-transition:leave-start="translate-x-0"
-        x-transition:leave-end="-translate-x-full"
+        x-cloak
+        :style="mobileOpen ? 'transform:translateX(0)' : 'transform:translateX(-100%)'"
+        style="transition: transform 300ms cubic-bezier(0.4,0,0.2,1); transform: translateX(-100%);"
         class="md:hidden fixed top-[57px] left-0 bottom-0 w-4/5 max-w-xs bg-white z-50 flex flex-col shadow-2xl overflow-y-auto">
 
         @auth

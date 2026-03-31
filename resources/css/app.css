@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+[x-cloak] { display: none !important; }
+
 /* ─── Skeleton Loading ───────────────────────────────────────────────────── */
 @keyframes skeleton-shimmer {
     0%   { background-position: -600px 0; }
