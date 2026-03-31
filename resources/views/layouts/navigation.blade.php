@@ -240,13 +240,11 @@
 
     {{-- Mobile Drawer Backdrop --}}
     <div @click="mobileOpen = false"
-        :style="mobileOpen ? 'opacity:1;pointer-events:auto' : 'opacity:0;pointer-events:none'"
-        style="transition:opacity 250ms ease;"
+        :style="'transition:opacity 250ms ease;opacity:' + (mobileOpen ? '1' : '0') + ';pointer-events:' + (mobileOpen ? 'auto' : 'none')"
         class="md:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40 top-[57px]"></div>
 
     {{-- Mobile Drawer --}}
-    <div :style="mobileOpen ? 'transform:translateX(0)' : 'transform:translateX(-100%)'"
-        style="transition:transform 300ms cubic-bezier(0.4,0,0.2,1);"
+    <div :style="'transition:transform 300ms cubic-bezier(0.4,0,0.2,1);transform:translateX(' + (mobileOpen ? '0' : '-100%') + ')'"
         class="md:hidden fixed top-[57px] left-0 bottom-0 w-4/5 max-w-xs bg-white z-50 flex flex-col shadow-2xl overflow-y-auto">
 
         @auth
