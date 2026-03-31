@@ -7,7 +7,7 @@
 <div class="max-w-5xl mx-auto px-4 py-8 md:py-12">
 
     <div class="mb-8">
-        <p class="text-xs tracking-widest uppercase text-gray-400 mb-2">Belanja</p>
+        <p class="text-xs tracking-widest uppercase text-gray-400 mb-2">{{ auth()->user()->name }}</p>
         <h1 style="font-family: 'Playfair Display', serif;"
             class="text-3xl font-semibold text-gray-900">Keranjang</h1>
     </div>

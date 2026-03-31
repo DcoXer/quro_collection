@@ -117,7 +117,7 @@
 
         {{-- Scroll hint --}}
         <a href="#products"
-            class="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 group">
+            class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 group">
             {{-- <p class="text-white/50 text-[10px] tracking-[0.2em] uppercase group-hover:text-white/80 transition">Scroll</p> --}}
             <div class="flex flex-col items-center gap-0.5">
                 <svg class="w-5 h-5 text-white/60 group-hover:text-white transition animate-[bounce_1.5s_ease-in-out_infinite]"

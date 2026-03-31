@@ -10,9 +10,9 @@
         </a>
 
         <div class="mb-6">
-            <p class="text-xs tracking-widest uppercase text-gray-400 mb-1">Kamu</p>
+            <p class="text-xs tracking-widest uppercase text-gray-400 mb-1">{{ auth()->user()->name }}</p>
             <h1 style="font-family: 'Playfair Display', serif;"
-                class="text-xl font-semibold text-gray-900">Wishlist Saya</h1>
+                class="text-xl font-semibold text-gray-900">My Favorites</h1>
         </div>
 
         @if(session('success'))

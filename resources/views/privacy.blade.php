@@ -33,7 +33,7 @@
         <p class="text-zinc-400 text-sm leading-relaxed max-w-xl mx-auto">
             Kami berkomitmen menjaga kepercayaan Anda. Pelajari bagaimana kami mengumpulkan, menggunakan, dan melindungi data pribadi Anda.
         </p>
-        <p class="mt-6 text-xs text-zinc-600">Terakhir diperbarui: Januari 2025</p>
+        <p class="mt-6 text-xs text-zinc-600">Terakhir diperbarui: April 2026</p>
     </div>
 </section>
 

@@ -2,9 +2,9 @@
     <div class="max-w-2xl mx-auto px-4 py-8 md:py-12">
 
         <div class="mb-8">
-            <p class="text-xs tracking-widest uppercase text-gray-400 mb-2">Akun Saya</p>
+            <p class="text-xs tracking-widest uppercase text-gray-400 mb-2">{{ auth()->user()->name }}</p>
             <h1 style="font-family: 'Playfair Display', serif;"
-                class="text-3xl font-semibold text-gray-900">Riwayat Pesanan</h1>
+                class="text-3xl font-semibold text-gray-900">My Orders</h1>
         </div>
 
         @if($orders->isEmpty())
