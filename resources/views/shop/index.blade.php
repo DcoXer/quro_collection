@@ -192,6 +192,7 @@
                             <div class="mb-4">
                                 <p class="text-xs text-gray-400 uppercase tracking-widest mb-2">Size</p>
                                 <div id="qv-sizes" class="flex flex-wrap gap-2"></div>
+                                <p id="qv-stock-info" class="text-xs text-gray-400 mt-2 hidden"></p>
                                 <input type="hidden" id="qv-selected-size">
                             </div>
 

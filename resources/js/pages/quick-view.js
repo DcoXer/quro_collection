@@ -4,6 +4,7 @@ const cartUrl = document.querySelector('meta[name="cart-add-url"]').content;
 
 let qvProductId    = null;
 let qvSelectedPrice = 0;
+let qvSelectedStock = 0;
 let qvQty          = 1;
 
 window.openQuickView = async function (apiUrl, detailUrl) {
@@ -73,13 +74,31 @@ function qvSelectSize(btn) {
         b.classList.remove('bg-gray-900', 'text-white', 'border-gray-900'));
     btn.classList.add('bg-gray-900', 'text-white', 'border-gray-900');
     qvSelectedPrice = parseInt(btn.dataset.price);
+    qvSelectedStock = parseInt(btn.dataset.stock);
     document.getElementById('qv-selected-size').value = btn.dataset.size;
+
+    // Reset qty ke 1 saat ganti size
+    qvQty = 1;
+    const qtyEl = document.getElementById('qv-qty-display');
+    if (qtyEl) qtyEl.textContent = 1;
+
+    // Tampilkan stok size yang dipilih
+    const stockEl = document.getElementById('qv-stock-info');
+    if (stockEl) {
+        stockEl.textContent = 'Stok: ' + qvSelectedStock + ' pcs';
+        stockEl.className = qvSelectedStock <= 5
+            ? 'text-xs text-red-400 mt-2'
+            : 'text-xs text-gray-400 mt-2';
+        stockEl.classList.remove('hidden');
+    }
+
     qvUpdateTotal();
 }
 window.qvSelectSize = qvSelectSize;
 
 window.qvChangeQty = function (delta) {
-    qvQty = Math.max(1, qvQty + delta);
+    const max = qvSelectedStock > 0 ? qvSelectedStock : 99;
+    qvQty = Math.min(max, Math.max(1, qvQty + delta));
     document.getElementById('qv-qty-display').textContent = qvQty;
     qvUpdateTotal();
 };
@@ -127,4 +146,7 @@ window.qvSubmitCart = async function () {
 
 window.closeQuickView = function () {
     document.getElementById('quick-view-modal').classList.add('hidden');
+    const stockEl = document.getElementById('qv-stock-info');
+    if (stockEl) stockEl.classList.add('hidden');
+    qvSelectedStock = 0;
 };
