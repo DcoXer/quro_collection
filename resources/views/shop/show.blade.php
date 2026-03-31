@@ -18,7 +18,7 @@
     @endpush
 
     @push('jsonld')
-    <script type="application/ld+json">{!! $jsonLd !!}</script>
+    <script type="application/ld+json">@json($jsonLd)</script>
     @endpush
     
     @vite(['resources/css/pages/product-show.css'])

@@ -11,36 +11,37 @@ class SchemaOrg
 {
     /**
      * Global site-level JSON-LD (Organization + WebSite).
-     * Used in the main layout head.
+     * Used in the main layout head via @json().
      */
-    public static function site(): string
+    public static function site(): array
     {
-        return self::encode([
+        return [
             '@context' => 'https://schema.org',
             '@graph'   => [
                 self::organization(),
                 self::website(),
             ],
-        ]);
+        ];
     }
 
     /**
      * Product page JSON-LD (Product + BreadcrumbList).
-     * Called from ShopController::show(), passed to view as $jsonLd.
+     * Called from ShopController::show(), passed to view as $jsonLd (array).
+     * Output in view via @json($jsonLd).
      */
     public static function productPage(
         Product $product,
         int $reviewCount,
         float $avgRating,
         ?FlashSaleItem $flashItem = null
-    ): string {
-        return self::encode([
+    ): array {
+        return [
             '@context' => 'https://schema.org',
             '@graph'   => [
                 self::product($product, $reviewCount, $avgRating, $flashItem),
                 self::breadcrumbList($product),
             ],
-        ]);
+        ];
     }
 
     // ─── Private builders ───────────────────────────────────────────────────
@@ -168,8 +169,4 @@ class SchemaOrg
         ];
     }
 
-    private static function encode(array $data): string
-    {
-        return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-    }
 }

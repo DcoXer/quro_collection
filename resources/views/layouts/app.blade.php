@@ -19,7 +19,7 @@
     @stack('seo')
 
     {{-- JSON-LD: Organization + WebSite (global) --}}
-    <script type="application/ld+json">{!! \App\Support\SchemaOrg::site() !!}</script>
+    <script type="application/ld+json">@json(\App\Support\SchemaOrg::site())</script>
     @stack('jsonld')
 </head>
 {{-- Page transition bar --}}
