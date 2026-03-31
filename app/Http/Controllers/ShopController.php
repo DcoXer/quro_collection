@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FlashSaleItem;
 use App\Models\HeroSlide;
 use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\Wishlist;
 use App\Models\Category;
+use App\Support\SchemaOrg;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -66,11 +68,18 @@ class ShopController extends Controller
         $avgRating    = $product->averageRating();
         $reviewCount  = $product->reviewCount();
 
+        $flashItem = FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())
+            ->where('product_id', $product->id)
+            ->with('flashSale')
+            ->first();
+
+        $jsonLd = SchemaOrg::productPage($product, $reviewCount, $avgRating, $flashItem);
+
         $inWishlist = auth()->check()
             ? Wishlist::where('user_id', auth()->id())->where('product_id', $product->id)->exists()
             : false;
 
-        return view('shop.show', compact('product', 'related', 'recentlyViewed', 'reviews', 'avgRating', 'reviewCount', 'inWishlist'));
+        return view('shop.show', compact('product', 'related', 'recentlyViewed', 'reviews', 'avgRating', 'reviewCount', 'inWishlist', 'flashItem', 'jsonLd'));
     }
 
     public function quickView(Product $product)

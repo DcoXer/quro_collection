@@ -1,10 +1,4 @@
 <x-app-layout>
-    @php
-        $flashItem = \App\Models\FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())
-            ->where('product_id', $product->id)
-            ->with('flashSale')
-            ->first();
-    @endphp
     @push('seo')
     <title>{{ $product->meta_title ?? $product->name }} — Quro Collection</title>
     <meta name="description" content="{{ $product->meta_description ?? Str::limit($product->description, 160) }}">
@@ -24,62 +18,7 @@
     @endpush
 
     @push('jsonld')
-    @php
-        $totalStock   = $product->variants->sum('stock');
-        $availability = $totalStock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
-        $imageUrl     = $product->image ? Storage::url($product->image) : asset('images/logo/apple-touch-icon.png');
-        $productPrice = $flashItem ? $flashItem->flash_price : $product->price;
-
-        $productSchema = [
-            '@type'       => 'Product',
-            '@id'         => route('shop.show', $product) . '/#product',
-            'name'        => $product->name,
-            'description' => Str::limit($product->description, 500),
-            'image'       => $imageUrl,
-            'url'         => route('shop.show', $product),
-            'brand'       => ['@type' => 'Brand', 'name' => 'Quro Collection'],
-            'category'    => $product->category?->name,
-            'offers'      => [
-                '@type'         => 'Offer',
-                'url'           => route('shop.show', $product),
-                'priceCurrency' => 'IDR',
-                'price'         => (string) $productPrice,
-                'availability'  => $availability,
-                'itemCondition' => 'https://schema.org/NewCondition',
-                'seller'        => ['@type' => 'Organization', 'name' => 'Quro Collection'],
-            ],
-        ];
-
-        if ($reviewCount > 0) {
-            $productSchema['aggregateRating'] = [
-                '@type'       => 'AggregateRating',
-                'ratingValue' => (string) $avgRating,
-                'reviewCount' => (string) $reviewCount,
-                'bestRating'  => '5',
-                'worstRating' => '1',
-            ];
-        }
-
-        $breadcrumbs = [
-            ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home',  'item' => url('/')],
-            ['@type' => 'ListItem', 'position' => 2, 'name' => 'Shop',  'item' => route('shop.index')],
-        ];
-        if ($product->category) {
-            $breadcrumbs[] = ['@type' => 'ListItem', 'position' => 3, 'name' => $product->category->name, 'item' => route('shop.category', $product->category)];
-            $breadcrumbs[] = ['@type' => 'ListItem', 'position' => 4, 'name' => $product->name, 'item' => route('shop.show', $product)];
-        } else {
-            $breadcrumbs[] = ['@type' => 'ListItem', 'position' => 3, 'name' => $product->name, 'item' => route('shop.show', $product)];
-        }
-
-        $jsonLd = [
-            '@context' => 'https://schema.org',
-            '@graph'   => [
-                $productSchema,
-                ['@type' => 'BreadcrumbList', 'itemListElement' => $breadcrumbs],
-            ],
-        ];
-    @endphp
-    <script type="application/ld+json">{!! json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    <script type="application/ld+json">{!! $jsonLd !!}</script>
     @endpush
     
     @vite(['resources/css/pages/product-show.css'])

@@ -19,45 +19,7 @@
     @stack('seo')
 
     {{-- JSON-LD: Organization + WebSite (global) --}}
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@graph": [
-            {
-                "@type": "Organization",
-                "@id": "{{ url('/') }}/#organization",
-                "name": "Quro Collection",
-                "url": "{{ url('/') }}",
-                "logo": {
-                    "@type": "ImageObject",
-                    "url": "{{ asset('images/logo/apple-touch-icon.png') }}"
-                },
-                "contactPoint": {
-                    "@type": "ContactPoint",
-                    "telephone": "+62-831-0826-7397",
-                    "contactType": "customer service",
-                    "availableLanguage": "Indonesian"
-                },
-                "sameAs": []
-            },
-            {
-                "@type": "WebSite",
-                "@id": "{{ url('/') }}/#website",
-                "url": "{{ url('/') }}",
-                "name": "Quro Collection",
-                "publisher": { "@id": "{{ url('/') }}/#organization" },
-                "potentialAction": {
-                    "@type": "SearchAction",
-                    "target": {
-                        "@type": "EntryPoint",
-                        "urlTemplate": "{{ route('shop.index') }}?search={search_term_string}"
-                    },
-                    "query-input": "required name=search_term_string"
-                }
-            }
-        ]
-    }
-    </script>
+    <script type="application/ld+json">{!! \App\Support\SchemaOrg::site() !!}</script>
     @stack('jsonld')
 </head>
 {{-- Page transition bar --}}
