@@ -138,33 +138,19 @@
                 <div class="mb-2">
                     <p class="text-xs tracking-widest uppercase text-gray-400 mb-3">Pilih Size</p>
                     <div class="flex flex-wrap gap-2">
-                        @foreach(['S','M','L','XL'] as $size)
-                            @if($product->stock > 0)
-                                <button type="button"
-                                    data-size="{{ $size }}"
-                                    data-price="{{ $product->price }}"
-                                    onclick="selectSizePage(this)"
-                                    class="page-size-btn px-4 py-2 border border-gray-200 rounded-lg text-sm hover:border-gray-900 transition">
-                                    {{ $size }}
-                                </button>
-                            @else
-                                <span class="px-4 py-2 border border-gray-100 rounded-lg text-sm text-gray-300 cursor-not-allowed">
-                                    {{ $size }}
-                                </span>
-                            @endif
-                        @endforeach
-
                         @foreach($product->variants as $variant)
                             @if($variant->stock > 0)
                                 <button type="button"
                                     data-size="{{ $variant->size }}"
-                                    data-price="{{ $variant->price }}"
+                                    data-price="{{ $variant->effective_price }}"
+                                    data-stock="{{ $variant->stock }}"
                                     onclick="selectSizePage(this)"
                                     class="page-size-btn px-4 py-2 border border-gray-200 rounded-lg text-sm hover:border-gray-900 transition">
                                     {{ $variant->size }}
                                 </button>
                             @else
-                                <span class="px-4 py-2 border border-gray-100 rounded-lg text-sm text-gray-300 cursor-not-allowed">
+                                <span class="px-4 py-2 border border-gray-100 rounded-lg text-sm text-gray-300 cursor-not-allowed"
+                                    title="Stok habis">
                                     {{ $variant->size }}
                                 </span>
                             @endif
@@ -173,11 +159,11 @@
                     <p class="text-xs text-gray-300 mt-2">Size redup = stok habis</p>
                 </div>
 
-                <p class="text-xs text-gray-400 mb-6">
-                    Stok tersedia: {{ $product->stock + $product->variants->sum('stock') }} pcs
+                <p class="text-xs text-gray-400 mb-6" id="stock-info">
+                    Stok tersedia: {{ $product->variants->sum('stock') }} pcs
                 </p>
 
-                @if($product->stock > 0 || $product->variants->isNotEmpty())
+                @if($product->variants->sum('stock') > 0)
                     @auth
                         <div class="flex gap-2">
                             <button onclick="document.getElementById('modal-add-cart').classList.remove('hidden')"
@@ -314,33 +300,19 @@
                     <div class="mb-6">
                         <p class="text-xs text-gray-400 uppercase tracking-widest mb-3">Size</p>
                         <div class="flex flex-wrap gap-2">
-                            @foreach(['S','M','L','XL'] as $size)
-                                @if($product->stock > 0)
-                                    <button type="button"
-                                        data-size="{{ $size }}"
-                                        data-price="{{ $product->price }}"
-                                        onclick="selectSize(this)"
-                                        class="size-btn px-4 py-2 border border-gray-200 rounded-lg text-sm hover:border-gray-900 transition">
-                                        {{ $size }}
-                                    </button>
-                                @else
-                                    <span class="px-4 py-2 border border-gray-100 rounded-lg text-sm text-gray-300">
-                                        {{ $size }}
-                                    </span>
-                                @endif
-                            @endforeach
-
                             @foreach($product->variants as $variant)
                                 @if($variant->stock > 0)
                                     <button type="button"
                                         data-size="{{ $variant->size }}"
-                                        data-price="{{ $variant->price }}"
+                                        data-price="{{ $variant->effective_price }}"
+                                        data-stock="{{ $variant->stock }}"
                                         onclick="selectSize(this)"
                                         class="size-btn px-4 py-2 border border-gray-200 rounded-lg text-sm hover:border-gray-900 transition">
                                         {{ $variant->size }}
                                     </button>
                                 @else
-                                    <span class="px-4 py-2 border border-gray-100 rounded-lg text-sm text-gray-300">
+                                    <span class="px-4 py-2 border border-gray-100 rounded-lg text-sm text-gray-300"
+                                        title="Stok habis">
                                         {{ $variant->size }}
                                     </span>
                                 @endif

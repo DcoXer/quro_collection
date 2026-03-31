@@ -39,16 +39,11 @@ class ProductForm
                 Textarea::make('description')->columnSpanFull(),
 
                 TextInput::make('price')
-                    ->label('Harga Base (S-XL)')
+                    ->label('Harga Base')
                     ->required()
                     ->numeric()
-                    ->prefix('Rp'),
-
-                TextInput::make('stock')
-                    ->label('Stok Base (S-XL)')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
+                    ->prefix('Rp')
+                    ->helperText('Harga default untuk semua size. Bisa di-override per size di bawah.'),
 
                 FileUpload::make('image')
                     ->label('Foto Utama (thumbnail)')
@@ -105,14 +100,18 @@ class ProductForm
                     ->columns(3)
                     ->maxItems(6),
 
-                // Variants
+                // Variants — semua size punya stok masing-masing
                 Repeater::make('variants')
                     ->relationship()
-                    ->label('Variant XXL (harga berbeda)')
+                    ->label('Ukuran & Stok')
                     ->columnSpanFull()
                     ->schema([
                         Select::make('size')
                             ->options([
+                                'S'      => 'S',
+                                'M'      => 'M',
+                                'L'      => 'L',
+                                'XL'     => 'XL',
                                 'XXL'    => 'XXL',
                                 'XXL+'   => 'XXL+',
                                 'XXL++'  => 'XXL++',
@@ -120,10 +119,11 @@ class ProductForm
                             ])
                             ->required(),
                         TextInput::make('price')
-                            ->label('Harga')
+                            ->label('Harga (opsional)')
                             ->numeric()
                             ->prefix('Rp')
-                            ->required(),
+                            ->placeholder('Kosongkan = pakai harga base')
+                            ->helperText('Isi jika size ini punya harga berbeda'),
                         TextInput::make('stock')
                             ->label('Stok')
                             ->numeric()

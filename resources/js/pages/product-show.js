@@ -1,6 +1,7 @@
 const csrf    = document.querySelector('meta[name="csrf-token"]').content;
 const cartUrl = document.querySelector('meta[name="cart-add-url"]').content;
 let selectedPrice = 0;
+let selectedStock = 0;
 let qty           = 1;
 
 // ─── Gallery ──────────────────────────────────────────────────
@@ -21,8 +22,11 @@ window.selectSizePage = function (btn) {
     btn.classList.add('selected');
 
     const price = parseInt(btn.dataset.price);
+    const stock = parseInt(btn.dataset.stock);
     document.getElementById('display-price').textContent =
         'Rp ' + price.toLocaleString('id-ID');
+    const stockEl = document.getElementById('stock-info');
+    if (stockEl) stockEl.textContent = 'Stok tersedia: ' + stock + ' pcs';
 };
 
 // ─── Modal Size Selector ──────────────────────────────────────
@@ -31,13 +35,19 @@ window.selectSize = function (btn) {
         b.classList.remove('bg-gray-900', 'text-white', 'border-gray-900'));
     btn.classList.add('bg-gray-900', 'text-white', 'border-gray-900');
     selectedPrice = parseInt(btn.dataset.price);
+    selectedStock = parseInt(btn.dataset.stock);
     document.getElementById('selected-size').value = btn.dataset.size;
+    // Reset qty ke 1 saat ganti size
+    qty = 1;
+    document.getElementById('qty-display').textContent = 1;
+    document.getElementById('qty-input').value = 1;
     updateTotal();
 };
 
 // ─── Qty ──────────────────────────────────────────────────────
 window.changeQty = function (delta) {
-    qty = Math.max(1, qty + delta);
+    const max = selectedStock > 0 ? selectedStock : 99;
+    qty = Math.min(max, Math.max(1, qty + delta));
     document.getElementById('qty-display').textContent = qty;
     document.getElementById('qty-input').value         = qty;
     updateTotal();

@@ -25,17 +25,13 @@ class CartController extends Controller
 
         $product = Product::findOrFail($request->product_id);
 
-        $baseSize = ['S', 'M', 'L', 'XL'];
-        $isBase   = in_array($request->size, $baseSize);
-
-        if ($isBase) {
-            $price = $product->price;
-            $stock = $product->stock;
-        } else {
-            $variant = $product->variants()->where('size', $request->size)->firstOrFail();
-            $price   = $variant->price;
-            $stock   = $variant->stock;
+        $variant = $product->variants()->where('size', $request->size)->first();
+        if (! $variant) {
+            return back()->with('error', 'Size tidak tersedia.');
         }
+
+        $price = $variant->effective_price;
+        $stock = $variant->stock;
 
         if ($request->quantity > $stock) {
             return back()->with('error', 'Stok tidak mencukupi.');
@@ -117,15 +113,9 @@ class CartController extends Controller
         $product = Product::find($productId);
         if (!$product) return redirect()->route('cart.index');
 
-        $baseSize = ['S', 'M', 'L', 'XL'];
-
-        if (in_array($newSize, $baseSize)) {
-            $price = $product->price;
-        } else {
-            $variant = $product->variants()->where('size', $newSize)->first();
-            if (!$variant) return redirect()->route('cart.index');
-            $price = $variant->price;
-        }
+        $variant = $product->variants()->where('size', $newSize)->first();
+        if (! $variant) return redirect()->route('cart.index');
+        $price = $variant->effective_price;
 
         // Hapus item lama
         unset($cart[$key]);
