@@ -32,28 +32,29 @@
                                 data-slider="{{ $product->id }}">
 
                                 {{-- Slides --}}
-                                <div class="slides-track flex h-full transition-transform duration-500"
+                                <div class="slides-track flex h-full will-change-transform"
                                     id="track-{{ $product->id }}"
+                                    style="transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);"
                                     @if($product->media->count() > 0) data-auto-slide="{{ $product->id }}" @endif>
 
                                     {{-- Foto utama --}}
                                     @if($product->image)
-                                        <div class="slide-item w-full h-full shrink-0">
+                                        <div class="slide-item w-full h-full shrink-0 overflow-hidden">
                                             <img src="{{ Storage::url($product->image) }}"
-                                                class="w-full h-full object-cover">
+                                                class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105">
                                         </div>
                                     @endif
 
                                     {{-- Media tambahan --}}
                                     @foreach($product->media as $media)
-                                        <div class="slide-item w-full h-full shrink-0">
+                                        <div class="slide-item w-full h-full shrink-0 overflow-hidden">
                                             @if($media->type === 'video')
                                                 <video class="w-full h-full object-cover" muted loop playsinline>
                                                     <source src="{{ Storage::url($media->path) }}" type="video/mp4">
                                                 </video>
                                             @else
                                                 <img src="{{ Storage::url($media->path) }}"
-                                                    class="w-full h-full object-cover">
+                                                    class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105">
                                             @endif
                                         </div>
                                     @endforeach
@@ -75,18 +76,18 @@
                                 {{-- Prev/Next --}}
                                 @if($product->media->count() > 0 || $product->image)
                                     <button onclick="event.stopPropagation(); slideCard({{ $product->id }}, -1)"
-                                        class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/80 rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition z-10">
+                                        class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/80 backdrop-blur-sm rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out hover:bg-white hover:scale-110 z-10">
                                         ‹
                                     </button>
                                     <button onclick="event.stopPropagation(); slideCard({{ $product->id }}, 1)"
-                                        class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/80 rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition z-10">
+                                        class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/80 backdrop-blur-sm rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out hover:bg-white hover:scale-110 z-10">
                                         ›
                                     </button>
                                 @endif
 
                                 {{-- Quick View overlay --}}
-                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition duration-300 flex items-end justify-center pb-3">
-                                    <span class="opacity-0 group-hover:opacity-100 transition bg-white text-gray-900 text-xs px-3 py-1.5 rounded-full font-medium">
+                                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-all duration-500 ease-out flex items-end justify-center pb-3">
+                                    <span class="opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out bg-white/95 backdrop-blur-sm text-gray-900 text-xs px-3 py-1.5 rounded-full font-medium shadow-sm">
                                         Quick View
                                     </span>
                                 </div>
