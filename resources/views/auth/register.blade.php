@@ -262,7 +262,7 @@
                 {{-- Login link --}}
                 <div class="fade-up delay-7">
                     <a href="{{ route('login') }}"
-                        class="block w-full text-center border border-zinc-800 text-zinc-400 py-3.5 rounded-xl text-sm hover:border-zinc-600 hover:text-white transition">
+                        class="block w-full text-center text-zinc-400 py-3.5 rounded-xl text-sm hover:text-white transition">
                         Sudah punya akun? <span class="font-medium text-zinc-300">Masuk sekarang</span>
                     </a>
                 </div>

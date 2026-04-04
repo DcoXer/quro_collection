@@ -20,6 +20,19 @@
         {{-- Desktop Nav --}}
         <div class="hidden md:flex items-center gap-1 text-sm flex-1 justify-center">
 
+            {{-- Beranda --}}
+            <a href="{{ route('home') }}"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-xl transition
+                {{ request()->routeIs('home')
+                    ? 'bg-gray-100 text-gray-900 font-medium'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Beranda
+            </a>
+
             {{-- Shop --}}
             <a href="{{ route('shop.index') }}"
                 class="flex items-center gap-1.5 px-4 py-2 rounded-xl transition
@@ -242,7 +255,7 @@
     {{-- close nav, drawer goes outside --}}
 </nav>
 
-    {{-- Mobile Menu — dropdown below nav, no fixed positioning issues --}}
+    {{-- Mobile Menu --}}
     <div x-show="mobileOpen"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0 -translate-y-2"
@@ -266,6 +279,16 @@
         @endauth
 
         <div class="px-4 py-3 space-y-0.5">
+
+            <a href="{{ route('home') }}"
+                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition
+                {{ request()->routeIs('home') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50' }}"
+                @click="mobileOpen = false">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Beranda
+            </a>
 
             <a href="{{ route('shop.index') }}"
                 class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition

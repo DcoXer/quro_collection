@@ -34,6 +34,7 @@ Route::get('/about', function () {
     return view('about', compact('totalSold'));
 })->name('about');
 Route::get('/privacy-policy', fn () => view('privacy'))->name('privacy');
+Route::get('/terms-of-service', fn () => view('terms'))->name('terms');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/search', [ShopController::class, 'search'])->name('shop.search');
