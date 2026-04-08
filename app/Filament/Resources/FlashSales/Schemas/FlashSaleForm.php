@@ -40,9 +40,11 @@ class FlashSaleForm
                             ->label('Produk')
                             ->required()
                             ->searchable()
+                            ->native(false)
                             ->options(
                                 Product::where('is_active', true)->pluck('name', 'id')
-                            ),
+                            )
+                            ->columnSpan(1),
 
                         Select::make('discount_type')
                             ->label('Tipe Diskon')
@@ -51,14 +53,19 @@ class FlashSaleForm
                                 'fixed'   => 'Nominal (Rp)',
                             ])
                             ->required()
-                            ->native(false),
+                            ->native(false)
+                            ->columnSpan(1),
 
                         TextInput::make('discount_value')
                             ->label('Nilai Diskon')
                             ->numeric()
-                            ->required(),
+                            ->required()
+                            ->columnSpan(1),
                     ])
-                    ->columns(3),
+                    ->columns([
+                        'sm' => 1,
+                        'md' => 3,
+                    ]),
             ]);
     }
 }
