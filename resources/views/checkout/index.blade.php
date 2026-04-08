@@ -124,8 +124,8 @@
                         <div id="voucher-applied" class="{{ session('voucher') ? '' : 'hidden' }}">
                             <div class="voucher-applied">
                                 <div>
-                                    <p class="text-sm font-semibold text-green-700">{{ session('voucher.code') }}</p>
-                                    <p class="text-xs text-green-500 mt-0.5">
+                                    <p id="voucher-code-display" class="text-sm font-semibold text-green-700">{{ session('voucher.code') }}</p>
+                                    <p id="voucher-discount-display" class="text-xs text-green-500 mt-0.5">
                                         Hemat Rp {{ number_format(session('voucher.discount', 0), 0, ',', '.') }}
                                     </p>
                                 </div>
@@ -203,12 +203,10 @@
                             <span id="ongkir-label">Ongkos Kirim</span>
                             <span id="ongkir-amount">Rp 0</span>
                         </div>
-                        @if(session('voucher'))
-                        <div class="flex justify-between text-sm text-green-600">
+                        <div id="discount-row" class="{{ session('voucher') ? '' : 'hidden' }} flex justify-between text-sm text-green-600">
                             <span>Diskon</span>
-                            <span>- Rp {{ number_format(session('voucher.discount', 0), 0, ',', '.') }}</span>
+                            <span id="discount-amount">- Rp {{ number_format(session('voucher.discount', 0), 0, ',', '.') }}</span>
                         </div>
-                        @endif
                     </div>
 
                     <div class="checkout-divider"></div>
@@ -252,7 +250,8 @@
     @push('scripts')
     <script>
         window.CheckoutConfig = {
-            baseTotal: {{ $total - session('voucher.discount', 0) }},
+            baseTotal: {{ $total }},
+            initialDiscount: {{ session('voucher.discount', 0) }},
             weight: {{ $weight ?? 0.5 }},
             urls: {
                 provinsi:      '{{ route('wilayah.provinsi') }}',

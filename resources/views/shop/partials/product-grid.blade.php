@@ -1,7 +1,8 @@
 @php
-    $flashProductIds = \App\Models\FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())
-        ->pluck('product_id')
-        ->toArray();
+    $flashItems = \App\Models\FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())
+        ->get()
+        ->keyBy('product_id');
+    $flashProductIds = $flashItems->keys()->toArray();
 @endphp
 @if($categories->isEmpty())
     <div class="text-center py-20 text-gray-400">
@@ -88,7 +89,7 @@
                                 {{-- Quick View overlay --}}
                                 <div class="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-all duration-500 ease-out flex items-end justify-center pb-3">
                                     <span class="opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out bg-white/95 backdrop-blur-sm text-gray-900 text-xs px-3 py-1.5 rounded-full font-medium shadow-sm">
-                                        Quick View
+                                        View
                                     </span>
                                 </div>
 
@@ -97,7 +98,24 @@
                             <p class="text-xs text-gray-400 mb-0.5">{{ $category->name }}</p>
                             <p class="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition">{{ $product->name }}</p>
                             <div class="flex items-center justify-between mt-0.5">
-                                <p class="text-sm text-gray-700">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                                @php
+                                    $flashItem = $flashItems[$product->id] ?? null;
+                                    $flashPrice = null;
+                                    if ($flashItem) {
+                                        $flashPrice = $flashItem->discount_type === 'percent'
+                                            ? $product->price - ($product->price * $flashItem->discount_value / 100)
+                                            : $product->price - $flashItem->discount_value;
+                                        $flashPrice = max(0, (int) $flashPrice);
+                                    }
+                                @endphp
+                                @if($flashPrice !== null)
+                                    <div class="flex items-center gap-1.5">
+                                        <p class="text-sm font-semibold text-amber-600">Rp {{ number_format($flashPrice, 0, ',', '.') }}</p>
+                                        <p class="text-xs text-gray-400 line-through">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                                    </div>
+                                @else
+                                    <p class="text-sm text-gray-700">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                                @endif
                                 @auth
                                     @php $wishlisted = in_array($product->id, $wishlistedIds ?? []); @endphp
                                     <button type="button"

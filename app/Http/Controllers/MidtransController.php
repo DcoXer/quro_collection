@@ -7,7 +7,6 @@ use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
-use App\Services\CartService;
 use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -146,14 +145,16 @@ class MidtransController extends Controller
      */
     private function deductStock(int $productId, ?string $size, int $quantity): int
     {
-        if (!$size || in_array($size, CartService::BASE_SIZES)) {
-            return Product::where('id', $productId)
+        $hasVariant = $size && ProductVariant::where('product_id', $productId)->where('size', $size)->exists();
+
+        if ($hasVariant) {
+            return ProductVariant::where('product_id', $productId)
+                ->where('size', $size)
                 ->where('stock', '>=', $quantity)
                 ->decrement('stock', $quantity);
         }
 
-        return ProductVariant::where('product_id', $productId)
-            ->where('size', $size)
+        return Product::where('id', $productId)
             ->where('stock', '>=', $quantity)
             ->decrement('stock', $quantity);
     }

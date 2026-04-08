@@ -86,17 +86,31 @@ class ShopController extends Controller
     {
         abort_if(!$product->is_active, 404);
 
+        $flashItem = FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())
+            ->where('product_id', $product->id)
+            ->first();
+
+        $flashPrice = null;
+        if ($flashItem) {
+            $flashPrice = $flashItem->discount_type === 'percent'
+                ? $product->price - ($product->price * $flashItem->discount_value / 100)
+                : $product->price - $flashItem->discount_value;
+            $flashPrice = max(0, (int) $flashPrice);
+        }
+
         return response()->json([
-            'id'              => $product->id,
-            'name'            => $product->name,
-            'slug'            => $product->slug,
-            'price'           => $product->price,
-            'price_formatted' => 'Rp ' . number_format($product->price, 0, ',', '.'),
-            'description'     => $product->description,
-            'stock'           => $product->stock,
-            'category'        => $product->category?->name,
-            'image'           => $product->image ? Storage::url($product->image) : null,
-            'media'           => $product->media->map(fn($m) => [
+            'id'                    => $product->id,
+            'name'                  => $product->name,
+            'slug'                  => $product->slug,
+            'price'                 => $product->price,
+            'price_formatted'       => 'Rp ' . number_format($product->price, 0, ',', '.'),
+            'flash_price'           => $flashPrice,
+            'flash_price_formatted' => $flashPrice !== null ? 'Rp ' . number_format($flashPrice, 0, ',', '.') : null,
+            'description'           => $product->description,
+            'stock'                 => $product->stock,
+            'category'              => $product->category?->name,
+            'image'                 => $product->image ? Storage::url($product->image) : null,
+            'media'                 => $product->media->map(fn($m) => [
                 'type' => $m->type,
                 'url'  => Storage::url($m->path),
             ]),

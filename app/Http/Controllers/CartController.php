@@ -2,16 +2,59 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FlashSaleItem;
 use App\Models\Notification;
 use App\Models\Product;
+use App\Services\CartService;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
+    public function __construct(private CartService $cartService) {}
+
     public function index()
     {
-        $cart = session()->get('cart', []);
-        $total = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
+        $sessionCart = session()->get('cart', []);
+
+        if (empty($sessionCart)) {
+            $cart  = [];
+            $total = 0;
+            return view('cart.index', compact('cart', 'total'));
+        }
+
+        try {
+            ['items' => $resolved, 'total' => $total] = $this->cartService->resolveItems($sessionCart);
+        } catch (\Exception $e) {
+            $cart  = array_values($sessionCart);
+            $total = collect($sessionCart)->sum(fn($item) => $item['price'] * $item['quantity']);
+            return view('cart.index', compact('cart', 'total'));
+        }
+
+        $flashItems = FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())
+            ->with('flashSale')
+            ->get()
+            ->keyBy('product_id');
+
+        // Rebuild cart keyed by product_id_size so route actions still work
+        $cart = [];
+        foreach ($resolved as $item) {
+            $key       = $item['product_id'] . '_' . $item['size'];
+            $flash     = $flashItems->get($item['product_id']);
+            $basePrice = $item['product']->variants->where('size', $item['size'])->first()?->effective_price
+                      ?? $item['product']->price;
+
+            $cart[$key] = [
+                'product_id'     => $item['product_id'],
+                'name'           => $item['product']->name,
+                'image'          => $item['product']->image,
+                'size'           => $item['size'],
+                'quantity'       => $item['quantity'],
+                'price'          => $item['price'],
+                'original_price' => $flash ? $basePrice : null,
+                'flash_sale'     => $flash ? true : false,
+            ];
+        }
+
         return view('cart.index', compact('cart', 'total'));
     }
 

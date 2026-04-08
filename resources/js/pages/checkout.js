@@ -167,6 +167,26 @@ async function loadOngkir(villageCode) {
 }
 
 // ─── Voucher ─────────────────────────────────────────────────────────────────
+function updateTotalDisplay() {
+    const voucher  = currentDiscount;
+    const subtotal = baseTotal;
+    const grand    = subtotal - voucher + shippingCost;
+
+    const discountRow = document.getElementById('discount-row');
+    const discountAmt = document.getElementById('discount-amount');
+    if (discountRow && discountAmt) {
+        if (voucher > 0) {
+            discountRow.classList.remove('hidden');
+            discountAmt.textContent = '- Rp ' + voucher.toLocaleString('id-ID');
+        } else {
+            discountRow.classList.add('hidden');
+        }
+    }
+    document.getElementById('final-total').textContent = 'Rp ' + grand.toLocaleString('id-ID');
+}
+
+let currentDiscount = cfg.initialDiscount ?? 0;
+
 window.applyVoucher = async function () {
     const code = document.getElementById('voucher-input').value.trim();
     if (!code) { window.showToast?.('Masukkan kode voucher dulu', 'error'); return; }
@@ -179,8 +199,16 @@ window.applyVoucher = async function () {
     const data = await res.json();
 
     if (data.success) {
+        currentDiscount = data.discount;
+
+        // Show applied state
+        document.getElementById('voucher-form').classList.add('hidden');
+        document.getElementById('voucher-applied').classList.remove('hidden');
+        document.getElementById('voucher-code-display').textContent  = data.code ?? code.toUpperCase();
+        document.getElementById('voucher-discount-display').textContent = 'Hemat ' + data.discount_formatted;
+
+        updateTotalDisplay();
         window.showToast?.(data.message, 'success');
-        setTimeout(() => location.reload(), 800);
     } else {
         window.showToast?.(data.message, 'error');
     }
@@ -191,7 +219,15 @@ window.removeVoucher = async function () {
         method: 'DELETE',
         headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
     });
-    location.reload();
+
+    currentDiscount = 0;
+
+    // Show form state
+    document.getElementById('voucher-applied').classList.add('hidden');
+    document.getElementById('voucher-form').classList.remove('hidden');
+    document.getElementById('voucher-input').value = '';
+
+    updateTotalDisplay();
 };
 
 // ─── Init ─────────────────────────────────────────────────────────────────────

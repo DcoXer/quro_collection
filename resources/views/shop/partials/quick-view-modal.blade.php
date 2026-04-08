@@ -25,7 +25,10 @@
 
                     <h2 id="qv-name" style="font-family: 'Playfair Display', serif;"
                         class="text-2xl font-semibold text-gray-900 mb-2"></h2>
-                    <p id="qv-price" class="text-xl text-gray-900 mb-3"></p>
+                    <div id="qv-price-wrap" class="mb-3 flex items-center gap-2">
+                        <p id="qv-price" class="text-xl text-gray-900"></p>
+                        <p id="qv-price-original" class="text-sm text-gray-400 line-through hidden"></p>
+                    </div>
                     <p id="qv-desc" class="text-gray-500 text-sm leading-relaxed mb-4"></p>
 
                     @auth

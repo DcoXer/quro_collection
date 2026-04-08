@@ -66,10 +66,9 @@
 
                         {{-- Image + Name --}}
                         <div class="col-span-12 md:col-span-6 flex items-center gap-4">
-                            <div class="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden shrink-0">
+                            <div class="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden shrink-0 relative">
                                 @if($item['image'])
-                                    <img src="{{ Storage::url($item['image']) }}"
-                                        class="w-full h-full object-cover">
+                                    <img src="{{ Storage::url($item['image']) }}" class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center">
                                         <svg class="w-6 h-6 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,12 +76,28 @@
                                         </svg>
                                     </div>
                                 @endif
+                                @if($item['flash_sale'])
+                                    <div class="absolute bottom-1 right-1">
+                                        <span class="inline-flex items-center justify-center w-5 h-5 bg-amber-400 rounded-full shadow-sm">
+                                            <svg class="w-2.5 h-2.5 text-gray-950" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                                        </span>
+                                    </div>
+                                @endif
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-medium text-gray-900 truncate">{{ $item['name'] }}</p>
-                                <p class="text-xs text-gray-400 mt-0.5" data-price="{{ $item['price'] }}">
-                                    Rp {{ number_format($item['price'], 0, ',', '.') }}
-                                </p>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <p class="text-xs {{ $item['flash_sale'] ? 'text-amber-600 font-semibold' : 'text-gray-400' }}" data-price="{{ $item['price'] }}">
+                                        Rp {{ number_format($item['price'], 0, ',', '.') }}
+                                    </p>
+                                    @if($item['flash_sale'] && $item['original_price'])
+                                        <p class="text-xs text-gray-300 line-through">Rp {{ number_format($item['original_price'], 0, ',', '.') }}</p>
+                                    @endif
+                                </div>
+                                @if($item['flash_sale'] && $item['original_price'])
+                                    @php $saved = ($item['original_price'] - $item['price']); @endphp
+                                    <p class="text-[10px] text-amber-500 mt-0.5">Hemat Rp {{ number_format($saved, 0, ',', '.') }}</p>
+                                @endif
                                 {{-- Remove button mobile --}}
                                 <form method="POST" action="{{ route('cart.remove', $key) }}" class="md:hidden mt-1">
                                     @csrf @method('DELETE')
@@ -98,26 +113,36 @@
 
                         {{-- Size --}}
                         <div class="col-span-4 md:col-span-2 flex justify-start md:justify-center">
-                            @php
-                                $cartProduct = \App\Models\Product::with('variants')->find($item['product_id']);
-                            @endphp
-                            @if($cartProduct)
-                                <form method="POST" action="{{ route('cart.change-size', $key) }}">
-                                    @csrf @method('PATCH')
-                                    <select name="size" onchange="this.form.submit()"
-                                        class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-gray-400 bg-white text-gray-700">
-                                        @foreach(['S','M','L','XL'] as $size)
-                                            @if($cartProduct->stock > 0)
-                                                <option value="{{ $size }}" {{ $item['size'] === $size ? 'selected' : '' }}>{{ $size }}</option>
-                                            @endif
-                                        @endforeach
+                            @php $cartProduct = \App\Models\Product::with('variants')->find($item['product_id']); @endphp
+                            @if($cartProduct && $cartProduct->variants->count() > 0)
+                                <div x-data="{ open: false }" class="relative">
+                                    <button type="button" @click="open = !open"
+                                        class="flex items-center gap-1 text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 hover:border-gray-400 transition bg-white text-gray-700 font-medium">
+                                        {{ $item['size'] }}
+                                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </button>
+                                    <div x-show="open" @click.outside="open = false" x-transition
+                                        class="absolute z-20 mt-1 bg-white border border-gray-100 rounded-xl shadow-lg p-1.5 flex flex-col gap-1 min-w-[60px]">
                                         @foreach($cartProduct->variants as $variant)
-                                            @if($variant->stock > 0)
-                                                <option value="{{ $variant->size }}" {{ $item['size'] === $variant->size ? 'selected' : '' }}>{{ $variant->size }}</option>
+                                            @if($variant->stock > 0 || $item['size'] === $variant->size)
+                                                @if($item['size'] === $variant->size)
+                                                    <span class="text-xs px-3 py-1.5 rounded-lg bg-gray-900 text-white text-center font-medium">{{ $variant->size }}</span>
+                                                @else
+                                                    <form method="POST" action="{{ route('cart.change-size', $key) }}">
+                                                        @csrf @method('PATCH')
+                                                        <input type="hidden" name="size" value="{{ $variant->size }}">
+                                                        <button type="submit"
+                                                            class="w-full text-xs px-3 py-1.5 rounded-lg hover:bg-gray-50 text-gray-600 transition text-center">
+                                                            {{ $variant->size }}
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             @endif
                                         @endforeach
-                                    </select>
-                                </form>
+                                    </div>
+                                </div>
                             @else
                                 <span class="text-xs text-gray-400">{{ $item['size'] ?? '-' }}</span>
                             @endif
@@ -139,9 +164,11 @@
 
                         {{-- Subtotal + Remove --}}
                         <div class="col-span-4 md:col-span-2 flex items-center justify-end gap-3">
-                            <p class="text-sm font-semibold text-gray-900">
-                                Rp {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
-                            </p>
+                            <div class="text-right">
+                                <p class="text-sm font-semibold {{ $item['flash_sale'] ? 'text-amber-600' : 'text-gray-900' }}">
+                                    Rp {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
+                                </p>
+                            </div>
                             <form method="POST" action="{{ route('cart.remove', $key) }}" class="hidden md:block">
                                 @csrf @method('DELETE')
                                 <button type="submit"
@@ -174,17 +201,32 @@
                         class="text-lg font-semibold text-gray-900 mb-5">Ringkasan</p>
 
                     {{-- Items --}}
-                    <div class="space-y-2 mb-5">
+                    <div class="space-y-3 mb-5">
                         @foreach($cart as $item)
-                            <div class="flex justify-between text-xs text-gray-400">
-                                <span class="truncate max-w-[140px]">
-                                    {{ $item['name'] }}
-                                    <span class="text-gray-300">({{ $item['size'] ?? '-' }})</span>
-                                    ×{{ $item['quantity'] }}
-                                </span>
-                                <span id="cart-total" class="shrink-0 ml-2 font-medium text-gray-600">
-                                    Rp {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
-                                </span>
+                            <div class="flex justify-between items-start gap-2">
+                                <div class="flex items-start gap-1.5 min-w-0">
+                                    @if($item['flash_sale'])
+                                        <span class="mt-0.5 shrink-0 inline-flex items-center justify-center w-4 h-4 bg-amber-400 rounded-full">
+                                            <svg class="w-2 h-2 text-gray-950" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                                        </span>
+                                    @endif
+                                    <div class="min-w-0">
+                                        <p class="text-xs text-gray-600 truncate max-w-[120px]">
+                                            {{ $item['name'] }} <span class="text-gray-300">({{ $item['size'] ?? '-' }})</span> ×{{ $item['quantity'] }}
+                                        </p>
+                                        @if($item['flash_sale'] && $item['original_price'])
+                                            <p class="text-[10px] text-amber-500">Hemat Rp {{ number_format(($item['original_price'] - $item['price']) * $item['quantity'], 0, ',', '.') }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="shrink-0 text-right">
+                                    <p class="text-xs font-medium {{ $item['flash_sale'] ? 'text-amber-600' : 'text-gray-600' }}">
+                                        Rp {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
+                                    </p>
+                                    @if($item['flash_sale'] && $item['original_price'])
+                                        <p class="text-[10px] text-gray-300 line-through">Rp {{ number_format($item['original_price'] * $item['quantity'], 0, ',', '.') }}</p>
+                                    @endif
+                                </div>
                             </div>
                         @endforeach
                     </div>

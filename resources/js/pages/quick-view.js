@@ -15,54 +15,80 @@ window.openQuickView = async function (apiUrl, detailUrl) {
     qvQty           = 1;
     qvSelectedPrice = 0;
 
-    const res = await fetch(apiUrl);
-    const p   = await res.json();
+    let p;
+    try {
+        const res = await fetch(apiUrl);
+        p = await res.json();
+    } catch (err) {
+        console.error('Quick view fetch failed:', err);
+        document.getElementById('qv-loading').classList.add('hidden');
+        document.getElementById('quick-view-modal').classList.add('hidden');
+        return;
+    }
 
     qvProductId = p.id;
 
-    if (p.image) {
-        document.getElementById('qv-image').src = p.image;
-        document.getElementById('qv-image').classList.remove('hidden');
-        document.getElementById('qv-no-image').classList.add('hidden');
-    } else {
-        document.getElementById('qv-image').classList.add('hidden');
-        document.getElementById('qv-no-image').classList.remove('hidden');
-    }
+    try {
+        if (p.image) {
+            document.getElementById('qv-image').src = p.image;
+            document.getElementById('qv-image').classList.remove('hidden');
+            document.getElementById('qv-no-image').classList.add('hidden');
+        } else {
+            document.getElementById('qv-image').classList.add('hidden');
+            document.getElementById('qv-no-image').classList.remove('hidden');
+        }
 
-    document.getElementById('qv-category').textContent  = p.category ?? '';
-    document.getElementById('qv-name').textContent      = p.name;
-    document.getElementById('qv-price').textContent     = p.price_formatted;
-    document.getElementById('qv-desc').textContent      = p.description ?? '';
-    document.getElementById('qv-detail-link').href      = detailUrl;
+        document.getElementById('qv-category').textContent  = p.category ?? '';
+        document.getElementById('qv-name').textContent      = p.name;
+        document.getElementById('qv-desc').textContent      = p.description ?? '';
 
-    const sizeEl = document.getElementById('qv-selected-size');
-    if (sizeEl) sizeEl.value = '';
-    const qtyEl = document.getElementById('qv-qty-display');
-    if (qtyEl) qtyEl.textContent = 1;
-    const totalEl = document.getElementById('qv-total');
-    if (totalEl) totalEl.textContent = 'Pilih size';
-
-    const sizesEl = document.getElementById('qv-sizes');
-    if (sizesEl) {
-        sizesEl.innerHTML = '';
-
-        p.variants.forEach(v => {
-            const btn          = document.createElement('button');
-            btn.type           = 'button';
-            btn.textContent    = v.size;
-            btn.dataset.price  = v.effective_price;
-            btn.dataset.size   = v.size;
-            btn.dataset.stock  = v.stock;
-
-            if (v.stock > 0) {
-                btn.className = 'size-btn px-4 py-2 border border-gray-200 rounded-lg text-sm hover:border-gray-900 transition';
-                btn.onclick   = () => qvSelectSize(btn);
-            } else {
-                btn.className = 'px-4 py-2 border border-gray-100 rounded-lg text-sm text-gray-300 cursor-not-allowed';
-                btn.disabled  = true;
+        const priceEl     = document.getElementById('qv-price');
+        const origPriceEl = document.getElementById('qv-price-original');
+        if (p.flash_price_formatted) {
+            priceEl.textContent = p.flash_price_formatted;
+            priceEl.style.color = '#d97706'; // amber-600
+            if (origPriceEl) {
+                origPriceEl.textContent = p.price_formatted;
+                origPriceEl.classList.remove('hidden');
             }
-            sizesEl.appendChild(btn);
-        });
+        } else {
+            priceEl.textContent = p.price_formatted;
+            priceEl.style.color = '';
+            if (origPriceEl) origPriceEl.classList.add('hidden');
+        }
+        document.getElementById('qv-detail-link').href = detailUrl;
+
+        const sizeEl = document.getElementById('qv-selected-size');
+        if (sizeEl) sizeEl.value = '';
+        const qtyEl = document.getElementById('qv-qty-display');
+        if (qtyEl) qtyEl.textContent = 1;
+        const totalEl = document.getElementById('qv-total');
+        if (totalEl) totalEl.textContent = 'Pilih size';
+
+        const sizesEl = document.getElementById('qv-sizes');
+        if (sizesEl) {
+            sizesEl.innerHTML = '';
+
+            p.variants.forEach(v => {
+                const btn          = document.createElement('button');
+                btn.type           = 'button';
+                btn.textContent    = v.size;
+                btn.dataset.price  = v.effective_price;
+                btn.dataset.size   = v.size;
+                btn.dataset.stock  = v.stock;
+
+                if (v.stock > 0) {
+                    btn.className = 'size-btn px-4 py-2 border border-gray-200 rounded-lg text-sm hover:border-gray-900 transition';
+                    btn.onclick   = () => qvSelectSize(btn);
+                } else {
+                    btn.className = 'px-4 py-2 border border-gray-100 rounded-lg text-sm text-gray-300 cursor-not-allowed';
+                    btn.disabled  = true;
+                }
+                sizesEl.appendChild(btn);
+            });
+        }
+    } catch (domErr) {
+        console.error('Quick view render error:', domErr);
     }
 
     document.getElementById('qv-loading').classList.add('hidden');

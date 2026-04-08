@@ -30,7 +30,21 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Keranjang kosong.');
         }
 
-        $total = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
+        try {
+            ['items' => $resolved, 'total' => $total] = $this->cartService->resolveItems($cart);
+        } catch (\Exception $e) {
+            return redirect()->route('cart.index')->with('error', $e->getMessage());
+        }
+
+        // Rebuild cart display with resolved (flash-discounted) prices
+        $cart = collect($resolved)->map(fn($item) => [
+            'product_id' => $item['product_id'],
+            'name'       => $item['product']->name,
+            'image'      => $item['product']->image,
+            'size'       => $item['size'],
+            'quantity'   => $item['quantity'],
+            'price'      => $item['price'],
+        ])->values()->all();
 
         return view('checkout.index', compact('cart', 'total'));
     }

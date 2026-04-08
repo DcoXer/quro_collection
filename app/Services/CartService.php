@@ -2,13 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\FlashSaleItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
 
 class CartService
 {
-    const BASE_SIZES = ['S', 'M', 'L', 'XL'];
-
     /**
      * Resolve cart items from session against DB (validate stock + get real prices).
      * Returns ['items' => [...], 'total' => int] or throws \Exception on error.
@@ -20,6 +19,11 @@ class CartService
         $items = [];
         $total = 0;
 
+        // Load active flash sale items once
+        $flashItems = FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())
+            ->get()
+            ->keyBy('product_id');
+
         foreach ($cart as $item) {
             $product = Product::with('variants')->find($item['product_id']);
 
@@ -27,11 +31,14 @@ class CartService
                 throw new \Exception("{$item['name']} tidak tersedia.");
             }
 
-            [$price, $stock] = $this->getPriceAndStock($product, $item['size']);
+            [$basePrice, $stock] = $this->getPriceAndStock($product, $item['size']);
 
             if ($stock < $item['quantity']) {
                 throw new \Exception("Stok {$product->name} size {$item['size']} tidak mencukupi.");
             }
+
+            // Apply flash sale discount if active
+            $price = $this->applyFlashDiscount($basePrice, $flashItems->get($product->id));
 
             $items[] = [
                 'product'    => $product,
@@ -49,33 +56,48 @@ class CartService
 
     /**
      * Decrement stock for an item. Returns number of affected rows.
+     * Always uses variant stock if variant exists, falls back to product stock.
      */
     public function decrementStock(int $productId, string $size, int $quantity): int
     {
-        if (in_array($size, self::BASE_SIZES)) {
-            return Product::where('id', $productId)
+        $variant = ProductVariant::where('product_id', $productId)
+            ->where('size', $size)
+            ->first();
+
+        if ($variant) {
+            return ProductVariant::where('product_id', $productId)
+                ->where('size', $size)
                 ->where('stock', '>=', $quantity)
                 ->decrement('stock', $quantity);
         }
 
-        return ProductVariant::where('product_id', $productId)
-            ->where('size', $size)
+        return Product::where('id', $productId)
             ->where('stock', '>=', $quantity)
             ->decrement('stock', $quantity);
     }
 
     private function getPriceAndStock(Product $product, string $size): array
     {
-        if (in_array($size, self::BASE_SIZES)) {
-            return [$product->price, $product->stock];
+        $variant = $product->variants->where('size', $size)->first();
+
+        if ($variant) {
+            return [$variant->effective_price, $variant->stock];
         }
 
-        $variant = $product->variants()->where('size', $size)->first();
+        // Simple product without variants
+        return [$product->price, $product->stock];
+    }
 
-        if (!$variant) {
-            throw new \Exception("Varian size {$size} tidak ditemukan untuk {$product->name}.");
+    private function applyFlashDiscount(int $price, ?FlashSaleItem $flashItem): int
+    {
+        if (!$flashItem) {
+            return $price;
         }
 
-        return [$variant->price, $variant->stock];
+        $discounted = $flashItem->discount_type === 'percent'
+            ? $price - ($price * $flashItem->discount_value / 100)
+            : $price - $flashItem->discount_value;
+
+        return max(0, (int) $discounted);
     }
 }

@@ -13,6 +13,21 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('images/favicon/favicon.ico') }}">
     <link rel="manifest" href="{{ asset('images/favicon/site.webmanifest') }}">
     <title>Quro Collection</title>
+
+    {{-- Default OG / Twitter — per-page @push('seo') overrides these --}}
+    <meta property="og:site_name" content="Quro Collection">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Quro Collection">
+    <meta property="og:description" content="Temukan koleksi pakaian terbaik di Quro Collection. Kualitas premium, harga terjangkau.">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Quro Collection">
+    <meta name="twitter:description" content="Temukan koleksi pakaian terbaik di Quro Collection. Kualitas premium, harga terjangkau.">
+    <meta name="twitter:image" content="{{ asset('images/og-image.jpg') }}">
+
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
@@ -63,6 +78,8 @@
         setTimeout(hideLoader, 120);
     } else {
         window.addEventListener('load', function(){ setTimeout(hideLoader, 120); });
+        // Fallback: paksa hide setelah 4 detik supaya tidak stuck
+        setTimeout(hideLoader, 4000);
     }
 
     // Show on navigation

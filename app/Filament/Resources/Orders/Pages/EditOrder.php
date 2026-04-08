@@ -7,7 +7,6 @@ use App\Mail\OrderStatusMail;
 use App\Models\Notification;
 use App\Models\Product;
 use App\Models\ProductVariant;
-use App\Services\CartService;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -63,12 +62,14 @@ class EditOrder extends EditRecord
 
     private function restoreStock(int $productId, ?string $size, int $quantity): void
     {
-        if (!$size || in_array($size, CartService::BASE_SIZES)) {
-            Product::where('id', $productId)->increment('stock', $quantity);
-        } else {
+        $hasVariant = $size && ProductVariant::where('product_id', $productId)->where('size', $size)->exists();
+
+        if ($hasVariant) {
             ProductVariant::where('product_id', $productId)
                 ->where('size', $size)
                 ->increment('stock', $quantity);
+        } else {
+            Product::where('id', $productId)->increment('stock', $quantity);
         }
     }
 }
