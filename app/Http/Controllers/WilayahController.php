@@ -46,6 +46,15 @@ class WilayahController extends Controller
             $request->weight,
         );
 
+        // Store server-side so checkout cannot be tampered via DevTools
+        if (!empty($result['data']['couriers'])) {
+            session(['ongkir_verified' => [
+                'destination' => $request->destination_village_code,
+                'weight'      => (float) $request->weight,
+                'couriers'    => $result['data']['couriers'],
+            ]]);
+        }
+
         return response()->json($result);
     }
 }

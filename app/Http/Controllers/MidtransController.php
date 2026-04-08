@@ -46,6 +46,18 @@ class MidtransController extends Controller
             return response()->json(['message' => 'Order not found'], 404);
         }
 
+        // Validate gross_amount from Midtrans matches DB — reject if tampered
+        $midtransAmount = (int) round((float) $notification->gross_amount);
+        if ($midtransAmount !== (int) $order->total_amount) {
+            Log::critical('Midtrans webhook: amount mismatch — possible fraud', [
+                'invoice'         => $order->invoice_number,
+                'db_amount'       => $order->total_amount,
+                'midtrans_amount' => $midtransAmount,
+                'ip'              => $request->ip(),
+            ]);
+            return response()->json(['message' => 'Amount mismatch'], 422);
+        }
+
         $transactionStatus = $notification->transaction_status;
         $newStatus         = $this->mapTransactionStatus($transactionStatus);
 
@@ -81,11 +93,22 @@ class MidtransController extends Controller
         DB::transaction(function () use ($order, $updateData, $newStatus) {
             $order->update($updateData);
 
-            // Kurangi stok saat pembayaran berhasil
+            // Kurangi stok atomik setelah pembayaran dikonfirmasi
             if ($newStatus === 'paid') {
                 $order->load('items');
                 foreach ($order->items as $item) {
-                    $this->deductStock($item->product_id, $item->size, $item->quantity);
+                    $updated = $this->deductStock($item->product_id, $item->size, $item->quantity);
+
+                    if (!$updated) {
+                        Log::warning('payment.suspicious', [
+                            'event'      => 'stock_insufficient_on_paid',
+                            'invoice'    => $order->invoice_number,
+                            'product_id' => $item->product_id,
+                            'size'       => $item->size,
+                            'quantity'   => $item->quantity,
+                        ]);
+                        // Lanjutkan proses — order tetap paid, stok bisa negatif ditangani ops
+                    }
                 }
             }
 
@@ -117,15 +140,22 @@ class MidtransController extends Controller
         return response()->json(['message' => 'OK']);
     }
 
-    private function deductStock(int $productId, ?string $size, int $quantity): void
+    /**
+     * Atomic stock decrement with WHERE stock >= quantity guard.
+     * Returns number of affected rows (0 = insufficient stock).
+     */
+    private function deductStock(int $productId, ?string $size, int $quantity): int
     {
         if (!$size || in_array($size, CartService::BASE_SIZES)) {
-            Product::where('id', $productId)->decrement('stock', $quantity);
-        } else {
-            ProductVariant::where('product_id', $productId)
-                ->where('size', $size)
+            return Product::where('id', $productId)
+                ->where('stock', '>=', $quantity)
                 ->decrement('stock', $quantity);
         }
+
+        return ProductVariant::where('product_id', $productId)
+            ->where('size', $size)
+            ->where('stock', '>=', $quantity)
+            ->decrement('stock', $quantity);
     }
 
     private function mapTransactionStatus(string $transactionStatus): ?string

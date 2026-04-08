@@ -35,9 +35,9 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinutes(5, 3)->by($key);
         });
 
-        // Voucher apply: 20 per menit per user — cegah enumeration kode voucher
+        // Voucher apply: 10 per menit per user — cegah enumeration kode voucher
         RateLimiter::for('voucher', function (Request $request) {
-            return Limit::perMinute(20)->by($request->user()?->id ?: $request->ip());
+            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
         });
 
         // Cart add: 60 per menit per user — reasonable untuk normal use
@@ -45,9 +45,14 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
-        // Checkout: 10 per menit per user — cegah double-submit & spam order
+        // Checkout: 5x per 10 menit per user — cegah double-submit & spam order
         RateLimiter::for('checkout', function (Request $request) {
-            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
+            return Limit::perMinutes(10, 5)->by($request->user()?->id ?: $request->ip());
+        });
+
+        // Midtrans webhook: 60x per menit per IP
+        RateLimiter::for('midtrans-webhook', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip());
         });
     }
 }

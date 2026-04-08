@@ -3,13 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\Product;
 use App\Models\ProductReview;
-use App\Models\ProductVariant;
-use App\Services\CartService;
 use App\Services\TrackingService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -45,13 +41,9 @@ class OrderController extends Controller
             ->where('status', 'pending')
             ->firstOrFail();
 
-        DB::transaction(function () use ($order) {
-            foreach ($order->items as $item) {
-                $this->restoreStock($item->product_id, $item->size, $item->quantity);
-            }
-
-            $order->update(['status' => 'cancelled']);
-        });
+        // Stock tidak dikurangi saat order dibuat, sehingga tidak perlu di-restore saat cancel.
+        // Stok hanya berkurang setelah pembayaran confirmed via Midtrans webhook.
+        $order->update(['status' => 'cancelled']);
 
         return redirect()->route('orders.index')
             ->with('success', 'Pesanan berhasil dibatalkan.');
@@ -74,16 +66,5 @@ class OrderController extends Controller
         $result   = $tracking->track($order->courier, $order->tracking_number);
 
         return response()->json($result);
-    }
-
-    private function restoreStock(int $productId, ?string $size, int $quantity): void
-    {
-        if (!$size || in_array($size, CartService::BASE_SIZES)) {
-            Product::where('id', $productId)->increment('stock', $quantity);
-        } else {
-            ProductVariant::where('product_id', $productId)
-                ->where('size', $size)
-                ->increment('stock', $quantity);
-        }
     }
 }

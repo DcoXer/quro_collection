@@ -7,11 +7,11 @@
     <meta name="cart-add-url" content="{{ route('cart.add') }}">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/logo/apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/logo/favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/logo/favicon-16x16.png') }}">
-    <link rel="icon" type="image/x-icon" href="{{ asset('images/logo/favicon.ico') }}">
-    <link rel="manifest" href="{{ asset('images/logo/site.webmanifest') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/favicon/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon/favicon-16x16.png') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('images/favicon/favicon.ico') }}">
+    <link rel="manifest" href="{{ asset('images/favicon/site.webmanifest') }}">
     <title>Quro Collection</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -22,49 +22,76 @@
     <script type="application/ld+json">@json(\App\Support\SchemaOrg::site())</script>
     @stack('jsonld')
 </head>
-{{-- Page transition bar --}}
-<div id="page-bar" style="
-    position:fixed;top:0;left:0;z-index:9999;
-    height:2px;width:0%;
-    background:linear-gradient(90deg,#111827,#6b7280);
-    transition:width .25s ease,opacity .3s ease;
-    opacity:0;pointer-events:none;
-"></div>
+{{-- Page Loader --}}
+<div id="quro-loader" style="
+    position:fixed;inset:0;z-index:99999;
+    background:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+    transition:opacity .4s ease, visibility .4s ease;
+">
+    <img src="{{ asset('images/logo.png') }}" alt="Quro Collection"
+        style="height:52px;width:auto;animation:quroLogoIn .5s cubic-bezier(.34,1.56,.64,1) both;">
+    <div style="display:flex;gap:7px;align-items:center;">
+        <span style="width:6px;height:6px;border-radius:50%;background:#111827;animation:quroDot .9s ease-in-out infinite;animation-delay:0s;"></span>
+        <span style="width:6px;height:6px;border-radius:50%;background:#111827;animation:quroDot .9s ease-in-out infinite;animation-delay:.18s;"></span>
+        <span style="width:6px;height:6px;border-radius:50%;background:#111827;animation:quroDot .9s ease-in-out infinite;animation-delay:.36s;"></span>
+    </div>
+</div>
+<style>
+@keyframes quroLogoIn {
+    from { opacity:0; transform:scale(.82) translateY(10px); }
+    to   { opacity:1; transform:scale(1) translateY(0); }
+}
+@keyframes quroDot {
+    0%,80%,100% { transform:scale(.6); opacity:.3; }
+    40%          { transform:scale(1.1); opacity:1; }
+}
+</style>
 
-<body class="bg-white text-gray-900 antialiased" style="font-family: 'Inter', sans-serif; opacity:0; transition: opacity .18s ease;">
+<body class="bg-white text-gray-900 antialiased" style="font-family: 'Inter', sans-serif;">
 <script>
 (function(){
-    var bar = document.getElementById('page-bar');
-    var body = document.body;
-    var timer;
+    var loader = document.getElementById('quro-loader');
 
-    // Fade in page on load
-    function pageIn() {
-        body.style.opacity = '1';
-        bar.style.width = '100%';
-        bar.style.opacity = '1';
-        clearTimeout(timer);
-        timer = setTimeout(function(){ bar.style.opacity = '0'; bar.style.width = '0%'; }, 350);
+    function hideLoader() {
+        loader.style.opacity = '0';
+        loader.style.visibility = 'hidden';
     }
 
-    // Start bar on link click
+    // Hide on load
+    if (document.readyState === 'complete') {
+        setTimeout(hideLoader, 120);
+    } else {
+        window.addEventListener('load', function(){ setTimeout(hideLoader, 120); });
+    }
+
+    // Show on navigation
     document.addEventListener('click', function(e){
         var a = e.target.closest('a');
         if (!a || !a.href) return;
         var url = a.href;
-        // Skip: external, hash-only, js:, target=_blank, download
-        if (a.target === '_blank' || a.download || url.startsWith('javascript') || url.startsWith('mailto') || url.startsWith('tel')) return;
+        if (a.target === '_blank' || a.download) return;
+        if (url.startsWith('javascript') || url.startsWith('mailto') || url.startsWith('tel')) return;
+        var isHashOnly = (a.getAttribute('href') || '').startsWith('#');
         var isSameOrigin = url.startsWith(location.origin) || url.startsWith('/');
-        var isHashOnly = a.getAttribute('href') && a.getAttribute('href').startsWith('#');
         if (!isSameOrigin || isHashOnly) return;
 
-        bar.style.transition = 'width .6s cubic-bezier(.4,0,.2,1), opacity .3s ease';
-        bar.style.opacity = '1';
-        bar.style.width = '75%';
+        loader.style.opacity = '1';
+        loader.style.visibility = 'visible';
     });
 
-    window.addEventListener('pageshow', pageIn);
-    document.addEventListener('DOMContentLoaded', pageIn);
+    // Show on form submit
+    document.addEventListener('submit', function(e){
+        var form = e.target;
+        if (form.method && form.method.toLowerCase() === 'get') return;
+        loader.style.opacity = '1';
+        loader.style.visibility = 'visible';
+    });
+
+    // Hide on back/forward (bfcache)
+    window.addEventListener('pageshow', function(e){
+        if (e.persisted) hideLoader();
+    });
 })();
 </script>
     {{-- Navigation --}}

@@ -62,7 +62,7 @@ Route::post('/verify-otp', [OtpController::class, 'verify'])->middleware('thrott
 Route::post('/verify-otp/resend', [OtpController::class, 'resend'])->middleware('throttle:otp-resend')->name('otp.resend');
 
 // Webhook
-Route::post('/webhook/midtrans', [MidtransController::class, 'webhook'])->name('webhook.midtrans');
+Route::post('/webhook/midtrans', [MidtransController::class, 'webhook'])->middleware('throttle:midtrans-webhook')->name('webhook.midtrans');
 Route::get('/checkout/payment/{invoice}', [CheckoutController::class, 'payment'])->name('checkout.payment');
 
 // Admin routes

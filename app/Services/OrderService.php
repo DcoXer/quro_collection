@@ -14,7 +14,8 @@ class OrderService
 
     /**
      * Create an order inside a DB transaction.
-     * Handles: order creation, order items, stock decrement, voucher usage.
+     * Handles: order creation, order items, voucher usage.
+     * Stock is NOT decremented here — only after payment confirmed via Midtrans webhook.
      *
      * @throws \Exception
      */
@@ -53,16 +54,6 @@ class OrderService
                     'price'      => $item['price'],
                     'size'       => $item['size'] ?? null,
                 ]);
-
-                $updated = $this->cartService->decrementStock(
-                    $item['product_id'],
-                    $item['size'],
-                    $item['quantity']
-                );
-
-                if (!$updated) {
-                    throw new \Exception("Stok {$item['product']->name} size {$item['size']} habis.");
-                }
             }
 
             if ($voucherCode) {

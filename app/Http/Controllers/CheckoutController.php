@@ -46,7 +46,6 @@ class CheckoutController extends Controller
             'district_id'      => 'required|string',
             'village_id'       => 'required|string',
             'courier'          => 'required|string',
-            'shipping_cost'    => 'required|integer|min:0',
         ]);
 
         $cart = session()->get('cart', []);
@@ -63,12 +62,18 @@ class CheckoutController extends Controller
 
         [$discount, $voucherCode] = $this->resolveVoucher($total);
 
+        try {
+            $shippingCost = $this->resolveShippingCost($request->village_id);
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
         $shippingData = array_merge($request->only([
             'shipping_name', 'shipping_phone',
             'province_id', 'city_id', 'district_id', 'village_id',
             'courier_service',
         ]), [
-            'shipping_cost'    => (int) $request->shipping_cost,
+            'shipping_cost'    => $shippingCost,
             'shipping_address' => implode(', ', array_filter([
                 $request->province_name,
                 $request->city_name,
@@ -83,7 +88,7 @@ class CheckoutController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        session()->forget(['cart', 'voucher']);
+        session()->forget(['cart', 'voucher', 'ongkir_verified']);
 
         $this->sendOrderEmails($order);
 
@@ -120,6 +125,39 @@ class CheckoutController extends Controller
 
     // -------------------------------------------------------------------------
 
+    /**
+     * Resolve shipping cost from server-side session — never trust $request->shipping_cost.
+     * Throws \Exception if no verified ongkir data found for the submitted village.
+     *
+     * @throws \Exception
+     */
+    private function resolveShippingCost(string $villageId): int
+    {
+        $ongkir = session('ongkir_verified');
+
+        if (!$ongkir || $ongkir['destination'] !== $villageId) {
+            Log::warning('payment.suspicious', [
+                'event'      => 'shipping_cost_tamper_attempt',
+                'user_id'    => auth()->id(),
+                'village_id' => $villageId,
+                'session'    => $ongkir ? $ongkir['destination'] : 'none',
+                'ip'         => request()->ip(),
+            ]);
+            throw new \Exception('Data ongkos kirim tidak valid. Silakan pilih ulang alamat pengiriman.');
+        }
+
+        $jne = collect($ongkir['couriers'])->first(
+            fn($c) => str_contains(strtolower($c['courier_name'] ?? ''), 'jne')
+                   || str_contains(strtolower($c['courier_code'] ?? ''), 'jne')
+        );
+
+        if (!$jne) {
+            throw new \Exception('Layanan JNE tidak tersedia untuk wilayah ini.');
+        }
+
+        return (int) $jne['price'];
+    }
+
     private function resolveVoucher(int $total): array
     {
         if (!session('voucher')) {
@@ -132,6 +170,14 @@ class CheckoutController extends Controller
         if ($voucher && $validation['valid']) {
             return [$voucher->calculateDiscount($total), $voucher->code];
         }
+
+        Log::warning('payment.suspicious', [
+            'event'        => 'voucher_revalidation_failed',
+            'user_id'      => auth()->id(),
+            'voucher_code' => session('voucher.code'),
+            'reason'       => $validation['reason'] ?? 'voucher not found',
+            'ip'           => request()->ip(),
+        ]);
 
         session()->forget('voucher');
 
