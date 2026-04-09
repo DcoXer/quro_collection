@@ -11,51 +11,33 @@
          x-data="flashCountdown({{ $flashSale->ends_at->timestamp }})"
          x-init="start()">
 
-        <div class="flex items-center gap-3 h-11">
+        <div class="flex items-center gap-2 h-11">
 
-            {{-- Toggle expand --}}
+            {{-- Lightning icon --}}
+            <div class="w-5 h-5 bg-amber-400 rounded flex items-center justify-center shrink-0">
+                <svg class="w-3 h-3 text-gray-950" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+            </div>
+
+            {{-- Name + countdown (clickable area) --}}
             <button @click="open = !open"
-                class="flex items-center gap-2.5 flex-1 min-w-0 text-left group">
-
-                {{-- Lightning icon --}}
-                <div class="w-5 h-5 bg-amber-400 rounded flex items-center justify-center shrink-0">
-                    <svg class="w-3 h-3 text-gray-950" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                    </svg>
-                </div>
-
-                {{-- Name --}}
+                class="flex items-center gap-2 flex-1 min-w-0 text-left">
                 <span class="text-white text-xs font-semibold truncate">{{ $flashSale->name }}</span>
-
-                {{-- Separator --}}
-                <span class="text-zinc-700 shrink-0 hidden sm:block">·</span>
-
-                {{-- Countdown --}}
-                <template x-if="!expired">
-                    <div class="items-center gap-1 shrink-0 hidden sm:flex">
-                        <span class="text-zinc-500 text-xs">Berakhir</span>
-                        <span class="text-amber-400 text-xs font-mono font-semibold tabular-nums"
-                              x-text="hours + ':' + minutes + ':' + seconds"></span>
-                    </div>
-                </template>
-                <template x-if="expired">
-                    <span class="text-red-400 text-xs font-medium shrink-0">Berakhir</span>
-                </template>
-
-                {{-- Mobile countdown --}}
-                <template x-if="!expired">
-                    <span class="text-amber-400 text-xs font-mono font-semibold tabular-nums shrink-0 sm:hidden"
-                          x-text="hours + ':' + minutes + ':' + seconds"></span>
-                </template>
-
+                <span class="text-zinc-700 shrink-0">·</span>
+                <span x-show="!expired"
+                      class="text-amber-400 text-xs font-mono font-semibold tabular-nums shrink-0"
+                      x-text="hours + ':' + minutes + ':' + seconds"></span>
+                <span x-show="expired"
+                      class="text-red-400 text-xs font-medium shrink-0">Berakhir</span>
             </button>
 
-            {{-- Produk count label --}}
+            {{-- Produk count — desktop only --}}
             <span class="text-zinc-600 text-xs shrink-0 hidden sm:block">{{ $flashSale->items->count() }} produk</span>
 
-            {{-- Dropdown toggle button --}}
-            <button @click.stop="open = !open"
-                class="text-zinc-500 hover:text-white transition shrink-0 p-1">
+            {{-- Chevron --}}
+            <button @click="open = !open"
+                class="text-zinc-500 hover:text-white transition shrink-0">
                 <svg class="w-4 h-4 transition-transform duration-200"
                      :class="open ? 'rotate-180' : ''"
                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,6 +52,7 @@
     @if($flashSale->items->isNotEmpty())
     <div x-show="open"
          x-collapse
+         style="display:none"
          class="border-t border-zinc-900">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3">
             <div class="flex gap-2.5 overflow-x-auto pb-1"
