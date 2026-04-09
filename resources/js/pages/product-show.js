@@ -21,10 +21,17 @@ window.selectSizePage = function (btn) {
     document.querySelectorAll('.page-size-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
 
-    const price = parseInt(btn.dataset.price);
-    const stock = parseInt(btn.dataset.stock);
-    document.getElementById('display-price').textContent =
-        'Rp ' + price.toLocaleString('id-ID');
+    const basePrice  = parseInt(btn.dataset.price);
+    const flashPrice = btn.dataset.flashPrice ? parseInt(btn.dataset.flashPrice) : null;
+    const stock      = parseInt(btn.dataset.stock);
+    const displayEl  = document.getElementById('display-price');
+
+    if (flashPrice !== null) {
+        displayEl.textContent = 'Rp ' + flashPrice.toLocaleString('id-ID');
+    } else {
+        displayEl.textContent = 'Rp ' + basePrice.toLocaleString('id-ID');
+    }
+
     const stockEl = document.getElementById('stock-info');
     if (stockEl) stockEl.textContent = 'Stok tersedia: ' + stock + ' pcs';
 };

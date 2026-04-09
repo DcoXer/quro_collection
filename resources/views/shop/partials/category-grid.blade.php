@@ -1,3 +1,10 @@
+@php
+    $flashItems = \App\Models\FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())
+        ->with('product')
+        ->get()
+        ->keyBy('product_id');
+@endphp
+
 @if($products->isEmpty())
     <div class="text-center py-20 text-gray-400">
         <p>Produk tidak ditemukan.</p>
@@ -23,7 +30,22 @@
                 <p class="text-xs text-gray-400 mb-0.5">{{ $product->category?->name }}</p>
                 <p class="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition">{{ $product->name }}</p>
                 <div class="flex items-center justify-between mt-0.5">
-                    <p class="text-sm text-gray-700">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                    @php
+                        $flashItem = $flashItems[$product->id] ?? null;
+                        $flashPrice = $flashItem ? max(0, (int)(
+                            $flashItem->discount_type === 'percent'
+                                ? $product->price - ($product->price * $flashItem->discount_value / 100)
+                                : $product->price - $flashItem->discount_value
+                        )) : null;
+                    @endphp
+                    @if($flashPrice !== null)
+                        <div class="flex items-center gap-1.5">
+                            <p class="text-sm font-semibold text-amber-600">Rp {{ number_format($flashPrice, 0, ',', '.') }}</p>
+                            <p class="text-xs text-gray-400 line-through">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-700">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                    @endif
                     @auth
                         @php $wishlisted = in_array($product->id, $wishlistedIds ?? []); @endphp
                         <button type="button"

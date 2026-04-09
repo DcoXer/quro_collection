@@ -26,12 +26,44 @@
     <div class="max-w-5xl mx-auto px-6 py-8 md:py-12">
 
         <a href="{{ route('shop.index') }}"
-            class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 border border-gray-100 hover:border-gray-200 px-3 py-1.5 rounded-xl transition mb-8">
+            class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 border border-gray-100 hover:border-gray-200 px-3 py-1.5 rounded-xl transition mb-6">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
             Semua Koleksi
         </a>
+
+        @if($flashItem)
+        <div class="bg-gray-950 rounded-2xl px-4 py-3 mb-8 flex items-center justify-between gap-4"
+             x-data="flashCountdown({{ $flashItem->flashSale->ends_at->timestamp }})"
+             x-init="start()">
+            <div class="flex items-center gap-3">
+                <div class="w-7 h-7 bg-amber-400 rounded-lg flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4 text-gray-950" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-white text-xs font-semibold">{{ $flashItem->flashSale->name }}</p>
+                    <p class="text-zinc-400 text-xs">
+                        {{ $flashItem->discount_type === 'percent'
+                            ? 'Diskon '.$flashItem->discount_value.'%'
+                            : 'Hemat Rp '.number_format($flashItem->discount_value, 0, ',', '.') }}
+                    </p>
+                </div>
+            </div>
+            <template x-if="!expired">
+                <div class="text-right shrink-0">
+                    <p class="text-zinc-500 text-[10px] uppercase tracking-widest">Berakhir dalam</p>
+                    <p class="text-amber-400 text-sm font-mono font-bold tabular-nums"
+                       x-text="hours + ':' + minutes + ':' + seconds"></p>
+                </div>
+            </template>
+            <template x-if="expired">
+                <span class="text-red-400 text-xs font-medium shrink-0">Flash sale berakhir</span>
+            </template>
+        </div>
+        @endif
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16">
 
@@ -138,9 +170,19 @@
                     <div class="flex flex-wrap gap-2">
                         @foreach($product->variants as $variant)
                             @if($variant->stock > 0)
+                                @php
+                                    $variantFlashPrice = null;
+                                    if ($flashItem) {
+                                        $variantFlashPrice = $flashItem->discount_type === 'percent'
+                                            ? $variant->effective_price - ($variant->effective_price * $flashItem->discount_value / 100)
+                                            : $variant->effective_price - $flashItem->discount_value;
+                                        $variantFlashPrice = max(0, (int) $variantFlashPrice);
+                                    }
+                                @endphp
                                 <button type="button"
                                     data-size="{{ $variant->size }}"
                                     data-price="{{ $variant->effective_price }}"
+                                    data-flash-price="{{ $variantFlashPrice }}"
                                     data-stock="{{ $variant->stock }}"
                                     onclick="selectSizePage(this)"
                                     class="page-size-btn px-4 py-2 border border-gray-200 rounded-lg text-sm hover:border-gray-900 transition">

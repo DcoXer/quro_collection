@@ -73,7 +73,7 @@ Write-Host "Cache Laravel di-rebuild." -ForegroundColor Green
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host " SIAP! Link loe udah bisa di share:" -ForegroundColor Cyan
+Write-Host " SIAP! Link sudah bisa di share:" -ForegroundColor Cyan
 Write-Host " $tunnelUrl" -ForegroundColor White
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
