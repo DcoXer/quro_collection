@@ -7,7 +7,7 @@
      class="bg-gray-950 border-b border-zinc-800">
 
     {{-- Compact Bar --}}
-    <div class="max-w-6xl mx-auto px-4 sm:px-6"
+    <div class="max-w-6xl mx-auto px-6"
          x-data="flashCountdown({{ $flashSale->ends_at->timestamp }})"
          x-init="start()">
 
@@ -54,7 +54,7 @@
          x-collapse
          style="display:none"
          class="border-t border-zinc-900">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3">
+        <div class="max-w-6xl mx-auto px-6 py-3">
             <div class="flex gap-2.5 overflow-x-auto pb-1"
                  style="scrollbar-width: none; -ms-overflow-style: none;">
                 @foreach($flashSale->items as $item)
