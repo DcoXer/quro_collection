@@ -6,7 +6,13 @@
       "Bash(php artisan:*)",
       "Bash(xargs grep:*)",
       "Bash(composer show:*)",
-      "Bash(php artisan tinker --execute=\":*)"
+      "Bash(php artisan tinker --execute=\":*)",
+      "Bash(xargs -I {} basename {})",
+      "Bash(grep -h \"extends\\\\|implements\" \"C:\\\\laragon\\\\www\\\\qurocollection\\\\app\\\\Filament\\\\Widgets\"/*.php)",
+      "Bash(npm run:*)",
+      "Bash(icacls C:\\\\laragon\\\\www\\\\qurocollection\\\\storage\\\\framework\\\\views:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(powershell.exe:*)"
     ]
   }
 }

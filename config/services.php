@@ -51,7 +51,7 @@ return [
 
     'binderbyte' => [
         'api_key' => env('BINDERBYTE_API_KEY'),
-        'base_url' => env('https://api.binderbyte.com/v1'),
+        'base_url' => env('BINDERBYTE_BASE_URL'),
         'origin' => env('BINDERBYTE_ORIGIN_ID'),
     ],
 

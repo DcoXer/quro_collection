@@ -26,17 +26,18 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->brandName('Quro Collection')
-            ->brandLogo(asset('images/logo.png'))
+            ->brandLogo('/images/logo.png')
             ->brandLogoHeight('2rem')
             ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Violet,
                 'secondary' => Color::Slate,
-                'success' => Color::Green,
-                'info' => Color::Cyan,
-                'warning' => Color::Yellow,
-                'danger' => Color::Red,
+                'success' => Color::Emerald,
+                'info' => Color::Blue,
+                'warning' => Color::Amber,
+                'danger' => Color::Rose,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

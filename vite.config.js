@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
     plugins: [
+        tailwindcss(),
         laravel({
             input: [
                 'resources/css/app.css',
@@ -20,6 +22,7 @@ export default defineConfig({
                 'resources/js/pages/shop.js',
                 'resources/js/pages/shop-category.js',
                 'resources/js/pages/product-show.js',
+                'resources/css/filament/admin/theme.css',
             ],
             refresh: true,
         }),

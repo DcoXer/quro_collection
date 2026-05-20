@@ -1,0 +1,766 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/* ============================================================
+   QURO ADMIN — MODERN SAAS THEME
+   ============================================================ */
+
+:root {
+    --font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ============================================================
+   LAYOUT & BODY
+   ============================================================ */
+
+.fi-body {
+    background-color: #f8fafc;
+    font-family: var(--font-family);
+}
+
+:where(.dark, .dark *) .fi-body {
+    background-color: #0a0f1e;
+}
+
+/* ============================================================
+   TOPBAR
+   ============================================================ */
+
+.fi-topbar {
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.08) !important;
+    border-bottom: none !important;
+    min-height: 3.75rem;
+}
+
+:where(.dark, .dark *) .fi-topbar {
+    background-color: #0f172a !important;
+    box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.07) !important;
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+
+.fi-sidebar {
+    background-color: #ffffff !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.07) !important;
+}
+
+:where(.dark, .dark *) .fi-sidebar {
+    background-color: #0f172a !important;
+    border-right-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.fi-sidebar-nav {
+    padding: 1.25rem 0.875rem;
+}
+
+/* Group labels */
+.fi-sidebar-group-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #94a3b8 !important;
+    padding-left: 0.625rem;
+}
+
+:where(.dark, .dark *) .fi-sidebar-group-label {
+    color: #475569 !important;
+}
+
+/* Nav item base */
+.fi-sidebar-item-btn {
+    border-radius: 0.625rem !important;
+    padding: 0.5rem 0.625rem !important;
+    margin-bottom: 1px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.fi-sidebar-item-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569 !important;
+}
+
+:where(.dark, .dark *) .fi-sidebar-item-label {
+    color: #94a3b8 !important;
+}
+
+.fi-sidebar-item-btn > .fi-icon {
+    color: #94a3b8 !important;
+}
+
+:where(.dark, .dark *) .fi-sidebar-item-btn > .fi-icon {
+    color: #475569 !important;
+}
+
+/* Nav item hover */
+.fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover {
+    background-color: #f1f5f9 !important;
+}
+
+:where(.dark, .dark *) .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Nav item active */
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+    background-color: #f0f0ff !important;
+}
+
+:where(.dark, .dark *) .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+    background-color: rgba(109, 40, 217, 0.12) !important;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-sidebar-item-label {
+    color: #5b21b6 !important;
+    font-weight: 600;
+}
+
+:where(.dark, .dark *) .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-sidebar-item-label {
+    color: #a78bfa !important;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon {
+    color: #6d28d9 !important;
+}
+
+:where(.dark, .dark *) .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon {
+    color: #a78bfa !important;
+}
+
+/* Sidebar footer */
+.fi-sidebar-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 0.75rem 1rem;
+}
+
+:where(.dark, .dark *) .fi-sidebar-footer {
+    border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ============================================================
+   PAGE HEADER
+   ============================================================ */
+
+.fi-header-heading {
+    font-size: 1.375rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em !important;
+    color: #0f172a !important;
+}
+
+:where(.dark, .dark *) .fi-header-heading {
+    color: #f1f5f9 !important;
+}
+
+.fi-header-subheading {
+    font-size: 0.9375rem !important;
+    color: #64748b !important;
+}
+
+/* Page content padding */
+.fi-main {
+    padding: 1.5rem;
+}
+
+/* ============================================================
+   SECTIONS / CARDS (Filament Panels)
+   ============================================================ */
+
+.fi-section {
+    border-radius: 0.875rem !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
+    overflow: hidden;
+}
+
+:where(.dark, .dark *) .fi-section {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.07) !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+.fi-section-header {
+    padding: 1.125rem 1.5rem !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+:where(.dark, .dark *) .fi-section-header {
+    border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.fi-section-header-heading {
+    font-size: 0.9375rem !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    letter-spacing: -0.01em;
+}
+
+:where(.dark, .dark *) .fi-section-header-heading {
+    color: #e2e8f0 !important;
+}
+
+.fi-section-content {
+    padding: 1.5rem !important;
+}
+
+.fi-section-content-ctn {
+    padding: 0 !important;
+}
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+
+.fi-ta-ctn {
+    border-radius: 0.875rem !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+    background-color: #ffffff;
+}
+
+:where(.dark, .dark *) .fi-ta-ctn {
+    border-color: rgba(255, 255, 255, 0.07) !important;
+    background-color: #1e293b;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+.fi-ta-header-cell {
+    font-size: 0.6875rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: #64748b !important;
+    background-color: #f8fafc !important;
+    padding: 0.875rem 1rem !important;
+}
+
+:where(.dark, .dark *) .fi-ta-header-cell {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    color: #475569 !important;
+}
+
+.fi-ta-row {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    transition: background-color 0.1s ease;
+}
+
+.fi-ta-row:hover {
+    background-color: #fafbfd !important;
+}
+
+:where(.dark, .dark *) .fi-ta-row {
+    border-bottom-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+:where(.dark, .dark *) .fi-ta-row:hover {
+    background-color: rgba(255, 255, 255, 0.025) !important;
+}
+
+.fi-ta-cell {
+    padding: 1rem !important;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+:where(.dark, .dark *) .fi-ta-cell {
+    color: #cbd5e1 !important;
+}
+
+/* Table filters toolbar */
+.fi-ta-filters-form {
+    padding: 1rem 1.25rem !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+:where(.dark, .dark *) .fi-ta-filters-form {
+    border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Table search */
+.fi-ta-search-field {
+    border-radius: 0.625rem !important;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.fi-btn {
+    border-radius: 0.625rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    letter-spacing: -0.01em;
+    transition: all 0.15s ease !important;
+}
+
+.fi-btn-size-md {
+    padding-top: 0.5625rem !important;
+    padding-bottom: 0.5625rem !important;
+}
+
+.fi-btn-color-primary {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.15) !important;
+}
+
+.fi-btn-color-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px 0 rgba(109, 40, 217, 0.25) !important;
+}
+
+.fi-btn-color-gray {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    color: #374151 !important;
+}
+
+:where(.dark, .dark *) .fi-btn-color-gray {
+    background-color: rgba(255, 255, 255, 0.07) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #e2e8f0 !important;
+}
+
+.fi-btn-color-gray:hover {
+    background-color: #f9fafb !important;
+}
+
+:where(.dark, .dark *) .fi-btn-color-gray:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ============================================================
+   FORM INPUTS
+   ============================================================ */
+
+.fi-input {
+    border-radius: 0.625rem !important;
+    border-color: #e2e8f0 !important;
+    background-color: #ffffff !important;
+    font-size: 0.875rem !important;
+    color: #0f172a !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04) !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+:where(.dark, .dark *) .fi-input {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #e2e8f0 !important;
+}
+
+.fi-input:focus {
+    border-color: #7c3aed !important;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12) !important;
+}
+
+.fi-input-wrp {
+    border-radius: 0.625rem !important;
+}
+
+.fi-fo-field-wrp-label {
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    margin-bottom: 0.375rem;
+}
+
+:where(.dark, .dark *) .fi-fo-field-wrp-label {
+    color: #94a3b8 !important;
+}
+
+.fi-fo-field-wrp-helper-text {
+    font-size: 0.8125rem !important;
+    color: #94a3b8 !important;
+}
+
+/* Select */
+.fi-select-input {
+    border-radius: 0.625rem !important;
+    border-color: #e2e8f0 !important;
+    font-size: 0.875rem !important;
+}
+
+:where(.dark, .dark *) .fi-select-input {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+
+.fi-badge {
+    border-radius: 9999px !important;
+    font-size: 0.6875rem !important;
+    font-weight: 600 !important;
+    padding: 0.2rem 0.6rem !important;
+    letter-spacing: 0.01em;
+}
+
+/* ============================================================
+   STATS / WIDGET OVERVIEW
+   ============================================================ */
+
+.fi-wi-stats-overview-stat {
+    border-radius: 0.875rem !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+    padding: 1.5rem !important;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-2px);
+}
+
+:where(.dark, .dark *) .fi-wi-stats-overview-stat {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.07) !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+:where(.dark, .dark *) .fi-wi-stats-overview-stat:hover {
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.4) !important;
+}
+
+.fi-wi-stats-overview-stat-label {
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    color: #64748b !important;
+    letter-spacing: 0.01em;
+}
+
+:where(.dark, .dark *) .fi-wi-stats-overview-stat-label {
+    color: #64748b !important;
+}
+
+.fi-wi-stats-overview-stat-value {
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.03em !important;
+    color: #0f172a !important;
+}
+
+:where(.dark, .dark *) .fi-wi-stats-overview-stat-value {
+    color: #f1f5f9 !important;
+}
+
+/* ============================================================
+   WIDGET CHARTS
+   ============================================================ */
+
+.fi-wi-chart {
+    border-radius: 0.875rem !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+:where(.dark, .dark *) .fi-wi-chart {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+
+.fi-modal-window {
+    border-radius: 1rem !important;
+    box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+:where(.dark, .dark *) .fi-modal-window {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.6) !important;
+}
+
+.fi-modal-header {
+    padding: 1.25rem 1.5rem !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+:where(.dark, .dark *) .fi-modal-header {
+    border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.fi-modal-heading {
+    font-size: 1.0625rem !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.01em;
+    color: #0f172a !important;
+}
+
+:where(.dark, .dark *) .fi-modal-heading {
+    color: #f1f5f9 !important;
+}
+
+.fi-modal-content {
+    padding: 1.5rem !important;
+}
+
+.fi-modal-footer {
+    padding: 1rem 1.5rem !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+:where(.dark, .dark *) .fi-modal-footer {
+    border-top-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ============================================================
+   DROPDOWNS
+   ============================================================ */
+
+.fi-dropdown-list {
+    border-radius: 0.75rem !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.15) !important;
+    overflow: hidden;
+}
+
+:where(.dark, .dark *) .fi-dropdown-list {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5) !important;
+}
+
+.fi-dropdown-list-item-btn {
+    border-radius: 0 !important;
+    padding: 0.6rem 1rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    transition: background-color 0.1s ease;
+}
+
+.fi-dropdown-list-item-btn:hover {
+    background-color: #f1f5f9 !important;
+}
+
+:where(.dark, .dark *) .fi-dropdown-list-item-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+
+.fi-pagination {
+    padding: 0.875rem 1.25rem !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+:where(.dark, .dark *) .fi-pagination {
+    border-top-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.fi-pagination-item-btn {
+    border-radius: 0.5rem !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+}
+
+/* ============================================================
+   TABS
+   ============================================================ */
+
+.fi-tabs {
+    border-radius: 0.625rem !important;
+}
+
+.fi-tabs-tab {
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    border-radius: 0.5rem !important;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.fi-tabs-tab-active {
+    font-weight: 600 !important;
+}
+
+/* ============================================================
+   BREADCRUMBS
+   ============================================================ */
+
+.fi-breadcrumbs-item-label {
+    font-size: 0.8125rem !important;
+    color: #64748b !important;
+}
+
+.fi-breadcrumbs-item:last-child .fi-breadcrumbs-item-label {
+    color: #0f172a !important;
+    font-weight: 500;
+}
+
+:where(.dark, .dark *) .fi-breadcrumbs-item:last-child .fi-breadcrumbs-item-label {
+    color: #e2e8f0 !important;
+}
+
+/* ============================================================
+   NOTIFICATIONS (Toast)
+   ============================================================ */
+
+.fi-no-notification {
+    border-radius: 0.875rem !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.15) !important;
+}
+
+:where(.dark, .dark *) .fi-no-notification {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ============================================================
+   LOGIN PAGE
+   ============================================================ */
+
+.fi-simple-layout {
+    background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%) !important;
+}
+
+:where(.dark, .dark *) .fi-simple-layout {
+    background: linear-gradient(135deg, #0a0f1e 0%, #0f172a 50%, #1a0a2e 100%) !important;
+}
+
+.fi-simple-main {
+    width: 100%;
+    max-width: 26rem;
+}
+
+.fi-simple-page {
+    border-radius: 1.25rem !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    background-color: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.15) !important;
+    padding: 2.5rem !important;
+}
+
+:where(.dark, .dark *) .fi-simple-page {
+    background-color: rgba(30, 41, 59, 0.85) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.6) !important;
+}
+
+.fi-simple-header-heading {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.03em !important;
+    color: #0f172a !important;
+}
+
+:where(.dark, .dark *) .fi-simple-header-heading {
+    color: #f1f5f9 !important;
+}
+
+.fi-simple-header-subheading {
+    color: #64748b !important;
+    font-size: 0.9375rem !important;
+}
+
+/* ============================================================
+   USER MENU
+   ============================================================ */
+
+.fi-user-menu-trigger {
+    border-radius: 0.625rem !important;
+    transition: background-color 0.15s ease;
+}
+
+.fi-user-menu-trigger:hover {
+    background-color: #f1f5f9 !important;
+}
+
+:where(.dark, .dark *) .fi-user-menu-trigger:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ============================================================
+   AVATAR
+   ============================================================ */
+
+.fi-avatar {
+    border-radius: 9999px !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+:where(.dark, .dark *) .fi-avatar {
+    box-shadow: 0 0 0 2px rgba(30, 41, 59, 0.8) !important;
+}
+
+/* ============================================================
+   SCROLLBAR (subtle, modern)
+   ============================================================ */
+
+.fi-sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.fi-sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fi-sidebar-nav::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.12);
+    border-radius: 9999px;
+}
+
+:where(.dark, .dark *) .fi-sidebar-nav::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================================
+   THEME SWITCHER
+   ============================================================ */
+
+.fi-theme-switcher-btn {
+    border-radius: 0.5rem !important;
+    transition: background-color 0.15s ease;
+}
+
+/* ============================================================
+   CALLOUT / ALERT
+   ============================================================ */
+
+.fi-callout {
+    border-radius: 0.75rem !important;
+    border-width: 1px !important;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+
+.fi-empty-state {
+    padding: 4rem 2rem !important;
+}
+
+.fi-empty-state-heading {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+}
+
+:where(.dark, .dark *) .fi-empty-state-heading {
+    color: #e2e8f0 !important;
+}
+
+.fi-empty-state-description {
+    font-size: 0.875rem !important;
+    color: #64748b !important;
+}
