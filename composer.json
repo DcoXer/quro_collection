@@ -1,9 +1,9 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "dcoxer/quro-collection",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "E-commerce platform for Quro Collection — baju koko premium.",
+    "keywords": ["laravel", "filament", "e-commerce", "quro collection"],
     "license": "MIT",
     "require": {
         "php": "^8.2",
