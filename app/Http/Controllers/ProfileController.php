@@ -34,6 +34,15 @@ class ProfileController extends Controller
             'name'               => $request->name,
             'email'              => $request->email,
             'phone'              => $request->phone,
+            'province_id'        => $request->province_id,
+            'province_name'      => $request->province_name,
+            'city_id'            => $request->city_id,
+            'city_name'          => $request->city_name,
+            'district_id'        => $request->district_id,
+            'district_name'      => $request->district_name,
+            'village_id'         => $request->village_id,
+            'village_name'       => $request->village_name,
+            'address_detail'     => $request->address_detail,
             'email_verified_at'  => $emailChanged ? null : $user->email_verified_at,
         ]);
 

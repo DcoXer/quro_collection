@@ -96,6 +96,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders/{invoice}', [OrderController::class, 'show'])->name('orders.show');
     Route::delete('/orders/{invoice}', [OrderController::class, 'destroy'])->name('orders.destroy');
     Route::get('/orders/{invoice}/track', [OrderController::class, 'track'])->name('orders.track');
+    Route::post('/orders/{invoice}/check-payment', [MidtransController::class, 'checkPayment'])->middleware('throttle:6,1')->name('orders.check-payment');
 
     // Voucher
     Route::post('/voucher/apply', [VoucherController::class, 'apply'])->middleware('throttle:voucher')->name('voucher.apply');

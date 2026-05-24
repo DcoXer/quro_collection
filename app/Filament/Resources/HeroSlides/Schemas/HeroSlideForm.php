@@ -37,11 +37,10 @@ class HeroSlideForm
             Select::make('placement')
                 ->label('Halaman')
                 ->options([
-                    'shop'    => 'Shop (Halaman Belanja)',
                     'welcome' => 'Welcome (Halaman Utama)',
                 ])
                 ->required()
-                ->default('shop'),
+                ->default('welcome'),
 
             TextInput::make('sort_order')
                 ->label('Urutan')

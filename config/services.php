@@ -60,4 +60,12 @@ return [
         'base_url' => env('APICOIID_BASE_URL'),
         'origin_village_code' => env('APICOIID_ORIGIN_ID'),
     ],
+
+    'biteship' => [
+        'api_key'          => env('BITESHIP_API_KEY'),
+        'shipper_name'     => env('BITESHIP_SHIPPER_NAME', 'Quro Collection'),
+        'shipper_phone'    => env('BITESHIP_SHIPPER_PHONE'),
+        'shipper_address'  => env('BITESHIP_SHIPPER_ADDRESS'),
+        'shipper_area_id'  => env('BITESHIP_SHIPPER_AREA_ID'),
+    ],
 ];

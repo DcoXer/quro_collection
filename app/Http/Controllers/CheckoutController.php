@@ -85,9 +85,11 @@ class CheckoutController extends Controller
         $shippingData = array_merge($request->only([
             'shipping_name', 'shipping_phone',
             'province_id', 'city_id', 'district_id', 'village_id',
-            'courier_service',
+            'courier_service', 'courier',
         ]), [
             'shipping_cost'    => $shippingCost,
+            'city_name'        => $request->city_name,
+            'district_name'    => $request->district_name,
             'shipping_address' => implode(', ', array_filter([
                 $request->province_name,
                 $request->city_name,

@@ -49,6 +49,67 @@ async function loadProvinsi() {
             select.innerHTML += `<option value="${p.code}">${p.name}</option>`;
         });
     }
+
+    // Auto-populate saved address
+    const saved = cfg.savedAddress;
+    if (saved?.province_id) {
+        select.value = saved.province_id;
+        if (select.value) {
+            document.getElementById('province-name').value = saved.province_name;
+            await autoFillKabupaten(saved);
+        }
+    }
+}
+
+async function autoFillKabupaten(saved) {
+    setSelectLoading('select-kabupaten', true);
+    const res  = await fetch(`${cfg.urls.kabupaten}/${saved.province_id}`);
+    const data = await res.json();
+    setSelectLoading('select-kabupaten', false, 'Pilih Kabupaten/Kota');
+    if (data.is_success) {
+        const select = document.getElementById('select-kabupaten');
+        data.data.forEach(k => { select.innerHTML += `<option value="${k.code}">${k.name}</option>`; });
+    }
+    const select = document.getElementById('select-kabupaten');
+    select.value = saved.city_id;
+    if (select.value) {
+        document.getElementById('city-name').value = saved.city_name;
+        await autoFillKecamatan(saved);
+    }
+}
+
+async function autoFillKecamatan(saved) {
+    setSelectLoading('select-kecamatan', true);
+    const res  = await fetch(`${cfg.urls.kecamatan}/${saved.city_id}`);
+    const data = await res.json();
+    setSelectLoading('select-kecamatan', false, 'Pilih Kecamatan');
+    if (data.is_success) {
+        const select = document.getElementById('select-kecamatan');
+        data.data.forEach(k => { select.innerHTML += `<option value="${k.code}">${k.name}</option>`; });
+    }
+    const select = document.getElementById('select-kecamatan');
+    select.value = saved.district_id;
+    if (select.value) {
+        document.getElementById('district-name').value = saved.district_name;
+        await autoFillKelurahan(saved);
+    }
+}
+
+async function autoFillKelurahan(saved) {
+    setSelectLoading('select-kelurahan', true);
+    const res  = await fetch(`${cfg.urls.kelurahan}/${saved.district_id}`);
+    const data = await res.json();
+    setSelectLoading('select-kelurahan', false, 'Pilih Kelurahan');
+    if (data.is_success) {
+        const select = document.getElementById('select-kelurahan');
+        data.data.forEach(k => { select.innerHTML += `<option value="${k.code}">${k.name}</option>`; });
+    }
+    const select = document.getElementById('select-kelurahan');
+    select.value = saved.village_id;
+    if (select.value) {
+        document.getElementById('village-name').value = saved.village_name;
+        loadOngkir(saved.village_id);
+    }
 }
 
 // ─── Cascade Listeners ───────────────────────────────────────────────────────
@@ -191,22 +252,26 @@ window.applyVoucher = async function () {
     const code = document.getElementById('voucher-input').value.trim();
     if (!code) { window.showToast?.('Masukkan kode voucher dulu', 'error'); return; }
 
-    const res  = await fetch(cfg.urls.voucherApply, {
+    const btn = document.getElementById('voucher-btn');
+    if (btn) { btn.disabled = true; btn.textContent = '...'; }
+
+    const res = await guardedFetch(cfg.urls.voucherApply, {
         method: 'POST',
         headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify({ code }),
     });
+
+    if (btn) { btn.disabled = false; btn.textContent = 'Pakai'; }
+    if (!res) return;
+
     const data = await res.json();
 
     if (data.success) {
         currentDiscount = data.discount;
-
-        // Show applied state
         document.getElementById('voucher-form').classList.add('hidden');
         document.getElementById('voucher-applied').classList.remove('hidden');
-        document.getElementById('voucher-code-display').textContent  = data.code ?? code.toUpperCase();
+        document.getElementById('voucher-code-display').textContent     = data.code ?? code.toUpperCase();
         document.getElementById('voucher-discount-display').textContent = 'Hemat ' + data.discount_formatted;
-
         updateTotalDisplay();
         window.showToast?.(data.message, 'success');
     } else {

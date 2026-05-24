@@ -205,8 +205,27 @@
 
                 @if($product->variants->sum('stock') > 0)
                     @auth
+                        <form id="page-cart-form">
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                            <input type="hidden" name="size" id="page-selected-size">
+                            <input type="hidden" name="quantity" id="page-qty-input" value="1">
+                        </form>
+
+                        {{-- Qty --}}
+                        <div class="flex items-center gap-4 mb-5">
+                            <p class="text-xs tracking-widest uppercase text-gray-400">Jumlah</p>
+                            <div class="flex items-center gap-3">
+                                <button type="button" onclick="changePageQty(-1)"
+                                    class="w-9 h-9 border border-gray-200 rounded-lg flex items-center justify-center text-lg hover:border-gray-900 transition">−</button>
+                                <span id="page-qty-display" class="text-base font-medium w-6 text-center">1</span>
+                                <button type="button" onclick="changePageQty(1)"
+                                    class="w-9 h-9 border border-gray-200 rounded-lg flex items-center justify-center text-lg hover:border-gray-900 transition">+</button>
+                            </div>
+                        </div>
+
                         <div class="flex gap-2">
-                            <button onclick="document.getElementById('modal-add-cart').classList.remove('hidden')"
+                            <button onclick="addToCartPage()"
                                 class="flex-1 bg-gray-900 text-white py-3.5 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
                                 Tambah ke Keranjang
                             </button>
@@ -295,122 +314,58 @@
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
             @foreach($related as $item)
-                <a href="{{ route('shop.show', $item) }}" class="product-card group">
-                    <div class="product-card-image">
+            @php $slideCount = ($item->image ? 1 : 0) + $item->media->count(); $trackId = 'rel-'.$item->id; @endphp
+            <div class="group cursor-pointer" onclick="window.location.href='{{ route('shop.show', $item) }}'">
+                <div class="aspect-square bg-gray-50 rounded-xl overflow-hidden mb-3 relative"
+                    data-slider="{{ $trackId }}"
+                    @if($slideCount > 1) data-has-slides="true" @endif
+                    style="touch-action: pan-y;">
+
+                    <div class="slides-track flex h-full will-change-transform"
+                        id="track-{{ $trackId }}"
+                        style="transition: transform 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94);">
+
                         @if($item->image)
+                        <div class="slide-item w-full h-full shrink-0 overflow-hidden">
                             <img src="{{ Storage::url($item->image) }}" alt="{{ $item->name }}"
-                                class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                        @else
-                            <div class="product-card-no-image">No Image</div>
-                        @endif
-                        <div class="product-card-overlay">
-                            <span class="product-card-cta">Lihat Detail</span>
+                                class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105">
                         </div>
+                        @endif
+
+                        @foreach($item->media as $media)
+                        <div class="slide-item w-full h-full shrink-0 overflow-hidden">
+                            @if($media->type === 'video')
+                            <video class="w-full h-full object-cover" muted loop playsinline>
+                                <source src="{{ Storage::url($media->path) }}" type="video/mp4">
+                            </video>
+                            @else
+                            <img src="{{ Storage::url($media->path) }}"
+                                class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105">
+                            @endif
+                        </div>
+                        @endforeach
                     </div>
-                    <p class="product-card-category">{{ $item->category?->name }}</p>
-                    <p class="product-card-name">{{ $item->name }}</p>
-                    <p class="product-card-price">Rp {{ number_format($item->price, 0, ',', '.') }}</p>
-                </a>
+
+                    @if($slideCount > 1)
+                    <button onclick="event.stopPropagation(); slideCard('{{ $trackId }}', -1)"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/80 backdrop-blur-sm rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out hover:bg-white hover:scale-110 z-10">
+                        ‹
+                    </button>
+                    <button onclick="event.stopPropagation(); slideCard('{{ $trackId }}', 1)"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/80 backdrop-blur-sm rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out hover:bg-white hover:scale-110 z-10">
+                        ›
+                    </button>
+                    @endif
+                </div>
+
+                <p class="text-xs text-gray-400 mb-0.5">{{ $item->category?->name }}</p>
+                <p class="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition">{{ $item->name }}</p>
+                <p class="text-sm text-gray-700 mt-0.5">Rp {{ number_format($item->price, 0, ',', '.') }}</p>
+            </div>
             @endforeach
         </div>
     </div>
     @endif
-
-    {{-- ───── Modal Add to Cart ───── --}}
-    @auth
-    <div id="modal-add-cart"
-        class="hidden fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4"
-        onclick="if(event.target===this) closeModal()">
-
-        <div class="bg-white rounded-2xl w-full max-w-md modal-scroll overflow-y-auto max-h-[90vh]">
-            <div class="p-6">
-
-                <div class="flex justify-between items-center mb-6">
-                    <h2 style="font-family: 'Playfair Display', serif;"
-                        class="text-lg font-semibold text-gray-900">Pilih Size</h2>
-                    <button onclick="closeModal()"
-                        class="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
-                </div>
-
-                <form id="form-add-cart">
-                    @csrf
-                    <input type="hidden" name="product_id" value="{{ $product->id }}">
-
-                    {{-- Size --}}
-                    <div class="mb-6">
-                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-3">Size</p>
-                        <div class="flex flex-wrap gap-2">
-                            @foreach($product->variants as $variant)
-                                @if($variant->stock > 0)
-                                    <button type="button"
-                                        data-size="{{ $variant->size }}"
-                                        data-price="{{ $variant->effective_price }}"
-                                        data-stock="{{ $variant->stock }}"
-                                        onclick="selectSize(this)"
-                                        class="size-btn px-4 py-2 border border-gray-200 rounded-lg text-sm hover:border-gray-900 transition">
-                                        {{ $variant->size }}
-                                    </button>
-                                @else
-                                    <span class="px-4 py-2 border border-gray-100 rounded-lg text-sm text-gray-300"
-                                        title="Stok habis">
-                                        {{ $variant->size }}
-                                    </span>
-                                @endif
-                            @endforeach
-                        </div>
-                        <input type="hidden" name="size" id="selected-size">
-                    </div>
-
-                    {{-- Qty --}}
-                    <div class="mb-6">
-                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-3">Jumlah</p>
-                        <div class="flex items-center gap-4">
-                            <button type="button" onclick="changeQty(-1)"
-                                class="w-9 h-9 border border-gray-200 rounded-lg flex items-center justify-center text-lg hover:border-gray-900 transition">−</button>
-                            <span id="qty-display" class="text-lg font-medium w-6 text-center">1</span>
-                            <button type="button" onclick="changeQty(1)"
-                                class="w-9 h-9 border border-gray-200 rounded-lg flex items-center justify-center text-lg hover:border-gray-900 transition">+</button>
-                            <input type="hidden" name="quantity" id="qty-input" value="1">
-                        </div>
-                    </div>
-
-                    {{-- Total --}}
-                    <div class="flex justify-between items-center py-4 border-t border-gray-100 mb-6">
-                        <span class="text-sm text-gray-500">Total</span>
-                        <span class="text-lg font-semibold" id="modal-total">Pilih size dulu</span>
-                    </div>
-
-                    <button type="button" onclick="submitCart()"
-                        class="w-full bg-gray-900 text-white py-3.5 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
-                        Tambah ke Keranjang
-                    </button>
-                </form>
-
-                {{-- Success --}}
-                <div id="cart-success" class="hidden text-center py-6">
-                    <div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                    </div>
-                    <p class="font-semibold text-gray-900 mb-1">Ditambahkan ke keranjang</p>
-                    <p class="text-sm text-gray-400 mb-6">Produk berhasil masuk keranjang</p>
-                    <div class="flex gap-3">
-                        <button onclick="closeModal()"
-                            class="flex-1 border border-gray-200 py-2.5 rounded-xl text-sm hover:border-gray-900 transition">
-                            Lanjut Belanja
-                        </button>
-                        <a href="{{ route('cart.index') }}"
-                            class="flex-1 bg-gray-900 text-white py-2.5 rounded-xl text-sm text-center hover:bg-gray-700 transition">
-                            Lihat Keranjang
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-    @endauth
 
     {{-- ───── Recently Viewed ───── --}}
     @if($recentlyViewed->isNotEmpty())
@@ -425,22 +380,54 @@
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
             @foreach($recentlyViewed as $item)
-                <a href="{{ route('shop.show', $item) }}" class="product-card group">
-                    <div class="product-card-image">
+            @php $slideCount = ($item->image ? 1 : 0) + $item->media->count(); $trackId = 'rv-'.$item->id; @endphp
+            <div class="group cursor-pointer" onclick="window.location.href='{{ route('shop.show', $item) }}'">
+                <div class="aspect-square bg-gray-50 rounded-xl overflow-hidden mb-3 relative"
+                    data-slider="{{ $trackId }}"
+                    @if($slideCount > 1) data-has-slides="true" @endif
+                    style="touch-action: pan-y;">
+
+                    <div class="slides-track flex h-full will-change-transform"
+                        id="track-{{ $trackId }}"
+                        style="transition: transform 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94);">
+
                         @if($item->image)
+                        <div class="slide-item w-full h-full shrink-0 overflow-hidden">
                             <img src="{{ Storage::url($item->image) }}" alt="{{ $item->name }}"
-                                class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                        @else
-                            <div class="product-card-no-image">No Image</div>
-                        @endif
-                        <div class="product-card-overlay">
-                            <span class="product-card-cta">Lihat Detail</span>
+                                class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105">
                         </div>
+                        @endif
+
+                        @foreach($item->media as $media)
+                        <div class="slide-item w-full h-full shrink-0 overflow-hidden">
+                            @if($media->type === 'video')
+                            <video class="w-full h-full object-cover" muted loop playsinline>
+                                <source src="{{ Storage::url($media->path) }}" type="video/mp4">
+                            </video>
+                            @else
+                            <img src="{{ Storage::url($media->path) }}"
+                                class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105">
+                            @endif
+                        </div>
+                        @endforeach
                     </div>
-                    <p class="product-card-category">{{ $item->category?->name }}</p>
-                    <p class="product-card-name">{{ $item->name }}</p>
-                    <p class="product-card-price">Rp {{ number_format($item->price, 0, ',', '.') }}</p>
-                </a>
+
+                    @if($slideCount > 1)
+                    <button onclick="event.stopPropagation(); slideCard('{{ $trackId }}', -1)"
+                        class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/80 backdrop-blur-sm rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out hover:bg-white hover:scale-110 z-10">
+                        ‹
+                    </button>
+                    <button onclick="event.stopPropagation(); slideCard('{{ $trackId }}', 1)"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white/80 backdrop-blur-sm rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out hover:bg-white hover:scale-110 z-10">
+                        ›
+                    </button>
+                    @endif
+                </div>
+
+                <p class="text-xs text-gray-400 mb-0.5">{{ $item->category?->name }}</p>
+                <p class="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition">{{ $item->name }}</p>
+                <p class="text-sm text-gray-700 mt-0.5">Rp {{ number_format($item->price, 0, ',', '.') }}</p>
+            </div>
             @endforeach
         </div>
     </div>

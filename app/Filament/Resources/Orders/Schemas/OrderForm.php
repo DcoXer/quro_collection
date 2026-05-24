@@ -116,6 +116,7 @@ class OrderForm
 
                         TextInput::make('tracking_number')
                             ->label('Nomor Resi')
+                            ->helperText('Diisi otomatis oleh Biteship saat status diubah ke Shipped.')
                             ->nullable(),
                     ]),
 

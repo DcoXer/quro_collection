@@ -39,12 +39,13 @@ class VoucherController extends Controller
         ]);
 
         return response()->json([
-            'success'           => true,
-            'message'           => 'Voucher berhasil diterapkan!',
-            'discount'          => $discount,
-            'discount_formatted'=> 'Rp ' . number_format($discount, 0, ',', '.'),
-            'final_total'       => $total - $discount,
-            'final_formatted'   => 'Rp ' . number_format($total - $discount, 0, ',', '.'),
+            'success'            => true,
+            'message'            => 'Voucher berhasil diterapkan!',
+            'code'               => $voucher->code,
+            'discount'           => $discount,
+            'discount_formatted' => 'Rp ' . number_format($discount, 0, ',', '.'),
+            'final_total'        => $total - $discount,
+            'final_formatted'    => 'Rp ' . number_format($total - $discount, 0, ',', '.'),
         ]);
     }
 

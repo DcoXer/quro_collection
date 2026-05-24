@@ -43,15 +43,14 @@
             @php
                 $statuses = [
                     'pending'    => ['label' => 'Pesanan Diterima',   'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
-                    'paid'       => ['label' => 'Pembayaran Lunas',   'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'],
-                    'processing' => ['label' => 'Sedang Diproses',    'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
+                    'processing' => ['label' => 'Pembayaran Dikonfirmasi & Diproses', 'icon' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
                     'shipped'    => ['label' => 'Dalam Pengiriman',   'icon' => 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0'],
                     'delivered'  => ['label' => 'Pesanan Diterima',   'icon' => 'M5 13l4 4L19 7'],
                     'cancelled'  => ['label' => 'Pesanan Dibatalkan', 'icon' => 'M6 18L18 6M6 6l12 12'],
                 ];
-                $order_flow = ['pending', 'paid', 'processing', 'shipped', 'delivered'];
+                $order_flow    = ['pending', 'processing', 'shipped', 'delivered'];
                 $current_index = array_search($order->status, $order_flow);
-                $is_cancelled = $order->status === 'cancelled';
+                $is_cancelled  = $order->status === 'cancelled';
             @endphp
 
             @if($is_cancelled)
@@ -121,6 +120,7 @@
 
         {{-- Tracking Paket --}}
         @if($order->tracking_number && $order->courier)
+        {{-- Resi + courier sudah ada → live tracking --}}
         <div id="tracking-section"
             data-url="{{ route('orders.track', $order->invoice_number) }}"
             class="border border-gray-100 rounded-2xl p-4 mb-4">
@@ -148,10 +148,41 @@
                 <button onclick="loadTracking()" class="text-xs text-gray-900 underline mt-2">Coba lagi</button>
             </div>
         </div>
-        @elseif(in_array($order->status, ['processing', 'shipped', 'delivered']))
+        @elseif($order->tracking_number)
+        {{-- Resi sudah ada (auto-generated), tampilkan dengan pesan sesuai status --}}
+        @php
+            $resiStatusMsg = match($order->status) {
+                'processing' => ['dot' => 'bg-amber-400', 'text' => 'Pesanan sedang disiapkan oleh penjual.'],
+                'shipped'    => ['dot' => 'bg-blue-400',  'text' => 'Paket sedang dalam pengiriman.'],
+                'delivered'  => ['dot' => 'bg-green-400', 'text' => 'Paket telah diterima.'],
+                default      => ['dot' => 'bg-gray-300',  'text' => ''],
+            };
+        @endphp
         <div class="border border-gray-100 rounded-2xl p-4 mb-4">
-            <p class="text-xs tracking-widest uppercase text-gray-400 mb-2">Lacak Paket</p>
-            <p class="text-sm text-gray-400">Nomor resi belum tersedia. Silakan hubungi kami via WhatsApp.</p>
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-xs tracking-widest uppercase text-gray-400">Nomor Resi</p>
+                <div class="flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-xl px-3 py-1.5">
+                    <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 7h.01M7 3h5l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+                    </svg>
+                    <span class="text-sm font-mono font-semibold text-gray-800 tracking-wide">{{ $order->tracking_number }}</span>
+                </div>
+            </div>
+            @if($resiStatusMsg['text'])
+            <div class="flex items-center gap-2 mt-1">
+                <div class="w-1.5 h-1.5 rounded-full {{ $resiStatusMsg['dot'] }} {{ $order->status !== 'delivered' ? 'animate-pulse' : '' }} shrink-0"></div>
+                <p class="text-xs text-gray-400">{{ $resiStatusMsg['text'] }}</p>
+            </div>
+            @endif
+        </div>
+        @elseif($order->status === 'processing')
+        <div class="border border-gray-100 rounded-2xl p-4 mb-4">
+            <p class="text-xs tracking-widest uppercase text-gray-400 mb-2">Nomor Resi</p>
+            <div class="flex items-center gap-2">
+                <div class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0"></div>
+                <p class="text-sm text-gray-400">Pesanan sedang disiapkan. Nomor resi akan muncul setelah paket dikirim.</p>
+            </div>
         </div>
         @endif
 
@@ -301,6 +332,13 @@
                     Selesaikan Pembayaran
                 </a>
             @endif
+            @if($order->status === 'pending')
+                <button id="check-payment-btn"
+                    onclick="checkPaymentStatus()"
+                    class="w-full text-center border border-gray-200 text-gray-600 py-3 rounded-xl text-sm hover:border-gray-900 transition mb-3">
+                    Cek Status Pembayaran
+                </button>
+            @endif
             <a href="{{ route('shop.index') }}"
                 class="block text-center border border-gray-200 text-gray-600 py-3 rounded-xl text-sm hover:border-gray-900 transition">
                 Lanjut Belanja
@@ -327,6 +365,43 @@
     @push('scripts')
     @if($order->tracking_number && $order->courier)
         @vite(['resources/js/pages/order-tracking.js'])
+    @endif
+    @if($order->status === 'pending')
+    <script>
+    async function checkPaymentStatus() {
+        const btn = document.getElementById('check-payment-btn');
+        if (!btn || btn.disabled) return;
+        btn.disabled = true;
+        btn.textContent = 'Mengecek...';
+        btn.style.opacity = '0.6';
+
+        try {
+            const res = await fetch('{{ route('orders.check-payment', $order->invoice_number) }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            });
+            const data = await res.json();
+
+            if (data.status && data.status !== 'pending') {
+                window.showToast('Pembayaran dikonfirmasi! Halaman akan diperbarui...', 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                window.showToast('Pembayaran belum diterima. Coba beberapa saat lagi.', 'info');
+                btn.disabled = false;
+                btn.textContent = 'Cek Status Pembayaran';
+                btn.style.opacity = '';
+            }
+        } catch (e) {
+            window.showToast('Gagal menghubungi server. Coba lagi.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Cek Status Pembayaran';
+            btn.style.opacity = '';
+        }
+    }
+    </script>
     @endif
     @endpush
 </x-app-layout>

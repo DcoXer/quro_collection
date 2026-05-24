@@ -9,7 +9,7 @@
     <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
 
         {{-- Logo --}}
-        <a href="{{ route('home') }}" class="flex items-center gap-2.5 shrink-0 group">
+        <a href="{{ auth()->check() ? route('shop.index') : route('home') }}" class="flex items-center gap-2.5 shrink-0 group">
             <img src="{{ asset('images/logo.png') }}" alt="Quro Collection" class="h-9 w-auto transition group-hover:opacity-80">
             <span style="font-family: 'Playfair Display', serif;"
                 class="text-lg font-semibold text-gray-900 whitespace-nowrap tracking-wide">
@@ -20,7 +20,8 @@
         {{-- Desktop Nav --}}
         <div class="hidden md:flex items-center gap-1 text-sm flex-1 justify-center">
 
-            {{-- Beranda --}}
+            {{-- Beranda (guest only) --}}
+            @guest
             <a href="{{ route('home') }}"
                 class="flex items-center gap-1.5 px-4 py-2 rounded-xl transition
                 {{ request()->routeIs('home')
@@ -32,6 +33,7 @@
                 </svg>
                 Beranda
             </a>
+            @endguest
 
             {{-- Shop --}}
             <a href="{{ route('shop.index') }}"
@@ -92,7 +94,8 @@
             </div>
             @endif
 
-            {{-- Tentang Kami --}}
+            {{-- Tentang Kami (guest only) / Pesanan Saya (auth only) --}}
+            @guest
             <a href="{{ route('about') }}"
                 class="flex items-center gap-1.5 px-4 py-2 rounded-xl transition
                 {{ request()->routeIs('about')
@@ -104,6 +107,20 @@
                 </svg>
                 Tentang Kami
             </a>
+            @endguest
+            @auth
+            <a href="{{ route('orders.index') }}"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-xl transition
+                {{ request()->routeIs('orders.*')
+                    ? 'bg-gray-100 text-gray-900 font-medium'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                Pesanan
+            </a>
+            @endauth
 
         </div>
 
@@ -295,6 +312,7 @@
 
         <div class="px-4 py-3 space-y-0.5">
 
+            @guest
             <a href="{{ route('home') }}"
                 class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition
                 {{ request()->routeIs('home') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50' }}"
@@ -304,6 +322,7 @@
                 </svg>
                 Beranda
             </a>
+            @endguest
 
             <a href="{{ route('shop.index') }}"
                 class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition
@@ -348,6 +367,7 @@
             </div>
             @endif
 
+            @guest
             <a href="{{ route('about') }}"
                 class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition
                 {{ request()->routeIs('about') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50' }}"
@@ -357,12 +377,16 @@
                 </svg>
                 Tentang Kami
             </a>
+            @endguest
 
             @auth
+            {{-- Divider setelah shopping links --}}
             <div class="h-px bg-gray-100 my-2"></div>
 
+            {{-- Account & Activity --}}
             <a href="{{ route('cart.index') }}"
-                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition
+                {{ request()->routeIs('cart.*') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50' }}"
                 @click="mobileOpen = false">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -374,20 +398,19 @@
                 @endif
             </a>
 
-            <a href="{{ route('notifications.index') }}"
-                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            <a href="{{ route('orders.index') }}"
+                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition
+                {{ request()->routeIs('orders.*') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50' }}"
                 @click="mobileOpen = false">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
-                Notifikasi
-                @if($unreadCount > 0)
-                    <span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">{{ $unreadCount }}</span>
-                @endif
+                Pesanan Saya
             </a>
 
             <a href="{{ route('wishlist.index') }}"
-                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition
+                {{ request()->routeIs('wishlist.*') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50' }}"
                 @click="mobileOpen = false">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
@@ -398,17 +421,22 @@
                 @endif
             </a>
 
-            <a href="{{ route('orders.index') }}"
-                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+            <a href="{{ route('notifications.index') }}"
+                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition
+                {{ request()->routeIs('notifications.*') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50' }}"
                 @click="mobileOpen = false">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                 </svg>
-                Pesanan Saya
+                Notifikasi
+                @if($unreadCount > 0)
+                    <span class="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">{{ $unreadCount }}</span>
+                @endif
             </a>
 
             <a href="{{ route('profile.edit') }}"
-                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+                class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition
+                {{ request()->routeIs('profile.*') ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50' }}"
                 @click="mobileOpen = false">
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>

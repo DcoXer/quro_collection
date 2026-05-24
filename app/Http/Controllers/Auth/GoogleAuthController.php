@@ -30,13 +30,20 @@ class GoogleAuthController extends Controller
                 } else {
                     // Buat user baru
                     $user = User::create([
-                        'name'      => $googleUser->getName(),
-                        'email'     => $googleUser->getEmail(),
-                        'google_id' => $googleUser->getId(),
-                        'password'  => null,
+                        'name'               => $googleUser->getName(),
+                        'email'              => $googleUser->getEmail(),
+                        'google_id'          => $googleUser->getId(),
+                        'password'           => null,
+                        'email_verified_at'  => now(),
+                        'is_verified'        => true,
                     ]);
                     $user->assignRole('user');
                 }
+            }
+
+            // Pastikan Google user selalu terverifikasi
+            if (!$user->email_verified_at) {
+                $user->update(['email_verified_at' => now(), 'is_verified' => true]);
             }
 
             Auth::login($user);

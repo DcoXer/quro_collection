@@ -1,8 +1,11 @@
 const csrf    = document.querySelector('meta[name="csrf-token"]').content;
+
+document.addEventListener('DOMContentLoaded', function () {
+    window.initCardTouch();
+});
 const cartUrl = document.querySelector('meta[name="cart-add-url"]').content;
-let selectedPrice = 0;
-let selectedStock = 0;
-let qty           = 1;
+let pageStock = 0;
+let pageQty   = 1;
 
 // ─── Gallery ──────────────────────────────────────────────────
 window.switchGallery = function (index) {
@@ -34,72 +37,43 @@ window.selectSizePage = function (btn) {
 
     const stockEl = document.getElementById('stock-info');
     if (stockEl) stockEl.textContent = 'Stok tersedia: ' + stock + ' pcs';
+
+    // Set page form
+    pageStock = stock;
+    pageQty   = 1;
+    document.getElementById('page-selected-size').value = btn.dataset.size;
+    document.getElementById('page-qty-display').textContent = 1;
+    document.getElementById('page-qty-input').value = 1;
 };
 
-// ─── Modal Size Selector ──────────────────────────────────────
-window.selectSize = function (btn) {
-    document.querySelectorAll('.size-btn').forEach(b =>
-        b.classList.remove('bg-gray-900', 'text-white', 'border-gray-900'));
-    btn.classList.add('bg-gray-900', 'text-white', 'border-gray-900');
-    selectedPrice = parseInt(btn.dataset.price);
-    selectedStock = parseInt(btn.dataset.stock);
-    document.getElementById('selected-size').value = btn.dataset.size;
-    // Reset qty ke 1 saat ganti size
-    qty = 1;
-    document.getElementById('qty-display').textContent = 1;
-    document.getElementById('qty-input').value = 1;
-    updateTotal();
+// ─── Page Qty ─────────────────────────────────────────────────
+window.changePageQty = function (delta) {
+    const max = pageStock > 0 ? pageStock : 99;
+    pageQty = Math.min(max, Math.max(1, pageQty + delta));
+    document.getElementById('page-qty-display').textContent = pageQty;
+    document.getElementById('page-qty-input').value         = pageQty;
 };
 
-// ─── Qty ──────────────────────────────────────────────────────
-window.changeQty = function (delta) {
-    const max = selectedStock > 0 ? selectedStock : 99;
-    qty = Math.min(max, Math.max(1, qty + delta));
-    document.getElementById('qty-display').textContent = qty;
-    document.getElementById('qty-input').value         = qty;
-    updateTotal();
-};
-
-function updateTotal() {
-    if (selectedPrice > 0) {
-        document.getElementById('modal-total').textContent =
-            'Rp ' + (selectedPrice * qty).toLocaleString('id-ID');
-    }
-}
-
-// ─── Modal ────────────────────────────────────────────────────
-window.closeModal = function () {
-    document.getElementById('modal-add-cart').classList.add('hidden');
-    document.getElementById('cart-success').classList.add('hidden');
-    document.getElementById('form-add-cart').classList.remove('hidden');
-    qty           = 1;
-    selectedPrice = 0;
-    document.getElementById('qty-display').textContent = 1;
-    document.getElementById('qty-input').value         = 1;
-    document.getElementById('modal-total').textContent = 'Pilih size dulu';
-    document.querySelectorAll('.size-btn').forEach(b =>
-        b.classList.remove('bg-gray-900', 'text-white', 'border-gray-900'));
-};
-
-// ─── Submit Cart ──────────────────────────────────────────────
-window.submitCart = async function () {
-    const size = document.getElementById('selected-size').value;
+// ─── Add to Cart (Page) ───────────────────────────────────────
+window.addToCartPage = async function () {
+    const size = document.getElementById('page-selected-size').value;
     if (!size) {
         showToast('Pilih size terlebih dahulu', 'error');
-        const sizeWrap = document.querySelector('#form-add-cart .flex.flex-wrap');
+        const sizeWrap = document.querySelector('.page-size-btn')?.closest('.flex');
         sizeWrap?.classList.add('ring-2', 'ring-red-300', 'rounded-lg', 'p-1');
         setTimeout(() => sizeWrap?.classList.remove('ring-2', 'ring-red-300', 'rounded-lg', 'p-1'), 1500);
         return;
     }
-    const formData = new FormData(document.getElementById('form-add-cart'));
-    const res = await fetch(cartUrl, {
+    const formData = new FormData(document.getElementById('page-cart-form'));
+    const res = await guardedFetch(cartUrl, {
         method: 'POST',
         headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
         body: formData,
     });
+    if (!res) return;
     if (res.ok) {
-        document.getElementById('form-add-cart').classList.add('hidden');
-        document.getElementById('cart-success').classList.remove('hidden');
+        showToast('Produk ditambahkan ke keranjang', 'success');
+        window.location.href = '/checkout';
     } else {
         showToast('Gagal menambahkan ke keranjang', 'error');
     }

@@ -7,23 +7,55 @@ use App\Mail\OrderStatusMail;
 use App\Models\Notification;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\BiteshipService;
+use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class EditOrder extends EditRecord
 {
     protected static string $resource = OrderResource::class;
 
+    protected ?string $statusBeforeSave = null;
+
     protected function getHeaderActions(): array
     {
         return [];
     }
 
+    protected function beforeSave(): void
+    {
+        $this->statusBeforeSave = $this->record->getOriginal('status');
+    }
+
     protected function afterSave(): void
     {
         $order          = $this->record;
-        $previousStatus = $order->getOriginal('status');
+        $previousStatus = $this->statusBeforeSave;
+
+        // Auto-generate resi via Biteship saat status berubah ke shipped
+        if ($previousStatus !== 'shipped' && $order->status === 'shipped') {
+            try {
+                $result = app(BiteshipService::class)->createOrder($order);
+                $order->update([
+                    'tracking_number' => $result['tracking_number'],
+                    'courier'         => $result['courier'],
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Biteship auto-resi failed', [
+                    'invoice' => $order->invoice_number,
+                    'error'   => $e->getMessage(),
+                ]);
+                FilamentNotification::make()
+                    ->title('Gagal generate resi otomatis')
+                    ->body('Biteship error: ' . $e->getMessage() . ' — Silakan input resi manual.')
+                    ->danger()
+                    ->persistent()
+                    ->send();
+            }
+        }
 
         // Restore stock only when transitioning INTO cancelled for the first time
         if ($previousStatus !== 'cancelled' && $order->status === 'cancelled') {

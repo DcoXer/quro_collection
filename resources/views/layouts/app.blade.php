@@ -28,7 +28,7 @@
     <meta name="twitter:description" content="Temukan koleksi pakaian terbaik di Quro Collection. Kualitas premium, harga terjangkau.">
     <meta name="twitter:image" content="{{ asset('images/og-image.jpg') }}">
 
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
     @stack('seo')
@@ -60,6 +60,9 @@
 @keyframes quroDot {
     0%,80%,100% { transform:scale(.6); opacity:.3; }
     40%          { transform:scale(1.1); opacity:1; }
+}
+@keyframes quroSpin {
+    to { transform:rotate(360deg); }
 }
 </style>
 
@@ -97,12 +100,34 @@
         loader.style.visibility = 'visible';
     });
 
+    // Track which submit button was clicked
+    var _lastSubmitBtn = null;
+    document.addEventListener('click', function(e){
+        var btn = e.target.closest('button[type="submit"], input[type="submit"]');
+        if (btn) _lastSubmitBtn = btn;
+    }, true);
+
     // Show on form submit
     document.addEventListener('submit', function(e){
         var form = e.target;
         if (form.method && form.method.toLowerCase() === 'get') return;
         loader.style.opacity = '1';
         loader.style.visibility = 'visible';
+
+        // Animate the clicked submit button
+        var target = _lastSubmitBtn || form.querySelector('button[type="submit"]');
+        if (target && !target.dataset.loading) {
+            target.dataset.loading = '1';
+            target.disabled = true;
+            var original = target.innerHTML;
+            target.dataset.originalHtml = original;
+            target.innerHTML =
+                '<span style="display:inline-flex;align-items:center;gap:8px;">' +
+                    '<span style="width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;display:inline-block;animation:quroSpin .6s linear infinite;flex-shrink:0;opacity:.8;"></span>' +
+                    'Memproses...' +
+                '</span>';
+        }
+        _lastSubmitBtn = null;
     });
 
     // Hide on back/forward (bfcache)

@@ -17,11 +17,11 @@ class MidtransController extends Controller
 {
     // Valid status transitions — order can only move forward, never back
     const TRANSITIONS = [
-        'pending'   => ['paid', 'cancelled'],
-        'paid'      => [],
-        'cancelled' => [],
-        'shipped'   => [],
-        'completed' => [],
+        'pending'    => ['processing', 'cancelled'],
+        'processing' => ['shipped', 'cancelled'],
+        'shipped'    => ['delivered'],
+        'delivered'  => [],
+        'cancelled'  => [],
     ];
 
     public function __construct(private MidtransService $midtransService) {}
@@ -85,7 +85,7 @@ class MidtransController extends Controller
 
         $updateData = ['status' => $newStatus];
 
-        if ($newStatus === 'paid') {
+        if ($newStatus === 'processing') {
             $updateData['payment_method'] = $notification->payment_type;
         }
 
@@ -93,7 +93,7 @@ class MidtransController extends Controller
             $order->update($updateData);
 
             // Kurangi stok atomik setelah pembayaran dikonfirmasi
-            if ($newStatus === 'paid') {
+            if ($newStatus === 'processing') {
                 $order->load('items');
                 foreach ($order->items as $item) {
                     $updated = $this->deductStock($item->product_id, $item->size, $item->quantity);
@@ -113,8 +113,8 @@ class MidtransController extends Controller
 
             // Kirim notifikasi in-app ke user
             $messages = [
-                'paid'      => 'Pembayaran pesanan ' . $order->invoice_number . ' dikonfirmasi.',
-                'cancelled' => 'Pesanan ' . $order->invoice_number . ' dibatalkan.',
+                'processing' => 'Pembayaran pesanan ' . $order->invoice_number . ' dikonfirmasi. Pesanan sedang diproses.',
+                'cancelled'  => 'Pesanan ' . $order->invoice_number . ' dibatalkan.',
             ];
             if (isset($messages[$newStatus])) {
                 Notification::send(
@@ -159,10 +159,105 @@ class MidtransController extends Controller
             ->decrement('stock', $quantity);
     }
 
+    /**
+     * Manual payment status check — user-triggered fallback for when webhook wasn't delivered.
+     * Polls Midtrans directly, then applies the same status-transition logic as the webhook.
+     */
+    public function checkPayment(Request $request, string $invoice)
+    {
+        $order = Order::where('invoice_number', $invoice)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        if ($order->status !== 'pending') {
+            return response()->json(['status' => $order->status, 'message' => 'Order already updated']);
+        }
+
+        try {
+            $data = $this->midtransService->checkTransactionStatus($invoice);
+        } catch (\Exception $e) {
+            Log::warning('checkPayment: Midtrans status check failed', [
+                'invoice' => $invoice,
+                'error'   => $e->getMessage(),
+            ]);
+            return response()->json(['message' => 'Failed to check payment status'], 502);
+        }
+
+        $transactionStatus = $data['transaction_status'] ?? null;
+
+        if (!$transactionStatus) {
+            return response()->json(['message' => 'No transaction status returned'], 422);
+        }
+
+        $newStatus = $this->mapTransactionStatus($transactionStatus);
+
+        if ($newStatus === null) {
+            return response()->json(['status' => $order->status, 'message' => 'Payment not yet completed']);
+        }
+
+        $allowed = self::TRANSITIONS[$order->status] ?? [];
+
+        if (!in_array($newStatus, $allowed)) {
+            return response()->json(['status' => $order->status, 'message' => 'Transition not allowed']);
+        }
+
+        $updateData = ['status' => $newStatus];
+
+        if ($newStatus === 'processing') {
+            $updateData['payment_method'] = $data['payment_type'] ?? null;
+        }
+
+        DB::transaction(function () use ($order, $updateData, $newStatus) {
+            $order->update($updateData);
+
+            if ($newStatus === 'processing') {
+                $order->load('items');
+                foreach ($order->items as $item) {
+                    $updated = $this->deductStock($item->product_id, $item->size, $item->quantity);
+                    if (!$updated) {
+                        Log::warning('checkPayment: stock insufficient', [
+                            'invoice'    => $order->invoice_number,
+                            'product_id' => $item->product_id,
+                            'size'       => $item->size,
+                        ]);
+                    }
+                }
+            }
+
+            $messages = [
+                'processing' => 'Pembayaran pesanan ' . $order->invoice_number . ' dikonfirmasi. Pesanan sedang diproses.',
+                'cancelled'  => 'Pesanan ' . $order->invoice_number . ' dibatalkan.',
+            ];
+            if (isset($messages[$newStatus])) {
+                Notification::send(
+                    $order->user_id,
+                    'order_status',
+                    'Update Pesanan',
+                    $messages[$newStatus],
+                    route('orders.show', $order->invoice_number)
+                );
+
+                Mail::to($order->user->email)
+                    ->queue(new OrderStatusMail($order, $order->getOriginal('status')));
+            }
+        });
+
+        Log::info('checkPayment: order status updated', [
+            'invoice' => $order->invoice_number,
+            'to'      => $newStatus,
+        ]);
+
+        return response()->json(['status' => $newStatus, 'message' => 'OK']);
+    }
+
     private function mapTransactionStatus(string $transactionStatus): ?string
     {
         return match (true) {
-            in_array($transactionStatus, ['capture', 'settlement']) => 'paid',
+            in_array($transactionStatus, ['capture', 'settlement']) => 'processing',
             in_array($transactionStatus, ['cancel', 'deny', 'expire']) => 'cancelled',
             default => null,
         };

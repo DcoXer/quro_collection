@@ -138,8 +138,9 @@
                             <div class="flex gap-2">
                                 <input type="text" id="voucher-input"
                                     placeholder="Masukkan kode voucher"
-                                    class="checkout-input uppercase" style="flex: 1;">
-                                <button type="button" onclick="applyVoucher()"
+                                    class="checkout-input uppercase" style="flex: 1;"
+                                    onkeydown="if(event.key==='Enter'){event.preventDefault();applyVoucher();}">
+                                <button type="button" id="voucher-btn" onclick="applyVoucher()"
                                     class="bg-gray-900 text-white px-5 rounded-xl text-sm font-medium hover:bg-gray-700 transition whitespace-nowrap">
                                     Pakai
                                 </button>
@@ -261,6 +262,16 @@
                 ongkir:        '{{ route('ongkir.check') }}',
                 voucherApply:  '{{ route('voucher.apply') }}',
                 voucherRemove: '{{ route('voucher.remove') }}',
+            },
+            savedAddress: {
+                province_id:   '{{ auth()->user()->province_id }}',
+                province_name: '{{ auth()->user()->province_name }}',
+                city_id:       '{{ auth()->user()->city_id }}',
+                city_name:     '{{ auth()->user()->city_name }}',
+                district_id:   '{{ auth()->user()->district_id }}',
+                district_name: '{{ auth()->user()->district_name }}',
+                village_id:    '{{ auth()->user()->village_id }}',
+                village_name:  '{{ auth()->user()->village_name }}',
             },
         };
     </script>

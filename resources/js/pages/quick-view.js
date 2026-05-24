@@ -11,7 +11,7 @@ window.openQuickView = async function (apiUrl, detailUrl) {
     document.getElementById('quick-view-modal').classList.remove('hidden');
     document.getElementById('qv-loading').classList.remove('hidden');
     document.getElementById('qv-content').classList.add('hidden');
-    document.getElementById('qv-success').classList.add('hidden');
+    // qv-success removed — toast is used instead
     qvQty           = 1;
     qvSelectedPrice = 0;
 
@@ -150,19 +150,17 @@ window.qvSubmitCart = async function () {
     formData.append('size', size);
     formData.append('quantity', qvQty);
 
-    const res = await fetch(cartUrl, {
+    const res = await guardedFetch(cartUrl, {
         method: 'POST',
         headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
         body: formData,
     });
+    if (!res) return;
 
     if (res.ok) {
-        const data  = await res.json();
-        document.getElementById('qv-success').classList.remove('hidden');
-        document.getElementById('qv-content')
-            .querySelector('button[onclick="qvSubmitCart()"]')
-            ?.closest('.flex-col')?.querySelector('.mb-3')?.classList.add('hidden');
-
+        const data = await res.json();
+        closeQuickView();
+        showToast('Produk ditambahkan ke keranjang', 'success');
         const badge = document.querySelector('.cart-badge');
         if (badge) badge.textContent = data.cartCount;
     } else {

@@ -20,7 +20,7 @@ class HeroSlideResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhoto;
 
-    protected static ?string $navigationLabel = 'Hero Slides';
+    protected static ?string $navigationLabel = 'Hero Beranda';
 
     protected static \UnitEnum|string|null $navigationGroup = 'Pengaturan';
 

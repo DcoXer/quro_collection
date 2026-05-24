@@ -70,24 +70,7 @@
                         Lihat Detail Produk →
                     </a>
 
-                    <div id="qv-success" class="hidden text-center py-4">
-                        <div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                        </div>
-                        <p class="font-medium text-gray-900 mb-1">Ditambahkan ke keranjang</p>
-                        <div class="flex gap-3 mt-4">
-                            <button onclick="closeQuickView()"
-                                class="flex-1 border border-gray-200 py-2 rounded-lg text-sm hover:border-gray-900 transition">
-                                Lanjut Belanja
-                            </button>
-                            <a href="{{ route('cart.index') }}"
-                                class="flex-1 bg-gray-900 text-white py-2 rounded-lg text-sm text-center hover:bg-gray-700 transition">
-                                Lihat Keranjang
-                            </a>
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </div>

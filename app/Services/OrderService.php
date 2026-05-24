@@ -38,12 +38,15 @@ class OrderService
                 'shipping_phone'  => $shippingData['shipping_phone'],
                 'shipping_address' => $shippingData['shipping_address'],
                 'payment_method'  => 'midtrans',
-                'province_id'     => $shippingData['province_id'],
-                'city_id'         => $shippingData['city_id'],
-                'district_id'     => $shippingData['district_id'],
-                'village_id'      => $shippingData['village_id'],
+                'province_id'   => $shippingData['province_id'],
+                'city_id'       => $shippingData['city_id'],
+                'city_name'     => $shippingData['city_name'] ?? null,
+                'district_id'   => $shippingData['district_id'],
+                'district_name' => $shippingData['district_name'] ?? null,
+                'village_id'    => $shippingData['village_id'],
+                'courier'       => $shippingData['courier'] ?? null,
                 'courier_service' => $shippingData['courier_service'],
-                'shipping_cost'   => $shippingData['shipping_cost'],
+                'shipping_cost' => $shippingData['shipping_cost'],
             ]);
 
             foreach ($items as $item) {

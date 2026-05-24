@@ -11,7 +11,8 @@ class Order extends Model
         'total_amount', 'shipping_name', 'shipping_phone',
         'shipping_address', 'payment_method', 'payment_token',
         'courier', 'tracking_number',
-        'province_id', 'city_id', 'district_id', 'village_id',
+        'province_id', 'city_id', 'city_name',
+        'district_id', 'district_name', 'village_id',
         'courier_service', 'shipping_cost',
     ];
 

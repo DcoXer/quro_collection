@@ -89,19 +89,57 @@
                             class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition bg-gray-50 focus:bg-white">
                     </div>
 
+                    {{-- Alamat Pengiriman --}}
+                    <div class="pt-2">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Alamat Pengiriman</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wider">Provinsi</label>
+                                <select id="profile-select-provinsi" name="province_id"
+                                    class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition bg-gray-50 focus:bg-white">
+                                    <option value="">Pilih Provinsi</option>
+                                </select>
+                                <input type="hidden" name="province_name" id="profile-province-name" value="{{ old('province_name', $user->province_name) }}">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wider">Kabupaten / Kota</label>
+                                <select id="profile-select-kabupaten" name="city_id" disabled
+                                    class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition bg-gray-50 focus:bg-white disabled:opacity-50">
+                                    <option value="">Pilih Kabupaten/Kota</option>
+                                </select>
+                                <input type="hidden" name="city_name" id="profile-city-name" value="{{ old('city_name', $user->city_name) }}">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wider">Kecamatan</label>
+                                <select id="profile-select-kecamatan" name="district_id" disabled
+                                    class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition bg-gray-50 focus:bg-white disabled:opacity-50">
+                                    <option value="">Pilih Kecamatan</option>
+                                </select>
+                                <input type="hidden" name="district_name" id="profile-district-name" value="{{ old('district_name', $user->district_name) }}">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wider">Kelurahan</label>
+                                <select id="profile-select-kelurahan" name="village_id" disabled
+                                    class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition bg-gray-50 focus:bg-white disabled:opacity-50">
+                                    <option value="">Pilih Kelurahan</option>
+                                </select>
+                                <input type="hidden" name="village_name" id="profile-village-name" value="{{ old('village_name', $user->village_name) }}">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wider">Alamat Lengkap</label>
+                                <textarea name="address_detail" rows="3"
+                                    placeholder="Nama jalan, nomor rumah, RT/RW, patokan..."
+                                    class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition bg-gray-50 focus:bg-white" style="resize:none;">{{ old('address_detail', $user->address_detail) }}</textarea>
+                                @error('address_detail')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex items-center gap-3 pt-2">
                         <button type="submit"
                             class="bg-gray-900 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
                             Simpan Perubahan
                         </button>
-                        @if(session('status') === 'profile-updated')
-                            <p class="text-sm text-green-600 flex items-center gap-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Tersimpan!
-                            </p>
-                        @endif
                     </div>
                 </form>
             </div>
@@ -153,14 +191,6 @@
                             class="bg-gray-900 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
                             Update Password
                         </button>
-                        @if(session('status') === 'password-updated')
-                            <p class="text-sm text-green-600 flex items-center gap-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Password diperbarui!
-                            </p>
-                        @endif
                     </div>
                 </form>
             </div>
@@ -199,5 +229,40 @@
         </div>
     </div>
 </div>
+
+
+@push('scripts')
+<script>
+@if(session('status') === 'profile-updated')
+    document.addEventListener('DOMContentLoaded', function () {
+        window.showToast('Profil berhasil diperbarui', 'success');
+    });
+@elseif(session('status') === 'password-updated')
+    document.addEventListener('DOMContentLoaded', function () {
+        window.showToast('Password berhasil diperbarui', 'success');
+    });
+@endif
+
+window.ProfileConfig = {
+    urls: {
+        provinsi:  '{{ route('wilayah.provinsi') }}',
+        kabupaten: '{{ url('wilayah/kabupaten') }}',
+        kecamatan: '{{ url('wilayah/kecamatan') }}',
+        kelurahan: '{{ url('wilayah/kelurahan') }}',
+    },
+    savedAddress: {
+        province_id:   '{{ auth()->user()->province_id }}',
+        province_name: '{{ auth()->user()->province_name }}',
+        city_id:       '{{ auth()->user()->city_id }}',
+        city_name:     '{{ auth()->user()->city_name }}',
+        district_id:   '{{ auth()->user()->district_id }}',
+        district_name: '{{ auth()->user()->district_name }}',
+        village_id:    '{{ auth()->user()->village_id }}',
+        village_name:  '{{ auth()->user()->village_name }}',
+    }
+};
+</script>
+@vite(['resources/js/pages/profile.js'])
+@endpush
 
 </x-app-layout>
