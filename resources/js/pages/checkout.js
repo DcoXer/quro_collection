@@ -205,23 +205,20 @@ async function loadOngkir(villageCode) {
 
     if (!jne) {
         document.getElementById('ongkir-list').innerHTML =
-            '<p class="text-xs text-red-400">Layanan JNE tidak tersedia untuk wilayah ini.</p>';
+            '<p class="text-xs text-red-400">Layanan pengiriman tidak tersedia untuk wilayah ini.</p>';
         return;
     }
 
     shippingCost = parseInt(jne.price);
     document.getElementById('shipping-cost').value    = shippingCost;
-    document.getElementById('courier-service').value  = `JNE Express${jne.estimation ? ' - ' + jne.estimation : ''}`;
+    document.getElementById('courier-service').value  = 'REG';
     document.getElementById('ongkir-row').classList.remove('hidden');
     document.getElementById('ongkir-amount').textContent = 'Rp ' + shippingCost.toLocaleString('id-ID');
     document.getElementById('final-total').textContent   = 'Rp ' + (baseTotal + shippingCost).toLocaleString('id-ID');
 
     document.getElementById('ongkir-list').innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1.5px solid #111827;border-radius:12px;background:#f9fafb;">
-            <div>
-                <p style="font-size:14px;font-weight:600;color:#111827;margin:0;">JNE Express</p>
-                <p style="font-size:12px;color:#9ca3af;margin:2px 0 0;">${jne.estimation ?? 'Estimasi tidak tersedia'}</p>
-            </div>
+            <p style="font-size:13px;color:#6b7280;margin:0;">${jne.estimation ? 'Estimasi ' + jne.estimation : 'Estimasi tidak tersedia'}</p>
             <span style="font-size:14px;font-weight:600;color:#111827;">Rp ${shippingCost.toLocaleString('id-ID')}</span>
         </div>
     `;

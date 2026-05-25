@@ -8,6 +8,9 @@ use App\Models\Notification;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Services\BiteshipService;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +25,141 @@ class EditOrder extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [];
+        return [
+
+            // paid → processing
+            Action::make('proses')
+                ->label('Proses Pesanan')
+                ->icon('heroicon-o-arrow-right-circle')
+                ->color('primary')
+                ->requiresConfirmation()
+                ->modalHeading('Proses pesanan ini?')
+                ->modalDescription('Status akan berubah ke "Processing". Pesanan akan mulai disiapkan.')
+                ->modalSubmitActionLabel('Ya, Proses')
+                ->visible(fn () => $this->record->status === 'paid')
+                ->action(fn () => $this->changeStatus('processing')),
+
+            // processing → shipped
+            Action::make('kirim')
+                ->label('Tandai Dikirim')
+                ->icon('heroicon-o-truck')
+                ->color('info')
+                ->form([
+                    TextInput::make('tracking_number')
+                        ->label('Nomor Resi')
+                        ->placeholder('Masukkan nomor resi dari ekspedisi...')
+                        ->required(),
+                ])
+                ->modalHeading('Tandai pesanan sebagai dikirim')
+                ->modalDescription('Input nomor resi jika sudah tersedia.')
+                ->modalSubmitActionLabel('Tandai Dikirim')
+                ->visible(fn () => $this->record->status === 'processing')
+                ->action(function (array $data) {
+                    $this->record->update(['tracking_number' => $data['tracking_number']]);
+                    $this->changeStatus('shipped');
+                }),
+
+            // shipped → delivered
+            Action::make('selesai')
+                ->label('Tandai Selesai')
+                ->icon('heroicon-o-check-badge')
+                ->color('success')
+                ->requiresConfirmation()
+                ->modalHeading('Tandai pesanan selesai?')
+                ->modalDescription('Status akan berubah ke "Delivered". Pastikan customer sudah menerima paket.')
+                ->modalSubmitActionLabel('Ya, Selesai')
+                ->visible(fn () => $this->record->status === 'shipped')
+                ->action(fn () => $this->changeStatus('delivered')),
+
+            // cancel
+            Action::make('batalkan')
+                ->label('Batalkan Pesanan')
+                ->icon('heroicon-o-x-circle')
+                ->color('danger')
+                ->form([
+                    Textarea::make('cancel_reason')
+                        ->label('Alasan pembatalan')
+                        ->placeholder('Opsional...')
+                        ->rows(2),
+                ])
+                ->modalHeading('Batalkan pesanan ini?')
+                ->modalSubmitActionLabel('Ya, Batalkan')
+                ->visible(fn () => in_array($this->record->status, ['pending', 'paid', 'processing']))
+                ->action(fn () => $this->changeStatus('cancelled')),
+
+        ];
+    }
+
+    private function changeStatus(string $status): void
+    {
+        $previousStatus = $this->record->status;
+
+        $this->record->update([
+            'status'     => $status,
+            'shipped_at' => $status === 'shipped' ? now() : $this->record->shipped_at,
+        ]);
+        $this->record->refresh();
+
+        // Restore stock on cancel
+        if ($previousStatus !== 'cancelled' && $status === 'cancelled') {
+            DB::transaction(function () {
+                foreach ($this->record->items as $item) {
+                    $this->restoreStock($item->product_id, $item->size, $item->quantity);
+                }
+            });
+        }
+
+        // Auto-resi via Biteship saat shipped (jika belum ada resi)
+        if ($previousStatus !== 'shipped' && $status === 'shipped' && !$this->record->tracking_number) {
+            try {
+                $result = app(BiteshipService::class)->createOrder($this->record);
+                $this->record->update([
+                    'tracking_number' => $result['tracking_number'],
+                    'courier'         => $result['courier'],
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Biteship auto-resi failed', [
+                    'invoice' => $this->record->invoice_number,
+                    'error'   => $e->getMessage(),
+                ]);
+                FilamentNotification::make()
+                    ->title('Resi belum ter-generate otomatis')
+                    ->body('Silakan input nomor resi manual di form di bawah.')
+                    ->warning()
+                    ->persistent()
+                    ->send();
+            }
+        }
+
+        // Notifikasi in-app + email
+        $messages = [
+            'paid'       => 'Pembayaran pesanan ' . $this->record->invoice_number . ' telah dikonfirmasi.',
+            'processing' => 'Pesanan ' . $this->record->invoice_number . ' sedang diproses.',
+            'shipped'    => 'Pesanan ' . $this->record->invoice_number . ' sudah dikirim. Lacak paketmu sekarang.',
+            'delivered'  => 'Pesanan ' . $this->record->invoice_number . ' telah diterima. Jangan lupa beri ulasan!',
+            'cancelled'  => 'Pesanan ' . $this->record->invoice_number . ' telah dibatalkan.',
+        ];
+
+        if (isset($messages[$status])) {
+            Notification::send(
+                $this->record->user_id,
+                'order_status',
+                'Update Pesanan',
+                $messages[$status],
+                route('orders.show', $this->record->invoice_number)
+            );
+
+            Mail::to($this->record->user->email)
+                ->queue(new OrderStatusMail($this->record, $previousStatus));
+        }
+
+        FilamentNotification::make()
+            ->title('Status diperbarui')
+            ->body('Pesanan ' . $this->record->invoice_number . ' → ' . ucfirst($status))
+            ->success()
+            ->send();
+
+        $this->refreshFormData(['status']);
     }
 
     protected function beforeSave(): void
@@ -32,63 +169,10 @@ class EditOrder extends EditRecord
 
     protected function afterSave(): void
     {
-        $order          = $this->record;
-        $previousStatus = $this->statusBeforeSave;
-
-        // Auto-generate resi via Biteship saat status berubah ke shipped
-        if ($previousStatus !== 'shipped' && $order->status === 'shipped') {
-            try {
-                $result = app(BiteshipService::class)->createOrder($order);
-                $order->update([
-                    'tracking_number' => $result['tracking_number'],
-                    'courier'         => $result['courier'],
-                ]);
-            } catch (\Exception $e) {
-                Log::error('Biteship auto-resi failed', [
-                    'invoice' => $order->invoice_number,
-                    'error'   => $e->getMessage(),
-                ]);
-                FilamentNotification::make()
-                    ->title('Gagal generate resi otomatis')
-                    ->body('Biteship error: ' . $e->getMessage() . ' — Silakan input resi manual.')
-                    ->danger()
-                    ->persistent()
-                    ->send();
-            }
-        }
-
-        // Restore stock only when transitioning INTO cancelled for the first time
-        if ($previousStatus !== 'cancelled' && $order->status === 'cancelled') {
-            DB::transaction(function () use ($order) {
-                foreach ($order->items as $item) {
-                    $this->restoreStock($item->product_id, $item->size, $item->quantity);
-                }
-            });
-        }
-
-        // Kirim notifikasi in-app ke user jika status berubah
-        if ($previousStatus !== $order->status) {
-            $messages = [
-                'paid'       => 'Pembayaran pesanan ' . $order->invoice_number . ' telah dikonfirmasi.',
-                'processing' => 'Pesanan ' . $order->invoice_number . ' sedang diproses.',
-                'shipped'    => 'Pesanan ' . $order->invoice_number . ' sudah dikirim. Lacak paketmu sekarang.',
-                'delivered'  => 'Pesanan ' . $order->invoice_number . ' telah diterima. Jangan lupa beri ulasan!',
-                'cancelled'  => 'Pesanan ' . $order->invoice_number . ' telah dibatalkan.',
-            ];
-
-            if (isset($messages[$order->status])) {
-                Notification::send(
-                    $order->user_id,
-                    'order_status',
-                    'Update Pesanan',
-                    $messages[$order->status],
-                    route('orders.show', $order->invoice_number)
-                );
-
-                // Kirim email ke customer
-                Mail::to($order->user->email)
-                    ->queue(new OrderStatusMail($order, $previousStatus));
-            }
+        // Status hanya boleh diubah via action buttons, bukan form save
+        // Kembalikan status ke nilai sebelumnya jika ada perubahan via form
+        if ($this->record->status !== $this->statusBeforeSave) {
+            $this->record->update(['status' => $this->statusBeforeSave]);
         }
     }
 

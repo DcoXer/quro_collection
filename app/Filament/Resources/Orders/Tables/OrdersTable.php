@@ -14,18 +14,31 @@ class OrdersTable
         return $table
             ->columns([
                 TextColumn::make('invoice_number')
+                    ->label('Invoice')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold'),
+                    ->weight('bold')
+                    ->copyable()
+                    ->copyMessage('Invoice disalin!'),
 
                 TextColumn::make('user.name')
                     ->label('Customer')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->description(fn ($record) => $record->shipping_phone ?? ''),
 
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        'pending'    => 'Pending',
+                        'paid'       => 'Paid',
+                        'processing' => 'Processing',
+                        'shipped'    => 'Shipped',
+                        'delivered'  => 'Delivered',
+                        'cancelled'  => 'Cancelled',
+                        default      => $state,
+                    })
+                    ->color(fn ($state) => match ($state) {
                         'pending'    => 'warning',
                         'paid'       => 'info',
                         'processing' => 'primary',
@@ -36,27 +49,25 @@ class OrdersTable
                     })
                     ->sortable(),
 
-                TextColumn::make('total_amount')
-                    ->label('Total')
-                    ->formatStateUsing(fn($state) => 'Rp ' . number_format($state, 0, ',', '.'))
-                    ->sortable(),
-
-                TextColumn::make('shipping_name')
-                    ->label('Penerima')
-                    ->searchable(),
-
-                TextColumn::make('shipping_phone')
-                    ->label('No. HP')
-                    ->searchable(),
-
-                TextColumn::make('payment_method')
-                    ->label('Pembayaran')
+                TextColumn::make('courier')
+                    ->label('Kurir')
+                    ->formatStateUsing(fn ($state, $record) =>
+                        strtoupper($state ?? '-') . ($record->tracking_number ? '' : '')
+                    )
+                    ->description(fn ($record) => $record->tracking_number ?? 'Belum ada resi')
                     ->badge()
                     ->color('gray'),
 
-                TextColumn::make('created_at')
+                TextColumn::make('total_amount')
+                    ->label('Total')
+                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'))
+                    ->sortable()
+                    ->weight('semibold'),
+
+TextColumn::make('created_at')
                     ->label('Tanggal')
-                    ->dateTime('d M Y, H:i')
+                    ->dateTime('d M Y')
+                    ->description(fn ($record) => $record->created_at->format('H:i'))
                     ->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
@@ -70,10 +81,13 @@ class OrdersTable
                         'delivered'  => 'Delivered',
                         'cancelled'  => 'Cancelled',
                     ])
-                    ->label('Filter Status'),
+                    ->label('Status'),
             ])
             ->recordActions([
-                EditAction::make(),
-            ]);
+                EditAction::make()->label('Kelola'),
+            ])
+            ->striped()
+            ->emptyStateHeading('Belum ada pesanan')
+            ->emptyStateDescription('Pesanan dari customer akan muncul di sini.');
     }
 }

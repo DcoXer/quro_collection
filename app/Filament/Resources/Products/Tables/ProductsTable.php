@@ -47,8 +47,6 @@ class ProductsTable
                             ->implode(' | ');
                     })
                     ->wrap(),
-                ImageColumn::make('image')
-                    ->label('Gambar'),
                 IconColumn::make('is_active')
                     ->label('Aktif')
                     ->boolean(),

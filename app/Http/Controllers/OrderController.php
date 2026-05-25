@@ -49,6 +49,19 @@ class OrderController extends Controller
             ->with('success', 'Pesanan berhasil dibatalkan.');
     }
 
+    public function confirm($invoice)
+    {
+        $order = Order::where('invoice_number', $invoice)
+            ->where('user_id', auth()->id())
+            ->where('status', 'shipped')
+            ->firstOrFail();
+
+        $order->update(['status' => 'delivered']);
+
+        return redirect()->route('orders.show', $invoice)
+            ->with('success', 'Pesanan dikonfirmasi diterima. Terima kasih!');
+    }
+
     public function track($invoice)
     {
         $order = Order::where('invoice_number', $invoice)

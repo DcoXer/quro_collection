@@ -23,6 +23,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
     })
+    ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule): void {
+        $schedule->command('orders:process-shipped')->dailyAt('07:00');
+    })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();

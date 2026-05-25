@@ -3,45 +3,35 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Product;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Filament\Widgets\TableWidget as BaseWidget;
+use Filament\Widgets\Widget;
 
-class LowStockWidget extends BaseWidget
+class LowStockWidget extends Widget
 {
-    protected static ?string $heading = 'Produk Stok Menipis / Habis';
-    protected static ?int $sort = 5;
+    protected static ?string $heading = 'Stok Menipis & Habis';
+    protected static ?int $sort = 2;
     protected int | string | array $columnSpan = 'full';
+    protected string $view = 'filament.widgets.low-stock-widget';
 
-    public function table(Table $table): Table
+    public function getViewData(): array
     {
-        return $table
-            ->query(
-                Product::query()
-                    ->where('is_active', true)
-                    ->where('stock', '<=', 10)
-                    ->orderBy('stock')
-            )
-            ->columns([
-                TextColumn::make('name')
-                    ->label('Produk')
-                    ->searchable(),
+        // Jika produk punya variants, stok asli ada di product_variants.
+        // Kalau tidak ada variants, pakai products.stock.
+        $products = Product::query()
+            ->with('category')
+            ->where('is_active', true)
+            ->selectRaw("
+                products.*,
+                (CASE
+                    WHEN EXISTS (SELECT 1 FROM product_variants WHERE product_id = products.id)
+                    THEN (SELECT COALESCE(SUM(stock), 0) FROM product_variants WHERE product_id = products.id)
+                    ELSE products.stock
+                END) as effective_stock
+            ")
+            ->havingRaw('effective_stock <= 10')
+            ->orderByRaw('effective_stock ASC')
+            ->limit(12)
+            ->get();
 
-                TextColumn::make('category.name')
-                    ->label('Kategori'),
-
-                TextColumn::make('stock')
-                    ->label('Stok')
-                    ->badge()
-                    ->color(fn ($state) => match(true) {
-                        $state === 0 => 'danger',
-                        $state <= 5  => 'warning',
-                        default      => 'gray',
-                    })
-                    ->sortable(),
-            ])
-            ->emptyStateHeading('Semua stok aman')
-            ->emptyStateIcon('heroicon-o-check-circle')
-            ->paginated(false);
+        return ['products' => $products];
     }
 }

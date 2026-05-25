@@ -325,6 +325,25 @@
             </span>
         </div>
 
+        @if($order->status === 'shipped')
+        <div class="border border-indigo-100 bg-indigo-50 rounded-2xl p-4 mb-4">
+            <p class="text-sm font-medium text-indigo-800 mb-1">Sudah menerima paket?</p>
+            <p class="text-xs text-indigo-500 mb-3">Konfirmasi jika paket sudah sampai di tanganmu. Jika tidak dikonfirmasi, pesanan otomatis selesai dalam 14 hari.</p>
+            <form method="POST" action="{{ route('orders.confirm', $order->invoice_number) }}">
+                @csrf
+                <button type="button"
+                    onclick="showConfirm(
+                        'Konfirmasi Pesanan Diterima',
+                        'Pastikan kamu sudah menerima paket sebelum konfirmasi.',
+                        () => this.closest('form').submit()
+                    )"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2.5 rounded-xl transition">
+                    Pesanan Sudah Diterima
+                </button>
+            </form>
+        </div>
+        @endif
+
         <div class="mt-8">
             @if($order->status === 'pending' && $order->payment_token)
                 <a href="{{ route('checkout.payment', $order->invoice_number) }}"

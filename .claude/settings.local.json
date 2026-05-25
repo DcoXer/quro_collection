@@ -15,7 +15,13 @@
       "Bash(powershell.exe:*)",
       "Bash(curl:*)",
       "Bash(composer dump-autoload:*)",
-      "Bash(php -r \"require 'vendor/autoload.php'; echo 'OK';\")"
+      "Bash(php -r \"require 'vendor/autoload.php'; echo 'OK';\")",
+      "Bash(grep -r 'navigationGroup\\\\|protected static.*$navigation\\\\|->icon\\(' 'C:\\\\laragon\\\\www\\\\qurocollection/app/Filament/Resources')",
+      "Bash(grep -r \"Tables\\\\\\\\\\\\\\\\Actions\\\\\\\\\\\\\\\\Action\\\\|use Filament\\\\\\\\\\\\\\\\Tables\\\\\\\\\\\\\\\\Actions\" C:/laragon/www/qurocollection/app/Filament --include=\"*.php\")",
+      "Bash(xargs cat:*)",
+      "Bash(php -r \"require 'C:/laragon/www/qurocollection/vendor/autoload.php';\")",
+      "Bash(xargs ls:*)",
+      "Bash(composer require:*)"
     ]
   }
 }

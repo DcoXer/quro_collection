@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\DB;
 class TopProductsWidget extends BaseWidget
 {
     protected static ?string $heading = 'Produk Terlaris';
-    protected static ?int $sort = 4;
-    protected int | string | array $columnSpan = 'full';
+    protected static ?int $sort = 6;
+    protected int | string | array $columnSpan = 1;
 
     public function table(Table $table): Table
     {

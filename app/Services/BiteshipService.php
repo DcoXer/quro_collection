@@ -110,6 +110,7 @@ class BiteshipService
 
     /**
      * Create a shipment order on Biteship and return the AWB (tracking number) + courier company.
+     * Tries direct courier creation first (no rates check), falls back to rates_id flow.
      *
      * @throws \Exception
      */
@@ -128,12 +129,7 @@ class BiteshipService
             );
         }
 
-        // Get rates_id first — required for regular couriers (JNE/J&T)
-        $ratesId = $this->getRatesId($order, $courier, $destAreaId);
-
-        $payload = [
-            'rates_id' => $ratesId,
-
+        $basePayload = [
             'shipper_contact_name'  => config('services.biteship.shipper_name'),
             'shipper_contact_phone' => config('services.biteship.shipper_phone'),
             'shipper_organization'  => config('services.biteship.shipper_name'),
@@ -155,16 +151,37 @@ class BiteshipService
             'items' => $this->buildItems($order),
         ];
 
-        $response = Http::withHeaders($this->headers())
-            ->post(self::BASE_URL . '/orders', $payload);
+        // Try direct courier creation first (bypasses rates API — no balance needed)
+        $directPayload = array_merge($basePayload, [
+            'courier_company'      => $courier['company'],
+            'courier_service_code' => $courier['service'],
+            'courier_type'         => 'regular',
+        ]);
 
+        $response = Http::withHeaders($this->headers())
+            ->post(self::BASE_URL . '/orders', $directPayload);
+
+        // If direct creation fails, fall back to rates_id flow
         if ($response->failed()) {
-            Log::error('Biteship create order failed', [
+            Log::warning('Biteship direct order failed, trying rates flow', [
                 'invoice' => $order->invoice_number,
-                'status'  => $response->status(),
                 'body'    => $response->body(),
             ]);
-            throw new \Exception('Biteship create order failed: ' . $response->body());
+
+            $ratesId = $this->getRatesId($order, $courier, $destAreaId);
+            $ratesPayload = array_merge($basePayload, ['rates_id' => $ratesId]);
+
+            $response = Http::withHeaders($this->headers())
+                ->post(self::BASE_URL . '/orders', $ratesPayload);
+
+            if ($response->failed()) {
+                Log::error('Biteship create order failed', [
+                    'invoice' => $order->invoice_number,
+                    'status'  => $response->status(),
+                    'body'    => $response->body(),
+                ]);
+                throw new \Exception('Biteship create order failed: ' . $response->body());
+            }
         }
 
         $data       = $response->json();

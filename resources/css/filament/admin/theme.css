@@ -6,7 +6,7 @@
 @source '../../../../resources/views/filament/**/*';
 
 /* ============================================================
-   QURO ADMIN — MODERN SAAS THEME
+   QURO ADMIN — DARK THEME
    ============================================================ */
 
 :root {
@@ -14,7 +14,7 @@
 }
 
 /* ============================================================
-   LAYOUT & BODY
+   BODY
    ============================================================ */
 
 .fi-body {
@@ -23,7 +23,7 @@
 }
 
 :where(.dark, .dark *) .fi-body {
-    background-color: #0a0f1e;
+    background-color: #0f0f0f;
 }
 
 /* ============================================================
@@ -38,8 +38,9 @@
 }
 
 :where(.dark, .dark *) .fi-topbar {
-    background-color: #0f172a !important;
-    box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.07) !important;
+    background-color: #111111 !important;
+    box-shadow: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
 /* ============================================================
@@ -52,8 +53,8 @@
 }
 
 :where(.dark, .dark *) .fi-sidebar {
-    background-color: #0f172a !important;
-    border-right-color: rgba(255, 255, 255, 0.06) !important;
+    background-color: #111111 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
 .fi-sidebar-nav {
@@ -71,7 +72,7 @@
 }
 
 :where(.dark, .dark *) .fi-sidebar-group-label {
-    color: #475569 !important;
+    color: #3f3f46 !important;
 }
 
 /* Nav item base */
@@ -89,7 +90,7 @@
 }
 
 :where(.dark, .dark *) .fi-sidebar-item-label {
-    color: #94a3b8 !important;
+    color: #71717a !important;
 }
 
 .fi-sidebar-item-btn > .fi-icon {
@@ -97,7 +98,7 @@
 }
 
 :where(.dark, .dark *) .fi-sidebar-item-btn > .fi-icon {
-    color: #475569 !important;
+    color: #52525b !important;
 }
 
 /* Nav item hover */
@@ -109,13 +110,14 @@
     background-color: rgba(255, 255, 255, 0.04) !important;
 }
 
-/* Nav item active */
+/* Nav item active — LIGHT: violet, DARK: putih bg + teks gelap */
 .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
     background-color: #f0f0ff !important;
 }
 
 :where(.dark, .dark *) .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
-    background-color: rgba(109, 40, 217, 0.12) !important;
+    background-color: #ffffff !important;
+    border-radius: 0.625rem !important;
 }
 
 .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-sidebar-item-label {
@@ -124,7 +126,8 @@
 }
 
 :where(.dark, .dark *) .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-sidebar-item-label {
-    color: #a78bfa !important;
+    color: #0f0f0f !important;
+    font-weight: 600;
 }
 
 .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon {
@@ -132,7 +135,7 @@
 }
 
 :where(.dark, .dark *) .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon {
-    color: #a78bfa !important;
+    color: #0f0f0f !important;
 }
 
 /* Sidebar footer */
@@ -157,7 +160,7 @@
 }
 
 :where(.dark, .dark *) .fi-header-heading {
-    color: #f1f5f9 !important;
+    color: #f5f5f5 !important;
 }
 
 .fi-header-subheading {
@@ -165,27 +168,30 @@
     color: #64748b !important;
 }
 
-/* Page content padding */
+:where(.dark, .dark *) .fi-header-subheading {
+    color: #52525b !important;
+}
+
 .fi-main {
     padding: 1.5rem;
 }
 
 /* ============================================================
-   SECTIONS / CARDS (Filament Panels)
+   SECTIONS / CARDS
    ============================================================ */
 
 .fi-section {
     border-radius: 0.875rem !important;
     border: 1px solid rgba(0, 0, 0, 0.08) !important;
     background-color: #ffffff !important;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
     overflow: hidden;
 }
 
 :where(.dark, .dark *) .fi-section {
-    background-color: #1e293b !important;
+    background-color: #1a1a1a !important;
     border-color: rgba(255, 255, 255, 0.07) !important;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+    box-shadow: none !important;
 }
 
 .fi-section-header {
@@ -205,7 +211,7 @@
 }
 
 :where(.dark, .dark *) .fi-section-header-heading {
-    color: #e2e8f0 !important;
+    color: #e4e4e7 !important;
 }
 
 .fi-section-content {
@@ -230,8 +236,8 @@
 
 :where(.dark, .dark *) .fi-ta-ctn {
     border-color: rgba(255, 255, 255, 0.07) !important;
-    background-color: #1e293b;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+    background-color: #1a1a1a !important;
+    box-shadow: none !important;
 }
 
 .fi-ta-header-cell {
@@ -245,8 +251,8 @@
 }
 
 :where(.dark, .dark *) .fi-ta-header-cell {
-    background-color: rgba(255, 255, 255, 0.03) !important;
-    color: #475569 !important;
+    background-color: #161616 !important;
+    color: #3f3f46 !important;
 }
 
 .fi-ta-row {
@@ -263,7 +269,7 @@
 }
 
 :where(.dark, .dark *) .fi-ta-row:hover {
-    background-color: rgba(255, 255, 255, 0.025) !important;
+    background-color: rgba(255, 255, 255, 0.02) !important;
 }
 
 .fi-ta-cell {
@@ -273,10 +279,9 @@
 }
 
 :where(.dark, .dark *) .fi-ta-cell {
-    color: #cbd5e1 !important;
+    color: #a1a1aa !important;
 }
 
-/* Table filters toolbar */
 .fi-ta-filters-form {
     padding: 1rem 1.25rem !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
@@ -286,7 +291,6 @@
     border-bottom-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-/* Table search */
 .fi-ta-search-field {
     border-radius: 0.625rem !important;
 }
@@ -324,9 +328,9 @@
 }
 
 :where(.dark, .dark *) .fi-btn-color-gray {
-    background-color: rgba(255, 255, 255, 0.07) !important;
+    background-color: rgba(255, 255, 255, 0.06) !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
-    color: #e2e8f0 !important;
+    color: #e4e4e7 !important;
 }
 
 .fi-btn-color-gray:hover {
@@ -334,7 +338,7 @@
 }
 
 :where(.dark, .dark *) .fi-btn-color-gray:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: rgba(255, 255, 255, 0.09) !important;
 }
 
 /* ============================================================
@@ -352,14 +356,19 @@
 }
 
 :where(.dark, .dark *) .fi-input {
-    background-color: rgba(255, 255, 255, 0.05) !important;
+    background-color: #1a1a1a !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
-    color: #e2e8f0 !important;
+    color: #e4e4e7 !important;
 }
 
 .fi-input:focus {
     border-color: #7c3aed !important;
     box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12) !important;
+}
+
+:where(.dark, .dark *) .fi-input:focus {
+    border-color: #7c3aed !important;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2) !important;
 }
 
 .fi-input-wrp {
@@ -374,7 +383,7 @@
 }
 
 :where(.dark, .dark *) .fi-fo-field-wrp-label {
-    color: #94a3b8 !important;
+    color: #71717a !important;
 }
 
 .fi-fo-field-wrp-helper-text {
@@ -382,7 +391,6 @@
     color: #94a3b8 !important;
 }
 
-/* Select */
 .fi-select-input {
     border-radius: 0.625rem !important;
     border-color: #e2e8f0 !important;
@@ -406,7 +414,7 @@
 }
 
 /* ============================================================
-   STATS / WIDGET OVERVIEW
+   STATS WIDGET
    ============================================================ */
 
 .fi-wi-stats-overview-stat {
@@ -424,13 +432,14 @@
 }
 
 :where(.dark, .dark *) .fi-wi-stats-overview-stat {
-    background-color: #1e293b !important;
+    background-color: #1a1a1a !important;
     border-color: rgba(255, 255, 255, 0.07) !important;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+    box-shadow: none !important;
 }
 
 :where(.dark, .dark *) .fi-wi-stats-overview-stat:hover {
-    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.5) !important;
+    transform: translateY(-2px);
 }
 
 .fi-wi-stats-overview-stat-label {
@@ -441,7 +450,7 @@
 }
 
 :where(.dark, .dark *) .fi-wi-stats-overview-stat-label {
-    color: #64748b !important;
+    color: #52525b !important;
 }
 
 .fi-wi-stats-overview-stat-value {
@@ -452,11 +461,11 @@
 }
 
 :where(.dark, .dark *) .fi-wi-stats-overview-stat-value {
-    color: #f1f5f9 !important;
+    color: #f5f5f5 !important;
 }
 
 /* ============================================================
-   WIDGET CHARTS
+   CHART WIDGETS
    ============================================================ */
 
 .fi-wi-chart {
@@ -467,8 +476,9 @@
 }
 
 :where(.dark, .dark *) .fi-wi-chart {
-    background-color: #1e293b !important;
+    background-color: #1a1a1a !important;
     border-color: rgba(255, 255, 255, 0.07) !important;
+    box-shadow: none !important;
 }
 
 /* ============================================================
@@ -482,9 +492,9 @@
 }
 
 :where(.dark, .dark *) .fi-modal-window {
-    background-color: #1e293b !important;
+    background-color: #1a1a1a !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.7) !important;
 }
 
 .fi-modal-header {
@@ -504,7 +514,7 @@
 }
 
 :where(.dark, .dark *) .fi-modal-heading {
-    color: #f1f5f9 !important;
+    color: #f5f5f5 !important;
 }
 
 .fi-modal-content {
@@ -532,9 +542,9 @@
 }
 
 :where(.dark, .dark *) .fi-dropdown-list {
-    background-color: #1e293b !important;
+    background-color: #1a1a1a !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.6) !important;
 }
 
 .fi-dropdown-list-item-btn {
@@ -606,7 +616,7 @@
 }
 
 :where(.dark, .dark *) .fi-breadcrumbs-item:last-child .fi-breadcrumbs-item-label {
-    color: #e2e8f0 !important;
+    color: #e4e4e7 !important;
 }
 
 /* ============================================================
@@ -620,7 +630,7 @@
 }
 
 :where(.dark, .dark *) .fi-no-notification {
-    background-color: #1e293b !important;
+    background-color: #1a1a1a !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
@@ -629,48 +639,42 @@
    ============================================================ */
 
 .fi-simple-layout {
-    background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #f0f9ff 100%) !important;
+    background-color: #f1f5f9 !important;
 }
 
 :where(.dark, .dark *) .fi-simple-layout {
-    background: linear-gradient(135deg, #0a0f1e 0%, #0f172a 50%, #1a0a2e 100%) !important;
+    background-color: #0a0a0a !important;
 }
 
+/* Card di Filament v5 = .fi-simple-main */
 .fi-simple-main {
-    width: 100%;
-    max-width: 26rem;
-}
-
-.fi-simple-page {
-    border-radius: 1.25rem !important;
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
-    background-color: rgba(255, 255, 255, 0.85) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.15) !important;
+    background-color: #ffffff !important;
+    border-radius: 1rem !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 4px 16px -4px rgba(0, 0, 0, 0.08) !important;
     padding: 2.5rem !important;
 }
 
-:where(.dark, .dark *) .fi-simple-page {
-    background-color: rgba(30, 41, 59, 0.85) !important;
+:where(.dark, .dark *) .fi-simple-main {
+    background-color: #1a1a1a !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
-    box-shadow: 0 20px 60px -12px rgba(0, 0, 0, 0.6) !important;
+    box-shadow: none !important;
 }
 
 .fi-simple-header-heading {
-    font-size: 1.5rem !important;
+    font-size: 1.375rem !important;
     font-weight: 700 !important;
-    letter-spacing: -0.03em !important;
+    letter-spacing: -0.025em !important;
     color: #0f172a !important;
 }
 
 :where(.dark, .dark *) .fi-simple-header-heading {
-    color: #f1f5f9 !important;
+    color: #f5f5f5 !important;
 }
 
 .fi-simple-header-subheading {
     color: #64748b !important;
-    font-size: 0.9375rem !important;
+    font-size: 0.875rem !important;
 }
 
 /* ============================================================
@@ -700,11 +704,11 @@
 }
 
 :where(.dark, .dark *) .fi-avatar {
-    box-shadow: 0 0 0 2px rgba(30, 41, 59, 0.8) !important;
+    box-shadow: 0 0 0 2px rgba(30, 30, 30, 0.8) !important;
 }
 
 /* ============================================================
-   SCROLLBAR (subtle, modern)
+   SCROLLBAR
    ============================================================ */
 
 .fi-sidebar-nav::-webkit-scrollbar {
@@ -721,7 +725,7 @@
 }
 
 :where(.dark, .dark *) .fi-sidebar-nav::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
 /* ============================================================
@@ -757,10 +761,328 @@
 }
 
 :where(.dark, .dark *) .fi-empty-state-heading {
-    color: #e2e8f0 !important;
+    color: #e4e4e7 !important;
 }
 
 .fi-empty-state-description {
     font-size: 0.875rem !important;
     color: #64748b !important;
+}
+
+/* ============================================================
+   COMPACT SCALE — tighten spacing & font sizes
+   ============================================================ */
+
+/* Topbar */
+.fi-topbar {
+    min-height: 2.875rem !important;
+}
+
+/* Sidebar narrower */
+.fi-sidebar {
+    width: 13.5rem !important;
+}
+
+.fi-sidebar-nav {
+    padding: 0.625rem 0.5rem !important;
+}
+
+.fi-sidebar-group-label {
+    font-size: 0.5625rem !important;
+    padding-left: 0.375rem !important;
+}
+
+.fi-sidebar-item-btn {
+    padding: 0.3125rem 0.4375rem !important;
+}
+
+.fi-sidebar-item-label {
+    font-size: 0.75rem !important;
+}
+
+/* Page header */
+.fi-header-heading {
+    font-size: 1rem !important;
+}
+
+.fi-header-subheading {
+    font-size: 0.75rem !important;
+}
+
+.fi-main {
+    padding: 1rem !important;
+}
+
+/* Stats widget compact */
+.fi-wi-stats-overview-stat {
+    padding: 0.875rem !important;
+}
+
+.fi-wi-stats-overview-stat-value {
+    font-size: 1.25rem !important;
+}
+
+.fi-wi-stats-overview-stat-label {
+    font-size: 0.6875rem !important;
+}
+
+/* Section / card compact */
+.fi-section-header {
+    padding: 0.75rem 1rem !important;
+}
+
+.fi-section-header-heading {
+    font-size: 0.8125rem !important;
+}
+
+.fi-section-content {
+    padding: 1rem !important;
+}
+
+/* Table compact — simetris header & cell */
+.fi-ta-header-cell {
+    padding: 0.3rem 0.625rem !important;
+    font-size: 0.5625rem !important;
+    letter-spacing: 0.06em !important;
+}
+
+/* fi-ta-cell sendiri p-0, padding asli ada di fi-ta-text (inner wrapper) */
+.fi-ta-cell {
+    padding: 0 !important;
+    font-size: 0.65rem !important;
+}
+
+.fi-ta-text:not(.fi-inline) {
+    padding: 0.5rem 0.625rem !important;
+}
+
+/* Action cell — kasih ruang & jangan terpotong */
+.fi-ta-cell:has(.fi-ta-actions) {
+    padding: 0.4rem 0.75rem !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+}
+
+.fi-ta-text,
+.fi-ta-cell * {
+    font-size: 0.65rem !important;
+}
+
+.fi-badge {
+    font-size: 0.55rem !important;
+    padding: 0.15rem 0.4rem !important;
+}
+
+.fi-ta-actions {
+    gap: 0.25rem !important;
+}
+
+.fi-ta-actions .fi-btn {
+    font-size: 0.6rem !important;
+    padding: 0.2rem 0.4rem !important;
+}
+
+/* ============================================================
+   PAGINATION — redesign
+   ============================================================ */
+
+.fi-pagination {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0.5rem 0.75rem !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+    gap: 0.5rem !important;
+}
+
+:where(.dark, .dark *) .fi-pagination {
+    border-top-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Overview text "X–Y of Z" */
+.fi-pagination-overview {
+    font-size: 0.6875rem !important;
+    color: #94a3b8 !important;
+}
+
+:where(.dark, .dark *) .fi-pagination-overview {
+    color: #52525b !important;
+}
+
+/* Records per page label */
+.fi-pagination-records-per-page-select {
+    font-size: 0.6875rem !important;
+    color: #64748b !important;
+}
+
+/* Page number items */
+.fi-pagination-items {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.125rem !important;
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.fi-pagination-item-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 1.375rem !important;
+    height: 1.375rem !important;
+    border-radius: 0.3rem !important;
+    font-size: 0.6rem !important;
+    font-weight: 500 !important;
+    color: #64748b !important;
+    background: transparent !important;
+    border: none !important;
+    transition: background 0.15s ease, color 0.15s ease !important;
+}
+
+.fi-pagination-item-label {
+    font-size: 0.6rem !important;
+}
+
+.fi-pagination-item-icon {
+    width: 0.75rem !important;
+    height: 0.75rem !important;
+}
+
+.fi-pagination-item-btn:hover {
+    background: #f1f5f9 !important;
+}
+
+.fi-pagination-item-btn:hover .fi-pagination-item-label,
+.fi-pagination-item-btn:hover .fi-pagination-item-icon {
+    color: #0f172a !important;
+}
+
+:where(.dark, .dark *) .fi-pagination-item-btn .fi-pagination-item-label,
+:where(.dark, .dark *) .fi-pagination-item-btn .fi-pagination-item-icon {
+    color: #52525b !important;
+}
+
+:where(.dark, .dark *) .fi-pagination-item-btn:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
+:where(.dark, .dark *) .fi-pagination-item-btn:hover .fi-pagination-item-label,
+:where(.dark, .dark *) .fi-pagination-item-btn:hover .fi-pagination-item-icon {
+    color: #e4e4e7 !important;
+}
+
+/* Active page */
+.fi-active .fi-pagination-item-btn {
+    background: #6d28d9 !important;
+}
+
+.fi-active .fi-pagination-item-btn .fi-pagination-item-label,
+.fi-active .fi-pagination-item-btn .fi-pagination-item-icon {
+    color: #ffffff !important;
+}
+
+:where(.dark, .dark *) .fi-active .fi-pagination-item-btn {
+    background: #7c3aed !important;
+}
+
+:where(.dark, .dark *) .fi-active .fi-pagination-item-btn .fi-pagination-item-label,
+:where(.dark, .dark *) .fi-active .fi-pagination-item-btn .fi-pagination-item-icon {
+    color: #ffffff !important;
+}
+
+/* Sembunyikan text-based prev/next — pakai icon di pagination-items */
+.fi-pagination-previous-btn,
+.fi-pagination-next-btn {
+    display: none !important;
+}
+
+/* Per page selector — compact */
+.fi-pagination-records-per-page-select-ctn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.375rem !important;
+}
+
+.fi-pagination-records-per-page-select.fi-compact {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+    font-size: 0.6875rem !important;
+    color: #94a3b8 !important;
+}
+
+.fi-pagination-records-per-page-select.fi-compact::before {
+    content: 'Per page';
+    font-size: 0.6875rem !important;
+    color: #94a3b8 !important;
+    white-space: nowrap;
+}
+
+.fi-pagination-records-per-page-select.fi-compact .fi-input-wrp {
+    border-radius: 0.375rem !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+    min-height: unset !important;
+    box-shadow: none !important;
+}
+
+:where(.dark, .dark *) .fi-pagination-records-per-page-select.fi-compact .fi-input-wrp {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.fi-pagination-records-per-page-select.fi-compact .fi-select-input {
+    font-size: 0.6875rem !important;
+    padding: 0.2rem 1.25rem 0.2rem 0.4rem !important;
+    border: none !important;
+    background: transparent !important;
+    color: #374151 !important;
+    cursor: pointer !important;
+}
+
+:where(.dark, .dark *) .fi-pagination-records-per-page-select.fi-compact .fi-select-input {
+    color: #a1a1aa !important;
+}
+
+/* Sembunyikan label "Per page" yang full (non-compact), karena kita handle sendiri */
+.fi-pagination-records-per-page-select:not(.fi-compact) {
+    display: none !important;
+}
+
+/* Buttons compact */
+.fi-btn {
+    font-size: 0.75rem !important;
+}
+
+.fi-btn-size-md {
+    padding-top: 0.375rem !important;
+    padding-bottom: 0.375rem !important;
+}
+
+/* Form inputs compact */
+.fi-input {
+    font-size: 0.75rem !important;
+}
+
+.fi-fo-field-wrp-label {
+    font-size: 0.6875rem !important;
+}
+
+/* Modal compact */
+.fi-modal-header {
+    padding: 0.875rem 1.125rem !important;
+}
+
+.fi-modal-content {
+    padding: 1.125rem !important;
+}
+
+.fi-modal-footer {
+    padding: 0.75rem 1.125rem !important;
+}
+
+.fi-modal-heading {
+    font-size: 0.875rem !important;
 }

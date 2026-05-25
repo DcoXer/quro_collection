@@ -14,6 +14,7 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\OtpController;
+use App\Http\Controllers\ResiController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -66,8 +67,8 @@ Route::post('/webhook/midtrans', [MidtransController::class, 'webhook'])->middle
 Route::get('/checkout/payment/{invoice}', [CheckoutController::class, 'payment'])->name('checkout.payment');
 
 // Admin routes
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    // Admin dashboard, product management, order management, voucher management, etc
+Route::middleware(['auth:admin'])->group(function () {
+    Route::get('/admin/resi/{order}/download', [ResiController::class, 'download'])->name('admin.resi.download');
 });
 
 // Auth required for user dashboard, cart, checkout, orders, etc
@@ -96,6 +97,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders/{invoice}', [OrderController::class, 'show'])->name('orders.show');
     Route::delete('/orders/{invoice}', [OrderController::class, 'destroy'])->name('orders.destroy');
     Route::get('/orders/{invoice}/track', [OrderController::class, 'track'])->name('orders.track');
+    Route::post('/orders/{invoice}/confirm', [OrderController::class, 'confirm'])->name('orders.confirm');
     Route::post('/orders/{invoice}/check-payment', [MidtransController::class, 'checkPayment'])->middleware('throttle:6,1')->name('orders.check-payment');
 
     // Voucher

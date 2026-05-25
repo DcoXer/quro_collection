@@ -22,6 +22,10 @@ class FlashSaleResource extends Resource
 
     protected static ?string $navigationLabel = 'Flash Sale';
 
+    protected static \UnitEnum|string|null $navigationGroup = 'Lainnya';
+
+    protected static ?int $navigationSort = 11;
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema

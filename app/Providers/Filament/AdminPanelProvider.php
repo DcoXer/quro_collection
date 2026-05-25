@@ -2,11 +2,13 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
+use Filament\Navigation\NavigationGroup;
+use App\Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -28,9 +30,9 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->brandName('Quro Collection')
-            ->brandLogo('/images/logo.png')
-            ->brandLogoHeight('2rem')
+            ->brandLogo(fn () => view('filament.brand'))
             ->login()
+            ->defaultThemeMode(ThemeMode::Dark)
             ->colors([
                 'primary' => Color::Violet,
                 'secondary' => Color::Slate,
@@ -38,6 +40,11 @@ class AdminPanelProvider extends PanelProvider
                 'info' => Color::Blue,
                 'warning' => Color::Amber,
                 'danger' => Color::Rose,
+            ])
+            ->navigationGroups([
+                NavigationGroup::make('Utama'),
+                NavigationGroup::make('Lainnya'),
+                NavigationGroup::make('Pengaturan'),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

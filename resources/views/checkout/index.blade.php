@@ -102,7 +102,7 @@
                         <input type="hidden" name="shipping_cost" id="shipping-cost" value="0">
 
                         <div id="ongkir-result" class="hidden">
-                            <p class="checkout-label mb-3">Layanan Pengiriman</p>
+                            <p class="checkout-label mb-3">Estimasi Biaya Pengiriman</p>
                             <div id="ongkir-list" class="space-y-2"></div>
                         </div>
 

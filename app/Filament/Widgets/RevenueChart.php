@@ -4,37 +4,43 @@ namespace App\Filament\Widgets;
 
 use App\Models\Order;
 use Filament\Widgets\ChartWidget;
-use Illuminate\Support\Carbon;
 
 class RevenueChart extends ChartWidget
 {
-    protected ?string $heading = 'Revenue 6 Bulan Terakhir';
-    protected static ?int $sort = 2;
-    protected ?string $maxHeight = '280px';
+    protected ?string $heading = 'Revenue Bulanan';
+    protected static ?int $sort = 3;
+    protected ?string $maxHeight = '180px';
 
     protected function getData(): array
     {
         $months  = [];
         $revenue = [];
 
-        for ($i = 5; $i >= 0; $i--) {
+        for ($i = 11; $i >= 0; $i--) {
             $date      = now()->subMonths($i);
-            $months[]  = $date->translatedFormat('M Y');
-            $revenue[] = Order::whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])
+            $months[]  = $date->translatedFormat('M');
+            $amount    = Order::whereIn('status', ['paid', 'processing', 'shipped', 'delivered'])
                 ->whereYear('created_at', $date->year)
                 ->whereMonth('created_at', $date->month)
-                ->sum('total_amount') / 1000; // dalam ribu rupiah
+                ->sum('total_amount') / 1000000;
+            $revenue[] = round($amount, 2);
         }
 
         return [
             'datasets' => [
                 [
-                    'label'           => 'Revenue (Rp ribu)',
-                    'data'            => $revenue,
-                    'borderColor'     => '#111827',
-                    'backgroundColor' => 'rgba(17, 24, 39, 0.08)',
-                    'fill'            => true,
-                    'tension'         => 0.4,
+                    'label'                => 'Revenue (Rp juta)',
+                    'data'                 => $revenue,
+                    'borderColor'          => 'rgb(109, 40, 217)',
+                    'backgroundColor'      => 'rgba(109, 40, 217, 0.08)',
+                    'borderWidth'          => 2,
+                    'fill'                 => true,
+                    'tension'              => 0.45,
+                    'pointRadius'          => 3,
+                    'pointHoverRadius'     => 5,
+                    'pointBackgroundColor' => 'rgb(109, 40, 217)',
+                    'pointBorderColor'     => '#fff',
+                    'pointBorderWidth'     => 1.5,
                 ],
             ],
             'labels' => $months,
@@ -44,5 +50,25 @@ class RevenueChart extends ChartWidget
     protected function getType(): string
     {
         return 'line';
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'plugins' => [
+                'legend' => ['display' => false],
+            ],
+            'scales' => [
+                'x' => [
+                    'grid'  => ['display' => false],
+                    'ticks' => ['color' => 'rgba(100,116,139,0.7)', 'font' => ['size' => 11]],
+                ],
+                'y' => [
+                    'grid'        => ['color' => 'rgba(100,116,139,0.08)'],
+                    'ticks'       => ['color' => 'rgba(100,116,139,0.7)', 'font' => ['size' => 11]],
+                    'beginAtZero' => true,
+                ],
+            ],
+        ];
     }
 }
