@@ -5,6 +5,7 @@
 .env.production
 .phpactor.json
 .phpunit.result.cache
+.claude
 tunnel.ps1
 /.fleet
 /.idea
