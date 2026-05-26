@@ -42,7 +42,7 @@ class GoogleAuthController extends Controller
             }
 
             // Pastikan Google user selalu terverifikasi
-            if (!$user->email_verified_at) {
+            if (!$user->email_verified_at || !$user->is_verified) {
                 $user->update(['email_verified_at' => now(), 'is_verified' => true]);
             }
 

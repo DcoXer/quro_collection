@@ -7,6 +7,7 @@ use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\FonnteService;
 use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +25,10 @@ class MidtransController extends Controller
         'cancelled'  => [],
     ];
 
-    public function __construct(private MidtransService $midtransService) {}
+    public function __construct(
+        private MidtransService $midtransService,
+        private FonnteService $fonnteService,
+    ) {}
 
     public function webhook(Request $request)
     {
@@ -128,6 +132,15 @@ class MidtransController extends Controller
                 // Kirim email ke customer
                 Mail::to($order->user->email)
                     ->queue(new OrderStatusMail($order, $order->getOriginal('status')));
+            }
+
+            // Notifikasi WhatsApp ke admin jika pembayaran dikonfirmasi
+            if ($newStatus === 'processing') {
+                $this->fonnteService->notifyAdminNewOrder(
+                    $order->invoice_number,
+                    $order->user->name,
+                    $order->total_amount,
+                );
             }
         });
 
@@ -243,6 +256,15 @@ class MidtransController extends Controller
 
                 Mail::to($order->user->email)
                     ->queue(new OrderStatusMail($order, $order->getOriginal('status')));
+            }
+
+            // Notifikasi WhatsApp ke admin jika pembayaran dikonfirmasi
+            if ($newStatus === 'processing') {
+                $this->fonnteService->notifyAdminNewOrder(
+                    $order->invoice_number,
+                    $order->user->name,
+                    $order->total_amount,
+                );
             }
         });
 

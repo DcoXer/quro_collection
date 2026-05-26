@@ -66,6 +66,14 @@
                             </span>
                         </div>
                     @endforeach
+                    @if($order->shipping_cost > 0)
+                        <div class="border-t border-gray-200 pt-2 mt-2 flex justify-between text-sm">
+                            <span class="text-gray-400">Ongkos Kirim</span>
+                            <span class="font-medium text-gray-900">
+                                Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}
+                            </span>
+                        </div>
+                    @endif
                 </div>
             </div>
 

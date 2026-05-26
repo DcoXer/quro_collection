@@ -150,7 +150,7 @@
 
                     {{-- Mobile: Submit --}}
                     <div class="lg:hidden space-y-3">
-                        <button type="submit" class="btn-primary">
+                        <button id="submit-btn-mobile" type="submit" class="btn-primary" disabled>
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -224,7 +224,7 @@
 
                     {{-- Desktop: Submit --}}
                     <div class="hidden lg:block space-y-3">
-                        <button type="submit" form="checkout-form" class="btn-primary">
+                        <button id="submit-btn-desktop" type="submit" form="checkout-form" class="btn-primary" disabled>
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>

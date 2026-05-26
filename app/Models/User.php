@@ -19,6 +19,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         'email',
         'password',
         'google_id',
+        'email_verified_at',
         'otp_code',
         'otp_expires_at',
         'is_verified',

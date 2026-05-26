@@ -31,6 +31,7 @@ function resetCourier() {
     if (costEl) costEl.value = 0;
     document.getElementById('ongkir-row')?.classList.add('hidden');
     document.getElementById('final-total').textContent = 'Rp ' + baseTotal.toLocaleString('id-ID');
+    checkFormReady();
 }
 
 // ─── Load Provinsi ───────────────────────────────────────────────────────────
@@ -222,6 +223,7 @@ async function loadOngkir(villageCode) {
             <span style="font-size:14px;font-weight:600;color:#111827;">Rp ${shippingCost.toLocaleString('id-ID')}</span>
         </div>
     `;
+    checkFormReady();
 }
 
 // ─── Voucher ─────────────────────────────────────────────────────────────────
@@ -292,5 +294,122 @@ window.removeVoucher = async function () {
     updateTotalDisplay();
 };
 
+// ─── Form Readiness (disable button until complete) ──────────────────────────
+const submitBtns = () => document.querySelectorAll('#submit-btn-mobile, #submit-btn-desktop');
+
+function getHint() {
+    const val = id => document.getElementById(id)?.value ?? '';
+    const txt = name => document.querySelector(`[name="${name}"]`)?.value.trim() ?? '';
+
+    if (!txt('shipping_name'))    return 'Nama penerima belum diisi';
+    if (!txt('shipping_phone'))   return 'Nomor HP belum diisi';
+    if (!val('select-provinsi'))  return 'Pilih provinsi pengiriman';
+    if (!val('select-kabupaten')) return 'Pilih kabupaten / kota';
+    if (!val('select-kecamatan')) return 'Pilih kecamatan';
+    if (!val('select-kelurahan')) return 'Pilih kelurahan';
+    if (!txt('shipping_address')) return 'Alamat lengkap belum diisi';
+    if (shippingCost === 0)       return 'Menunggu estimasi ongkos kirim...';
+    return null;
+}
+
+function checkFormReady() {
+    const hint  = getHint();
+    const ready = hint === null;
+
+    submitBtns().forEach(btn => {
+        btn.disabled       = !ready;
+        btn.style.opacity  = ready ? '' : '0.6';
+        btn.style.cursor   = ready ? '' : 'not-allowed';
+
+        let hintEl = btn.parentNode.querySelector('.btn-hint');
+        if (!hintEl) {
+            hintEl = document.createElement('p');
+            hintEl.className = 'btn-hint text-xs text-gray-400 text-center mt-1';
+            btn.insertAdjacentElement('afterend', hintEl);
+        }
+        hintEl.textContent = hint ?? '';
+        hintEl.style.display = ready ? 'none' : '';
+    });
+}
+
+// ─── Client-side Validation ──────────────────────────────────────────────────
+function showFieldError(field, message) {
+    clearFieldError(field);
+    const err = document.createElement('p');
+    err.className = 'checkout-field-error text-red-500 text-xs mt-1.5';
+    err.textContent = message;
+    field.parentNode.appendChild(err);
+    field.classList.add('border-red-400');
+}
+
+function clearFieldError(field) {
+    field.parentNode.querySelector('.checkout-field-error')?.remove();
+    field.classList.remove('border-red-400');
+}
+
+function validateCheckout() {
+    let firstError = null;
+
+    const fields = [
+        { el: document.querySelector('[name="shipping_name"]'),    label: 'Nama penerima wajib diisi' },
+        { el: document.querySelector('[name="shipping_phone"]'),   label: 'Nomor HP wajib diisi' },
+        { el: document.getElementById('select-provinsi'),          label: 'Pilih provinsi' },
+        { el: document.getElementById('select-kabupaten'),         label: 'Pilih kabupaten/kota' },
+        { el: document.getElementById('select-kecamatan'),         label: 'Pilih kecamatan' },
+        { el: document.getElementById('select-kelurahan'),         label: 'Pilih kelurahan' },
+        { el: document.querySelector('[name="shipping_address"]'), label: 'Alamat lengkap wajib diisi' },
+    ];
+
+    fields.forEach(({ el, label }) => {
+        if (!el) return;
+        if (!el.value.trim()) {
+            showFieldError(el, label);
+            if (!firstError) firstError = el;
+        } else {
+            clearFieldError(el);
+        }
+    });
+
+    if (shippingCost === 0) {
+        const placeholder = document.getElementById('ongkir-placeholder');
+        if (placeholder) {
+            placeholder.classList.remove('hidden');
+            placeholder.textContent = 'Lengkapi alamat hingga kelurahan untuk melihat estimasi ongkir.';
+            placeholder.classList.add('text-red-400');
+        }
+        if (!firstError) firstError = document.getElementById('select-kelurahan');
+    }
+
+    if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+    }
+
+    return true;
+}
+
+// Auto-clear error + recheck readiness saat user mulai benerin
+document.querySelectorAll('[name="shipping_name"], [name="shipping_phone"], [name="shipping_address"]')
+    .forEach(el => el.addEventListener('input', () => { clearFieldError(el); checkFormReady(); }));
+
+['select-provinsi', 'select-kabupaten', 'select-kecamatan', 'select-kelurahan'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', function () {
+        clearFieldError(this);
+        const placeholder = document.getElementById('ongkir-placeholder');
+        if (placeholder) {
+            placeholder.classList.remove('text-red-400');
+            placeholder.textContent = 'Lengkapi alamat hingga kelurahan untuk melihat estimasi ongkir.';
+        }
+        checkFormReady();
+    });
+});
+
+document.getElementById('checkout-form').addEventListener('submit', function (e) {
+    if (!validateCheckout()) {
+        e.preventDefault();
+    }
+});
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
+checkFormReady();
 loadProvinsi();

@@ -68,4 +68,9 @@ return [
         'shipper_address'  => env('BITESHIP_SHIPPER_ADDRESS'),
         'shipper_area_id'  => env('BITESHIP_SHIPPER_AREA_ID'),
     ],
+
+    'fonnte' => [
+        'token'       => env('FONNTE_TOKEN'),
+        'admin_phone' => env('FONNTE_ADMIN_PHONE'),
+    ],
 ];
