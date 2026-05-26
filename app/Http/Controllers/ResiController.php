@@ -11,6 +11,9 @@ class ResiController extends Controller
 {
     public function download(Order $order): Response
     {
+        // Double-check: hanya user yang login via admin guard yang boleh akses
+        abort_unless(auth('admin')->check(), 403);
+
         $order->load(['items.product', 'user']);
 
         $sender = [

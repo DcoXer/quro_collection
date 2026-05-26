@@ -21,7 +21,13 @@
       "Bash(xargs cat:*)",
       "Bash(php -r \"require 'C:/laragon/www/qurocollection/vendor/autoload.php';\")",
       "Bash(xargs ls:*)",
-      "Bash(composer require:*)"
+      "Bash(composer require:*)",
+      "Bash(grep -n \"SESSION_DRIVER\\\\|session\\(\\)\" C:/laragon/www/qurocollection/.env*)",
+      "Bash(xargs basename:*)",
+      "Bash(grep -A 20 \"createTable\\\\|index\\\\|unique\" /c/laragon/www/qurocollection/database/migrations/*.php)",
+      "Bash(grep -n \"payment_token\\\\|->toJson\\\\|->get\\(\\)\\\\|->pluck\" /c/laragon/www/qurocollection/app/Http/Controllers/*.php)",
+      "Bash(grep:*)",
+      "Bash(find:*)"
     ]
   }
 }

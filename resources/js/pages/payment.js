@@ -4,7 +4,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     btn.onclick = function () {
         snap.pay(btn.dataset.token, {
-            onSuccess: function () {
+            onSuccess: async function () {
+                // Panggil checkPayment dulu biar status langsung update,
+                // tidak perlu nunggu webhook dari Midtrans
+                try {
+                    await fetch(btn.dataset.checkUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        },
+                    });
+                } catch (e) {
+                    // Tetap redirect meski gagal — webhook akan jalan belakangan
+                }
                 window.location.href = btn.dataset.successUrl;
             },
             onPending: function () {

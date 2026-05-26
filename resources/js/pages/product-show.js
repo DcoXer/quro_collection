@@ -55,6 +55,16 @@ window.changePageQty = function (delta) {
 };
 
 // ─── Add to Cart (Page) ───────────────────────────────────────
+function pageSetBtnLoading(loading) {
+    const btn     = document.getElementById('page-add-btn');
+    const spinner = document.getElementById('page-btn-spinner');
+    const text    = document.getElementById('page-btn-text');
+    if (!btn) return;
+    btn.disabled = loading;
+    spinner?.classList.toggle('hidden', !loading);
+    if (text) text.textContent = loading ? 'Menambahkan...' : 'Tambah ke Keranjang';
+}
+
 window.addToCartPage = async function () {
     const size = document.getElementById('page-selected-size').value;
     if (!size) {
@@ -64,17 +74,29 @@ window.addToCartPage = async function () {
         setTimeout(() => sizeWrap?.classList.remove('ring-2', 'ring-red-300', 'rounded-lg', 'p-1'), 1500);
         return;
     }
+
+    pageSetBtnLoading(true);
+
+    // Tunggu 2 frame biar browser sempat render spinner sebelum fetch dimulai
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
     const formData = new FormData(document.getElementById('page-cart-form'));
-    const res = await guardedFetch(cartUrl, {
-        method: 'POST',
-        headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
-        body: formData,
-    });
-    if (!res) return;
+    const [res] = await Promise.all([
+        guardedFetch(cartUrl, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+            body: formData,
+        }),
+        new Promise(r => setTimeout(r, 400)), // minimum 400ms loading biar keliatan
+    ]);
+
+    if (!res) { pageSetBtnLoading(false); return; }
+
     if (res.ok) {
         showToast('Produk ditambahkan ke keranjang', 'success');
         window.location.href = '/checkout';
     } else {
+        pageSetBtnLoading(false);
         showToast('Gagal menambahkan ke keranjang', 'error');
     }
 };

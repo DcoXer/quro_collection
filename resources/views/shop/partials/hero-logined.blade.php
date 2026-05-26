@@ -176,7 +176,7 @@
                     </div>
                     <div class="min-w-0 flex-1">
                         <p class="text-xs font-medium text-gray-800 leading-tight">Terakhir Dilihat</p>
-                        <p class="text-[11px] text-gray-400 leading-tight">{{ $recentCount }} produk</p>
+                        <p class="recent-viewed-count text-[11px] text-gray-400 leading-tight">{{ $recentCount }} produk</p>
                     </div>
                 </a>
 

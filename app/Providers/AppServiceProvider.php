@@ -50,6 +50,11 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinutes(10, 5)->by($request->user()?->id ?: $request->ip());
         });
 
+        // Wishlist toggle: 30x per menit per user — cegah spam toggle
+        RateLimiter::for('wishlist', function (Request $request) {
+            return Limit::perMinute(30)->by($request->user()?->id ?: $request->ip());
+        });
+
         // Midtrans webhook: 60x per menit per IP
         RateLimiter::for('midtrans-webhook', function (Request $request) {
             return Limit::perMinute(60)->by($request->ip());

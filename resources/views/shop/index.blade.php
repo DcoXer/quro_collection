@@ -1,8 +1,9 @@
 <x-app-layout>
     @push('seo')
-    <title>Shop — Quro Collection</title>
+    <title>Belanja — Quro Collection</title>
     <meta name="description" content="Koleksi baju koko premium dengan desain modern dan bahan berkualitas tinggi.">
-    <meta property="og:title" content="Shop — Quro Collection">
+    <link rel="canonical" href="{{ route('shop.index') }}">
+    <meta property="og:title" content="Belanja — Quro Collection">
     <meta property="og:description" content="Koleksi baju koko premium dengan desain modern dan bahan berkualitas tinggi.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ route('shop.index') }}">
@@ -122,7 +123,7 @@
                 {{-- NEW ARRIVAL --}}
                 <div class="flex items-center gap-2 mb-7">
                     <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
-                    <span class="text-[11px] tracking-[0.2em] uppercase text-white font-medium">New Arrival Quro Collection</span>
+                    <span class="text-[11px] tracking-[0.2em] uppercase text-white font-medium">Koleksi Terbaru Quro Collection</span>
                 </div>
 
                 {{-- Headline: desktop only --}}
@@ -190,7 +191,7 @@
                 {{-- "Featured ♦" pill top-right --}}
                 <div class="absolute top-4 right-4 z-20">
                     <span class="inline-flex items-center gap-1.5 bg-white border border-gray-200 text-gray-800 text-[11px] font-medium px-4 py-2 rounded-full">
-                        Featured ♦
+                        Unggulan ♦
                     </span>
                 </div>
 
@@ -317,6 +318,87 @@
 
     {{-- Products --}}
     <section class="max-w-6xl mx-auto px-6 pb-20 pt-4">
+
+        {{-- Toolbar: total produk + sort --}}
+        <div class="flex items-center justify-between mb-6">
+            <p class="text-sm text-gray-400">
+                <span class="font-medium text-gray-900">{{ $products->total() }}</span> produk
+                @if(request('search'))
+                    untuk "<span class="font-medium text-gray-900">{{ request('search') }}</span>"
+                @endif
+            </p>
+
+            {{-- Hidden form yang di-submit secara programatik --}}
+            <form id="sort-form" method="GET" action="{{ route('shop.index') }}">
+                @if(request('search'))
+                    <input type="hidden" name="search" value="{{ request('search') }}">
+                @endif
+                @if(request('category'))
+                    <input type="hidden" name="category" value="{{ request('category') }}">
+                @endif
+                <input type="hidden" name="sort" id="sort-input" value="{{ request('sort', 'terbaru') }}">
+            </form>
+
+            {{-- Custom dropdown --}}
+            <div x-data="{
+                    open: false,
+                    sort: '{{ request('sort', 'terbaru') }}',
+                    options: [
+                        { value: 'terbaru',    label: 'Terbaru' },
+                        { value: 'terpopuler', label: 'Terpopuler' },
+                        { value: 'harga-asc',  label: 'Harga Terendah' },
+                        { value: 'harga-desc', label: 'Harga Tertinggi' },
+                    ],
+                    get label() { return this.options.find(o => o.value === this.sort)?.label ?? 'Urutkan' },
+                    pick(val) {
+                        this.sort = val; this.open = false;
+                        document.getElementById('sort-input').value = val;
+                        document.getElementById('sort-form').submit();
+                    }
+                }"
+                @click.outside="open = false"
+                class="relative">
+
+                <button @click="open = !open"
+                    class="flex items-center gap-2 text-sm border border-gray-200 rounded-xl px-4 py-2.5 bg-white text-gray-700 hover:border-gray-400 transition-colors">
+                    {{-- sort icon --}}
+                    <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/>
+                    </svg>
+                    <span x-text="label" class="font-medium leading-none"></span>
+                    {{-- chevron --}}
+                    <svg class="w-3.5 h-3.5 text-gray-400 shrink-0 transition-transform duration-200"
+                        :class="open ? 'rotate-180' : ''"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+
+                <div x-show="open"
+                    x-transition:enter="transition ease-out duration-150"
+                    x-transition:enter-start="opacity-0 -translate-y-1 scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                    x-transition:leave="transition ease-in duration-100"
+                    x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                    x-transition:leave-end="opacity-0 -translate-y-1 scale-95"
+                    class="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl shadow-gray-200/70 py-1.5 z-30 origin-top-right">
+                    <template x-for="opt in options" :key="opt.value">
+                        <button @click="pick(opt.value)"
+                            class="w-full flex items-center justify-between px-4 py-2.5 text-sm rounded-xl transition-colors hover:bg-gray-50 mx-auto"
+                            style="width: calc(100% - 8px); margin-left: 4px;"
+                            :class="sort === opt.value ? 'text-gray-900 font-semibold' : 'text-gray-500 font-normal'">
+                            <span x-text="opt.label"></span>
+                            <svg x-show="sort === opt.value" class="w-3.5 h-3.5 text-gray-900 shrink-0"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </button>
+                    </template>
+                </div>
+            </div>
+        </div>
+
         <div id="product-grid">
             @include('shop.partials.product-grid', ['products' => $products])
         </div>
@@ -341,7 +423,7 @@
                         {{-- Image --}}
                         <div class="aspect-square bg-gray-50 rounded-xl overflow-hidden">
                             <img id="qv-image" src="" class="w-full h-full object-cover">
-                            <div id="qv-no-image" class="hidden w-full h-full flex items-center justify-center text-gray-300 text-sm">No Image</div>
+                            <div id="qv-no-image" class="hidden w-full h-full flex items-center justify-center text-gray-300 text-sm">Tidak ada gambar</div>
                         </div>
 
                         {{-- Detail --}}

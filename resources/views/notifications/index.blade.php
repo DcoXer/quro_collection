@@ -1,4 +1,10 @@
 <x-app-layout>
+
+@push('seo')
+<title>Notifikasi — Quro Collection</title>
+<meta name="robots" content="noindex, nofollow">
+@endpush
+
     <div class="max-w-xl mx-auto px-4 py-8 md:py-12">
 
         <a href="{{ url()->previous(route('home')) }}"
@@ -12,13 +18,15 @@
         <div class="mb-6">
             <p class="text-xs tracking-widest uppercase text-gray-400 mb-1">{{ auth()->user()->name }}</p>
             <h1 style="font-family: 'Playfair Display', serif;"
-                class="text-xl font-semibold text-gray-900">My Notifications</h1>
+                class="text-xl font-semibold text-gray-900">Notifikasi Saya</h1>
         </div>
 
         {{-- Banner: Pesanan Menunggu Pembayaran --}}
         @if($pendingOrders->isNotEmpty())
-            <div class="mb-6 space-y-3">
-                @foreach($pendingOrders as $pending)
+            <div class="mb-6">
+                @if($pendingOrders->count() === 1)
+                    {{-- Single pending order: tampil detail --}}
+                    @php $pending = $pendingOrders->first() @endphp
                     <a href="{{ route('checkout.payment', $pending->invoice_number) }}"
                         class="flex items-start gap-3 p-4 rounded-2xl border border-amber-200 bg-amber-50 hover:bg-amber-100 transition">
                         <div class="w-9 h-9 rounded-full bg-amber-400 flex items-center justify-center shrink-0">
@@ -42,7 +50,30 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
                     </a>
-                @endforeach
+                @else
+                    {{-- Multiple pending orders: tampil consolidated --}}
+                    <a href="{{ route('orders.index') }}"
+                        class="flex items-start gap-3 p-4 rounded-2xl border border-amber-200 bg-amber-50 hover:bg-amber-100 transition">
+                        <div class="w-9 h-9 rounded-full bg-amber-400 flex items-center justify-center shrink-0">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-amber-800">
+                                {{ $pendingOrders->count() }} Pesanan Menunggu Pembayaran
+                            </p>
+                            <p class="text-xs text-amber-700 mt-0.5">
+                                Segera selesaikan pembayaran sebelum kehabisan stok.
+                            </p>
+                            <p class="text-xs text-amber-600 mt-1 font-medium">Lihat semua pesanan →</p>
+                        </div>
+                        <svg class="w-4 h-4 text-amber-500 shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                @endif
             </div>
         @endif
 
@@ -144,9 +175,86 @@
                 @endforeach
             </div>
 
-            <div class="mt-6">
-                {{ $notifications->links() }}
+            <div class="mt-6 flex items-center justify-between gap-3 flex-wrap">
+                <p class="text-xs text-gray-400">
+                    <span class="font-medium text-gray-700">{{ $notifications->total() }}</span> notifikasi ·
+                    Halaman <span class="font-medium text-gray-700">{{ $notifications->currentPage() }}</span>
+                    dari <span class="font-medium text-gray-700">{{ $notifications->lastPage() }}</span>
+                </p>
+
+                <form id="notif-perpage-form" method="GET" action="{{ route('notifications.index') }}">
+                    <input type="hidden" name="per_page" id="notif-perpage-input" value="{{ $perPage }}">
+                </form>
+
+                <div x-data="{
+                        open: false,
+                        val: {{ $perPage }},
+                        options: [10, 25, 50],
+                        pick(n) { this.val = n; this.open = false; document.getElementById('notif-perpage-input').value = n; document.getElementById('notif-perpage-form').submit(); }
+                    }"
+                    @click.outside="open = false"
+                    class="relative">
+                    <button @click="open = !open"
+                        class="flex items-center gap-2 text-xs border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-600 hover:border-gray-400 transition-colors">
+                        <span x-text="val + ' per halaman'"></span>
+                        <svg class="w-3 h-3 text-gray-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div x-show="open"
+                        x-transition:enter="transition ease-out duration-150"
+                        x-transition:enter-start="opacity-0 -translate-y-1 scale-95"
+                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave="transition ease-in duration-100"
+                        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                        x-transition:leave-end="opacity-0 -translate-y-1 scale-95"
+                        class="absolute right-0 top-full mt-2 w-36 bg-white border border-gray-100 rounded-2xl shadow-xl shadow-gray-200/70 py-1.5 z-30 origin-top-right">
+                        <template x-for="n in options" :key="n">
+                            <button @click="pick(n)"
+                                class="w-full flex items-center justify-between px-4 py-2 text-xs transition-colors hover:bg-gray-50 rounded-xl mx-auto"
+                                style="width: calc(100% - 8px); margin-left: 4px;"
+                                :class="val === n ? 'text-gray-900 font-semibold' : 'text-gray-500'">
+                                <span x-text="n + ' per halaman'"></span>
+                                <svg x-show="val === n" class="w-3 h-3 text-gray-900 shrink-0"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </button>
+                        </template>
+                    </div>
+                </div>
             </div>
+
+            @if($notifications->hasPages())
+            <div class="mt-4 flex justify-center gap-1">
+                {{-- Prev --}}
+                @if($notifications->onFirstPage())
+                    <span class="px-3 py-2 text-sm text-gray-300 border border-gray-100 rounded-lg cursor-not-allowed">‹</span>
+                @else
+                    <a href="{{ $notifications->previousPageUrl() }}"
+                        class="px-3 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:border-gray-900 hover:text-gray-900 transition">‹</a>
+                @endif
+
+                {{-- Pages --}}
+                @foreach($notifications->getUrlRange(1, $notifications->lastPage()) as $page => $url)
+                    @if($page == $notifications->currentPage())
+                        <span class="px-3 py-2 text-sm font-medium bg-gray-900 text-white border border-gray-900 rounded-lg">{{ $page }}</span>
+                    @else
+                        <a href="{{ $url }}"
+                            class="px-3 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:border-gray-900 hover:text-gray-900 transition">{{ $page }}</a>
+                    @endif
+                @endforeach
+
+                {{-- Next --}}
+                @if($notifications->hasMorePages())
+                    <a href="{{ $notifications->nextPageUrl() }}"
+                        class="px-3 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:border-gray-900 hover:text-gray-900 transition">›</a>
+                @else
+                    <span class="px-3 py-2 text-sm text-gray-300 border border-gray-100 rounded-lg cursor-not-allowed">›</span>
+                @endif
+            </div>
+            @endif
         @endif
     </div>
 </x-app-layout>

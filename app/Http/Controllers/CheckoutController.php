@@ -180,8 +180,9 @@ class CheckoutController extends Controller
             return [0, null];
         }
 
-        $voucher    = Voucher::where('code', session('voucher.code'))->first();
-        $validation = $voucher?->isValid($total);
+        // lockForUpdate mencegah race condition jika 2 request checkout bersamaan
+        $voucher    = Voucher::where('code', session('voucher.code'))->lockForUpdate()->first();
+        $validation = $voucher?->isValid($total, auth()->id());
 
         if ($voucher && $validation['valid']) {
             return [$voucher->calculateDiscount($total), $voucher->code];

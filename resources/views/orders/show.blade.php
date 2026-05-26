@@ -1,4 +1,10 @@
 <x-app-layout>
+
+@push('seo')
+<title>Detail Pesanan — Quro Collection</title>
+<meta name="robots" content="noindex, nofollow">
+@endpush
+
     <div class="max-w-xl mx-auto px-4 py-8 md:py-12">
 
         <a href="{{ route('orders.index') }}"
@@ -316,13 +322,49 @@
         </div>
         @endif
 
-        {{-- Total --}}
-        <div class="flex justify-between items-center px-1">
-            <span class="text-sm text-gray-500">Total Pembayaran</span>
-            <span style="font-family: 'Playfair Display', serif;"
-                class="text-xl font-semibold text-gray-900">
-                Rp {{ number_format($order->total_amount, 0, ',', '.') }}
-            </span>
+        {{-- Rincian Pembayaran --}}
+        <div class="border border-gray-100 rounded-2xl p-4 mb-4">
+            <p class="text-xs tracking-widest uppercase text-gray-400 mb-3">Rincian Pembayaran</p>
+            <div class="space-y-2">
+
+                {{-- Subtotal item --}}
+                @php $subtotal = $order->items->sum(fn($i) => $i->price * $i->quantity); @endphp
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">Subtotal</span>
+                    <span class="text-gray-700">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
+                </div>
+
+                {{-- Ongkir --}}
+                @if($order->shipping_cost > 0)
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-400">Ongkos Kirim</span>
+                    <span class="text-gray-700">Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}</span>
+                </div>
+                @endif
+
+                {{-- Diskon Voucher --}}
+                @if($order->discount_amount > 0)
+                <div class="flex justify-between text-sm">
+                    <span class="text-green-600 flex items-center gap-1.5">
+                        Diskon Voucher
+                        @if($order->voucher_code)
+                            <span class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-mono">{{ $order->voucher_code }}</span>
+                        @endif
+                    </span>
+                    <span class="text-green-600 font-medium">− Rp {{ number_format($order->discount_amount, 0, ',', '.') }}</span>
+                </div>
+                @endif
+
+                {{-- Total --}}
+                <div class="border-t border-gray-100 pt-2 mt-1 flex justify-between items-center">
+                    <span class="text-sm font-medium text-gray-700">Total</span>
+                    <span style="font-family: 'Playfair Display', serif;"
+                        class="text-xl font-semibold text-gray-900">
+                        Rp {{ number_format($order->total_amount, 0, ',', '.') }}
+                    </span>
+                </div>
+
+            </div>
         </div>
 
         @if($order->status === 'shipped')
@@ -345,11 +387,18 @@
         @endif
 
         <div class="mt-8">
-            @if($order->status === 'pending' && $order->payment_token)
-                <a href="{{ route('checkout.payment', $order->invoice_number) }}"
-                    class="block text-center bg-gray-900 text-white py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition mb-3">
-                    Selesaikan Pembayaran
-                </a>
+            @if($order->status === 'pending')
+                @if($order->payment_token)
+                    <a href="{{ route('checkout.payment', $order->invoice_number) }}"
+                        class="block text-center bg-gray-900 text-white py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition mb-3">
+                        Selesaikan Pembayaran
+                    </a>
+                @else
+                    <div class="bg-yellow-50 border border-yellow-100 rounded-xl px-4 py-3 mb-3 text-center">
+                        <p class="text-sm text-yellow-700">Link pembayaran belum tersedia.</p>
+                        <p class="text-xs text-yellow-500 mt-0.5">Hubungi admin atau tunggu beberapa saat, lalu refresh halaman ini.</p>
+                    </div>
+                @endif
             @endif
             @if($order->status === 'pending')
                 <button id="check-payment-btn"

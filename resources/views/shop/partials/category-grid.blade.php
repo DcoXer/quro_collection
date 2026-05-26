@@ -19,7 +19,7 @@
                         <img src="{{ Storage::url($product->image) }}"
                             class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                     @else
-                        <div class="w-full h-full flex items-center justify-center text-gray-300 text-xs">No Image</div>
+                        <div class="w-full h-full flex items-center justify-center text-gray-300 text-xs">Tidak ada gambar</div>
                     @endif
                     <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition duration-300 flex items-center justify-center">
                         <span class="opacity-0 group-hover:opacity-100 transition bg-white text-gray-900 text-xs px-3 py-1.5 rounded-full font-medium">

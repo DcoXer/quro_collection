@@ -2,6 +2,7 @@
 
 @push('seo')
 <title>Pembayaran — Quro Collection</title>
+<meta name="robots" content="noindex, nofollow">
 @endpush
 
 <div class="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -66,11 +67,26 @@
                             </span>
                         </div>
                     @endforeach
+
                     @if($order->shipping_cost > 0)
                         <div class="border-t border-gray-200 pt-2 mt-2 flex justify-between text-sm">
                             <span class="text-gray-400">Ongkos Kirim</span>
                             <span class="font-medium text-gray-900">
                                 Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}
+                            </span>
+                        </div>
+                    @endif
+
+                    @if($order->discount_amount > 0)
+                        <div class="flex justify-between text-sm">
+                            <span class="text-green-600">
+                                Diskon Voucher
+                                @if($order->voucher_code)
+                                    <span class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-mono ml-1">{{ $order->voucher_code }}</span>
+                                @endif
+                            </span>
+                            <span class="font-medium text-green-600">
+                                − Rp {{ number_format($order->discount_amount, 0, ',', '.') }}
                             </span>
                         </div>
                     @endif
@@ -94,6 +110,7 @@
                     data-token="{{ $order->payment_token }}"
                     data-success-url="{{ route('checkout.success', $order->invoice_number) }}"
                     data-pending-url="{{ route('orders.index') }}"
+                    data-check-url="{{ route('orders.check-payment', $order->invoice_number) }}"
                     class="w-full bg-gray-900 text-white py-4 rounded-2xl text-sm font-medium hover:bg-gray-700 transition flex items-center justify-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

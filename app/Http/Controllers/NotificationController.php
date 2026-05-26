@@ -7,11 +7,14 @@ use App\Models\Order;
 
 class NotificationController extends Controller
 {
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
+        $perPage = in_array((int) $request->input('per_page'), [10, 25, 50]) ? (int) $request->input('per_page') : 20;
+
         $notifications = Notification::where('user_id', auth()->id())
             ->latest()
-            ->paginate(20);
+            ->paginate($perPage)
+            ->withQueryString();
 
         $pendingOrders = Order::where('user_id', auth()->id())
             ->where('status', 'pending')
@@ -23,7 +26,7 @@ class NotificationController extends Controller
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
 
-        return view('notifications.index', compact('notifications', 'pendingOrders'));
+        return view('notifications.index', compact('notifications', 'pendingOrders', 'perPage'));
     }
 
     public function markRead(Notification $notification)

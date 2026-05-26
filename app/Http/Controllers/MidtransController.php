@@ -178,6 +178,7 @@ class MidtransController extends Controller
      */
     public function checkPayment(Request $request, string $invoice)
     {
+        // Load awal tanpa lock — hanya untuk validasi awal sebelum HTTP call ke Midtrans
         $order = Order::where('invoice_number', $invoice)
             ->where('user_id', $request->user()->id)
             ->first();
@@ -212,12 +213,6 @@ class MidtransController extends Controller
             return response()->json(['status' => $order->status, 'message' => 'Payment not yet completed']);
         }
 
-        $allowed = self::TRANSITIONS[$order->status] ?? [];
-
-        if (!in_array($newStatus, $allowed)) {
-            return response()->json(['status' => $order->status, 'message' => 'Transition not allowed']);
-        }
-
         $updateData = ['status' => $newStatus];
 
         if ($newStatus === 'processing') {
@@ -225,6 +220,21 @@ class MidtransController extends Controller
         }
 
         DB::transaction(function () use ($order, $updateData, $newStatus) {
+            // Re-load dengan lockForUpdate di dalam transaction — cegah race condition dengan webhook
+            $order = Order::where('id', $order->id)
+                ->lockForUpdate()
+                ->first();
+
+            // Re-check status setelah dapat lock — mungkin webhook udah update duluan
+            if ($order->status !== 'pending') {
+                return;
+            }
+
+            $allowed = self::TRANSITIONS[$order->status] ?? [];
+            if (!in_array($newStatus, $allowed)) {
+                return;
+            }
+
             $order->update($updateData);
 
             if ($newStatus === 'processing') {

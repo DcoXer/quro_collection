@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FlashSaleItem;
 use App\Models\Notification;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Services\CartService;
 use Illuminate\Http\Request;
 
@@ -111,10 +112,23 @@ class CartController extends Controller
 
     public function update(Request $request, $productId)
     {
+        $request->validate(['quantity' => 'required|integer|min:1|max:100']);
+
         $cart = session()->get('cart', []);
 
         if (isset($cart[$productId])) {
-            $cart[$productId]['quantity'] = max(1, (int) $request->quantity);
+            $item = $cart[$productId];
+
+            // Validasi stock dari DB — jangan percaya quantity dari client
+            $product = Product::with('variants')->find($item['product_id'] ?? explode('_', $productId)[0]);
+            if (!$product || !$product->is_active) {
+                return response()->json(['success' => false, 'message' => 'Produk tidak tersedia.'], 422);
+            }
+            $variant = $product->variants->where('size', $item['size'] ?? '')->first();
+            $stock   = $variant ? $variant->stock : $product->stock;
+            $qty     = min((int) $request->quantity, $stock);
+
+            $cart[$productId]['quantity'] = max(1, $qty);
             session()->put('cart', $cart);
         }
 

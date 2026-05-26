@@ -1,6 +1,7 @@
 <x-app-layout>
     @push('seo')
-    <title>Checkout - Quro Collection</title>
+    <title>Checkout — Quro Collection</title>
+    <meta name="robots" content="noindex, nofollow">
     @endpush
 
     @vite(['resources/css/pages/checkout.css'])

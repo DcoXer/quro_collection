@@ -2,6 +2,7 @@
 
 @push('seo')
 <title>Profil Saya — Quro Collection</title>
+<meta name="robots" content="noindex, nofollow">
 @endpush
 
 <div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
@@ -9,7 +10,7 @@
     <div class="mb-8">
         <p class="text-xs tracking-widest uppercase text-gray-400 mb-2">{{ auth()->user()->name }}</p>
         <h1 style="font-family: 'Playfair Display', serif;"
-            class="text-3xl font-semibold text-gray-900">My Profile</h1>
+            class="text-3xl font-semibold text-gray-900">Profil Saya</h1>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

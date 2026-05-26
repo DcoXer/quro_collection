@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Voucher;
+use App\Models\VoucherUsage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -22,7 +23,7 @@ class OrderService
     public function create(array $shippingData, array $items, int $total, int $discount, ?string $voucherCode): Order
     {
         return DB::transaction(function () use ($shippingData, $items, $total, $discount, $voucherCode) {
-            $finalTotal = $total - $discount + $shippingData['shipping_cost'];
+            $finalTotal = max(1000, $total - $discount + $shippingData['shipping_cost']);
 
             // Generate unique invoice number — loop handles the astronomically rare collision
             do {
@@ -34,6 +35,8 @@ class OrderService
                 'invoice_number'  => $invoiceNumber,
                 'status'          => 'pending',
                 'total_amount'    => $finalTotal,
+                'discount_amount' => $discount,
+                'voucher_code'    => $voucherCode,
                 'shipping_name'   => $shippingData['shipping_name'],
                 'shipping_phone'  => $shippingData['shipping_phone'],
                 'shipping_address' => $shippingData['shipping_address'],
@@ -60,7 +63,14 @@ class OrderService
             }
 
             if ($voucherCode) {
-                Voucher::where('code', $voucherCode)->increment('used_count');
+                $voucher = Voucher::where('code', $voucherCode)->lockForUpdate()->first();
+                if ($voucher) {
+                    $voucher->increment('used_count');
+                    VoucherUsage::create([
+                        'voucher_id' => $voucher->id,
+                        'user_id'    => auth()->id(),
+                    ]);
+                }
             }
 
             return $order;

@@ -1,4 +1,10 @@
 <x-app-layout>
+
+@push('seo')
+<title>Favorit Saya — Quro Collection</title>
+<meta name="robots" content="noindex, nofollow">
+@endpush
+
     <div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
 
         <a href="{{ route('shop.index') }}"
@@ -12,7 +18,7 @@
         <div class="mb-6">
             <p class="text-xs tracking-widest uppercase text-gray-400 mb-1">{{ auth()->user()->name }}</p>
             <h1 style="font-family: 'Playfair Display', serif;"
-                class="text-xl font-semibold text-gray-900">My Favorites</h1>
+                class="text-xl font-semibold text-gray-900">Favorit Saya</h1>
         </div>
 
         @if(session('success'))
@@ -67,7 +73,7 @@
                                             alt="{{ $item->product->name }}"
                                             class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                     @else
-                                        <div class="w-full h-full flex items-center justify-center text-gray-200 text-xs">No Image</div>
+                                        <div class="w-full h-full flex items-center justify-center text-gray-200 text-xs">Tidak ada gambar</div>
                                     @endif
                                 </div>
                                 <p class="text-xs text-gray-400 mb-0.5">{{ $item->product->category?->name }}</p>

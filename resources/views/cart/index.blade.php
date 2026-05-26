@@ -2,6 +2,7 @@
 
 @push('seo')
 <title>Keranjang — Quro Collection</title>
+<meta name="robots" content="noindex, nofollow">
 @endpush
 
 <div class="max-w-5xl mx-auto px-4 py-8 md:py-12">

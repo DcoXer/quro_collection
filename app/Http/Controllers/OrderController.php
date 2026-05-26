@@ -9,13 +9,16 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $perPage = in_array((int) $request->input('per_page'), [10, 25, 50]) ? (int) $request->input('per_page') : 10;
+
         $orders = Order::where('user_id', auth()->id())
             ->latest()
-            ->paginate(10);
+            ->paginate($perPage)
+            ->withQueryString();
 
-        return view('orders.index', compact('orders'));
+        return view('orders.index', compact('orders', 'perPage'));
     }
 
     public function show($invoice)
@@ -54,6 +57,7 @@ class OrderController extends Controller
         $order = Order::where('invoice_number', $invoice)
             ->where('user_id', auth()->id())
             ->where('status', 'shipped')
+            ->lockForUpdate()
             ->firstOrFail();
 
         $order->update(['status' => 'delivered']);

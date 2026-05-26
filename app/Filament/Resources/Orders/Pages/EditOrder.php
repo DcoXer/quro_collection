@@ -10,7 +10,6 @@ use App\Models\ProductVariant;
 use App\Services\BiteshipService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification as FilamentNotification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\DB;
@@ -44,20 +43,12 @@ class EditOrder extends EditRecord
                 ->label('Tandai Dikirim')
                 ->icon('heroicon-o-truck')
                 ->color('info')
-                ->form([
-                    TextInput::make('tracking_number')
-                        ->label('Nomor Resi')
-                        ->placeholder('Masukkan nomor resi dari ekspedisi...')
-                        ->required(),
-                ])
-                ->modalHeading('Tandai pesanan sebagai dikirim')
-                ->modalDescription('Input nomor resi jika sudah tersedia.')
+                ->requiresConfirmation()
+                ->modalHeading('Tandai pesanan sebagai dikirim?')
+                ->modalDescription('Resi akan di-generate otomatis via Biteship. Jika gagal, Anda bisa input resi manual di form.')
                 ->modalSubmitActionLabel('Tandai Dikirim')
                 ->visible(fn () => $this->record->status === 'processing')
-                ->action(function (array $data) {
-                    $this->record->update(['tracking_number' => $data['tracking_number']]);
-                    $this->changeStatus('shipped');
-                }),
+                ->action(fn () => $this->changeStatus('shipped')),
 
             // shipped → delivered
             Action::make('selesai')
@@ -109,8 +100,8 @@ class EditOrder extends EditRecord
             });
         }
 
-        // Auto-resi via Biteship saat shipped (jika belum ada resi)
-        if ($previousStatus !== 'shipped' && $status === 'shipped' && !$this->record->tracking_number) {
+        // Auto-resi via Biteship saat shipped
+        if ($previousStatus !== 'shipped' && $status === 'shipped') {
             try {
                 $result = app(BiteshipService::class)->createOrder($this->record);
                 $this->record->update([

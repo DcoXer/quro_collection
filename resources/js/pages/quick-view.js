@@ -6,6 +6,8 @@ let qvProductId    = null;
 let qvSelectedPrice = 0;
 let qvSelectedStock = 0;
 let qvQty          = 1;
+let qvWishlistUrl  = null;
+let qvInWishlist   = false;
 
 window.openQuickView = async function (apiUrl, detailUrl) {
     document.getElementById('quick-view-modal').classList.remove('hidden');
@@ -26,7 +28,17 @@ window.openQuickView = async function (apiUrl, detailUrl) {
         return;
     }
 
-    qvProductId = p.id;
+    qvProductId   = p.id;
+    qvWishlistUrl = p.wishlist_url ?? null;
+    qvInWishlist  = p.in_wishlist ?? false;
+    qvSyncWishlistIcon();
+
+    // Update recently viewed count di hero
+    if (p.recentCount !== undefined) {
+        document.querySelectorAll('.recent-viewed-count').forEach(el => {
+            el.textContent = p.recentCount + ' produk';
+        });
+    }
 
     try {
         if (p.image) {
@@ -136,6 +148,27 @@ function qvUpdateTotal() {
     }
 }
 
+function qvSetBtnLoading(loading) {
+    const btn     = document.getElementById('qv-add-btn');
+    const spinner = document.getElementById('qv-btn-spinner');
+    const text    = document.getElementById('qv-btn-text');
+    if (!btn) return;
+    btn.disabled = loading;
+    spinner?.classList.toggle('hidden', !loading);
+    if (text) text.textContent = loading ? 'Menambahkan...' : 'Tambah ke Keranjang';
+}
+
+function qvSetBtnSuccess() {
+    const btn    = document.getElementById('qv-add-btn');
+    const check  = document.getElementById('qv-btn-check');
+    const text   = document.getElementById('qv-btn-text');
+    if (!btn) return;
+    btn.classList.remove('bg-gray-900', 'hover:bg-gray-700');
+    btn.classList.add('bg-green-500');
+    check?.classList.remove('hidden');
+    if (text) text.textContent = 'Ditambahkan!';
+}
+
 window.qvSubmitCart = async function () {
     const size = document.getElementById('qv-selected-size').value;
     if (!size) {
@@ -145,26 +178,90 @@ window.qvSubmitCart = async function () {
         return;
     }
 
+    qvSetBtnLoading(true);
+
+    // Tunggu 2 frame biar browser sempat render spinner sebelum fetch dimulai
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
     const formData = new FormData();
     formData.append('product_id', qvProductId);
     formData.append('size', size);
     formData.append('quantity', qvQty);
 
-    const res = await guardedFetch(cartUrl, {
-        method: 'POST',
-        headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
-        body: formData,
-    });
+    const [res] = await Promise.all([
+        guardedFetch(cartUrl, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+            body: formData,
+        }),
+        new Promise(r => setTimeout(r, 400)), // minimum 400ms loading biar keliatan
+    ]);
+
+    qvSetBtnLoading(false);
+
     if (!res) return;
 
     if (res.ok) {
         const data = await res.json();
-        closeQuickView();
-        showToast('Produk ditambahkan ke keranjang', 'success');
-        const badge = document.querySelector('.cart-badge');
-        if (badge) badge.textContent = data.cartCount;
+        qvSetBtnSuccess();
+        document.querySelectorAll('.cart-badge').forEach(badge => {
+            badge.textContent = data.cartCount;
+            badge.classList.remove('hidden');
+            badge.classList.add('flex');
+        });
+        setTimeout(() => {
+            closeQuickView();
+            showToast('Produk ditambahkan ke keranjang', 'success');
+        }, 700);
     } else {
         showToast('Gagal menambahkan ke keranjang', 'error');
+    }
+};
+
+function qvSyncWishlistIcon() {
+    const icon = document.getElementById('qv-wishlist-icon');
+    if (!icon) return;
+    if (qvInWishlist) {
+        icon.setAttribute('fill', 'currentColor');
+        icon.classList.remove('text-gray-400');
+        icon.classList.add('text-red-500');
+    } else {
+        icon.setAttribute('fill', 'none');
+        icon.classList.remove('text-red-500');
+        icon.classList.add('text-gray-400');
+    }
+}
+
+window.qvToggleWishlist = async function () {
+    if (!qvWishlistUrl) return;
+
+    const prev = qvInWishlist;
+    qvInWishlist = !prev;
+    qvSyncWishlistIcon();
+
+    try {
+        const res  = await fetch(qvWishlistUrl, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+        });
+        const data = await res.json();
+        qvInWishlist = data.in_wishlist;
+        qvSyncWishlistIcon();
+
+        // Sync the grid card wishlist button for this product
+        if (qvProductId) {
+            const gridBtn = document.querySelector(`[data-product-id="${qvProductId}"]`);
+            if (gridBtn && gridBtn.__x) {
+                gridBtn.__x.$data.on = qvInWishlist;
+            }
+        }
+
+        showToast(qvInWishlist ? 'Ditambahkan ke wishlist' : 'Dihapus dari wishlist', 'success');
+    } catch {
+        // revert on error
+        qvInWishlist = prev;
+        qvSyncWishlistIcon();
+        showToast('Gagal memperbarui wishlist', 'error');
     }
 };
 

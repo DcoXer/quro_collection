@@ -7,8 +7,22 @@
 @endphp
 
 @if($products->isEmpty())
-    <div class="text-center py-20 text-gray-400">
-        <p class="text-lg">Produk tidak ditemukan.</p>
+    <div class="flex flex-col items-center justify-center py-24 text-center">
+        <div class="relative mb-6">
+            <div class="w-20 h-20 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center">
+                <svg class="w-9 h-9 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+            <div class="absolute inset-0 w-20 h-20 rounded-full border border-dashed border-gray-200 scale-125"></div>
+        </div>
+        <p class="text-xs tracking-widest uppercase text-gray-300 mb-2">Hasil Pencarian</p>
+        <h3 style="font-family: 'Playfair Display', serif;" class="text-xl font-semibold text-gray-800 mb-2">Produk Tidak Ditemukan</h3>
+        <p class="text-sm text-gray-400 max-w-xs">Coba kata kunci lain atau jelajahi semua koleksi kami.</p>
+        <a href="{{ route('shop.index') }}" class="mt-6 text-sm bg-gray-900 text-white px-6 py-2.5 rounded-xl hover:bg-gray-700 transition">
+            Lihat Semua Produk
+        </a>
     </div>
 @else
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">

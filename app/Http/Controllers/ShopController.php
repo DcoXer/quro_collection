@@ -55,12 +55,19 @@ class ShopController extends Controller
             ->limit(6)
             ->get();
 
+        $sort = $request->input('sort', 'terbaru');
+
         $products = Product::with(['category', 'media'])
             ->where('is_active', true)
             ->withCount('reviews as review_count')
             ->withAvg('reviews as avg_rating', 'rating')
-            ->latest()
-            ->paginate(12);
+            ->when($sort === 'terbaru',     fn($q) => $q->latest())
+            ->when($sort === 'harga-asc',   fn($q) => $q->orderBy('price', 'asc'))
+            ->when($sort === 'harga-desc',  fn($q) => $q->orderBy('price', 'desc'))
+            ->when($sort === 'terpopuler',  fn($q) => $q->orderByDesc('review_count'))
+            ->when($request->search,        fn($q) => $q->where('name', 'like', "%{$request->search}%"))
+            ->paginate(12)
+            ->withQueryString();
 
         if (auth()->check()) {
             $activeOrdersCount = Order::where('user_id', auth()->id())
@@ -127,6 +134,12 @@ class ShopController extends Controller
     {
         abort_if(!$product->is_active, 404);
 
+        // Track recently viewed (same logic as show())
+        $viewed = session()->get('recently_viewed', []);
+        $viewed = array_filter($viewed, fn($id) => $id !== $product->id);
+        array_unshift($viewed, $product->id);
+        session()->put('recently_viewed', array_slice($viewed, 0, 8));
+
         $flashItem = FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())
             ->where('product_id', $product->id)
             ->first();
@@ -138,6 +151,10 @@ class ShopController extends Controller
                 : $product->price - $flashItem->discount_value;
             $flashPrice = max(0, (int) $flashPrice);
         }
+
+        $inWishlist = auth()->check()
+            ? Wishlist::where('user_id', auth()->id())->where('product_id', $product->id)->exists()
+            : false;
 
         return response()->json([
             'id'                    => $product->id,
@@ -161,6 +178,9 @@ class ShopController extends Controller
                 'price_formatted' => 'Rp ' . number_format($v->effective_price, 0, ',', '.'),
                 'stock'           => $v->stock,
             ]),
+            'recentCount'    => count(session('recently_viewed', [])),
+            'in_wishlist'    => $inWishlist,
+            'wishlist_url'   => route('wishlist.toggle', $product->id),
         ]);
     }
 

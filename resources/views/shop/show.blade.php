@@ -225,9 +225,13 @@
                         </div>
 
                         <div class="flex gap-2">
-                            <button onclick="addToCartPage()"
-                                class="flex-1 bg-gray-900 text-white py-3.5 rounded-xl text-sm font-medium hover:bg-gray-700 transition">
-                                Tambah ke Keranjang
+                            <button id="page-add-btn" onclick="addToCartPage()"
+                                class="flex-1 bg-gray-900 text-white py-3.5 rounded-xl text-sm font-medium hover:bg-gray-700 transition flex items-center justify-center gap-2">
+                                <svg id="page-btn-spinner" class="hidden animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                                </svg>
+                                <span id="page-btn-text">Tambah ke Keranjang</span>
                             </button>
                             <button type="button"
                                 x-data="{ on: {{ $inWishlist ? 'true' : 'false' }} }"

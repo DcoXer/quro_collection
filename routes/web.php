@@ -21,8 +21,9 @@ use Illuminate\Support\Facades\Route;
 // Public
 Route::get('/', function () {
     $heroSlides = \App\Models\HeroSlide::active()->forPlacement('welcome')->orderBy('sort_order')->get()
-        ->flatMap(fn ($record) => collect($record->getPaths())
-            ->map(fn ($path) => (object) ['image' => $path, 'type' => $record->type])
+        ->flatMap(
+            fn($record) => collect($record->getPaths())
+                ->map(fn($path) => (object) ['image' => $path, 'type' => $record->type])
         );
     $categories    = \App\Models\Category::withCount(['products' => fn($q) => $q->where('is_active', true)])->get();
     $totalSold     = \App\Models\OrderItem::sum('quantity');
@@ -34,8 +35,8 @@ Route::get('/about', function () {
     $totalSold = \App\Models\OrderItem::sum('quantity');
     return view('about', compact('totalSold'));
 })->name('about');
-Route::get('/privacy-policy', fn () => view('privacy'))->name('privacy');
-Route::get('/terms-of-service', fn () => view('terms'))->name('terms');
+Route::get('/privacy-policy', fn() => view('privacy'))->name('privacy');
+Route::get('/terms-of-service', fn() => view('terms'))->name('terms');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/search', [ShopController::class, 'search'])->name('shop.search');
@@ -82,9 +83,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Cart
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'add'])->middleware('throttle:cart')->name('cart.add');
-    Route::patch('/cart/update/{productId}', [CartController::class, 'update'])->name('cart.update');
+    Route::patch('/cart/update/{productId}', [CartController::class, 'update'])->middleware('throttle:cart')->name('cart.update');
     Route::delete('/cart/remove/{productId}', [CartController::class, 'remove'])->name('cart.remove');
-    Route::patch('/cart/change-size/{key}', [CartController::class, 'changeSize'])->name('cart.change-size');
+    Route::patch('/cart/change-size/{key}', [CartController::class, 'changeSize'])->middleware('throttle:cart')->name('cart.change-size');
 
     // Checkout
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
@@ -114,8 +115,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
-    Route::post('/wishlist/{product}/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
-    Route::delete('/wishlist/{wishlist}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
+    Route::post('/wishlist/{product}/toggle', [WishlistController::class, 'toggle'])->middleware('throttle:wishlist')->name('wishlist.toggle');
+    Route::delete('/wishlist/{wishlist}', [WishlistController::class, 'destroy'])->middleware('throttle:wishlist')->name('wishlist.destroy');
 });
 
 require __DIR__ . '/auth.php';
