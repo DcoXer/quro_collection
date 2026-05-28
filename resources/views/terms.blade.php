@@ -1,8 +1,11 @@
 <x-app-layout>
 
 @push('seo')
-<title>Syarat & Ketentuan — Quro Collection</title>
-<meta name="description" content="Syarat dan ketentuan penggunaan layanan Quro Collection — hak, kewajiban, dan aturan yang berlaku bagi seluruh pengguna.">
+<title>{{ $page?->meta_title ?? 'Syarat & Ketentuan — Quro Collection' }}</title>
+<meta name="description" content="{{ $page?->meta_description ?? 'Syarat dan ketentuan penggunaan layanan Quro Collection — hak, kewajiban, dan aturan yang berlaku bagi seluruh pengguna.' }}">
+<meta property="og:title" content="{{ $page?->meta_title ?? 'Syarat & Ketentuan — Quro Collection' }}">
+<meta property="og:description" content="{{ $page?->meta_description ?? 'Syarat dan ketentuan penggunaan layanan Quro Collection.' }}">
+<meta property="og:url" content="{{ route('terms') }}">
 @endpush
 
 @push('styles')

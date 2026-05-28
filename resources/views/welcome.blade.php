@@ -1,8 +1,12 @@
 <x-app-layout>
 
 @push('seo')
-<title>Quro Collection — Premium Muslim Fashion</title>
-<meta name="description" content="Koleksi baju koko premium dengan desain modern dan bahan berkualitas tinggi untuk tampilan elegan sehari-hari.">
+<title>{{ \App\Models\SiteSetting::get('seo_home_title', 'Quro Collection — Premium Muslim Fashion') }}</title>
+<meta name="description" content="{{ \App\Models\SiteSetting::get('seo_home_description', 'Koleksi baju koko premium dengan desain modern dan bahan berkualitas tinggi untuk tampilan elegan sehari-hari.') }}">
+<meta property="og:title" content="{{ \App\Models\SiteSetting::get('seo_home_title', 'Quro Collection — Premium Muslim Fashion') }}">
+<meta property="og:description" content="{{ \App\Models\SiteSetting::get('seo_home_description', 'Koleksi baju koko premium dengan desain modern dan bahan berkualitas tinggi untuk tampilan elegan sehari-hari.') }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ url('/') }}">
 @endpush
 
 @push('styles')

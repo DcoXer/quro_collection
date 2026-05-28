@@ -1,8 +1,11 @@
 <x-app-layout>
 
 @push('seo')
-<title>Tentang Kami — Quro Collection</title>
-<meta name="description" content="Quro Collection adalah brand fashion muslim premium yang menghadirkan koleksi baju koko modern dengan bahan berkualitas tinggi.">
+<title>{{ $page?->meta_title ?? 'Tentang Kami — Quro Collection' }}</title>
+<meta name="description" content="{{ $page?->meta_description ?? 'Quro Collection adalah brand fashion muslim premium yang menghadirkan koleksi baju koko modern dengan bahan berkualitas tinggi.' }}">
+<meta property="og:title" content="{{ $page?->meta_title ?? 'Tentang Kami — Quro Collection' }}">
+<meta property="og:description" content="{{ $page?->meta_description ?? 'Quro Collection adalah brand fashion muslim premium yang menghadirkan koleksi baju koko modern dengan bahan berkualitas tinggi.' }}">
+<meta property="og:url" content="{{ route('about') }}">
 @endpush
 
 @push('styles')

@@ -1,10 +1,10 @@
 <x-app-layout>
     @push('seo')
-    <title>Belanja — Quro Collection</title>
-    <meta name="description" content="Koleksi baju koko premium dengan desain modern dan bahan berkualitas tinggi.">
+    <title>{{ \App\Models\SiteSetting::get('seo_shop_title', 'Belanja — Quro Collection') }}</title>
+    <meta name="description" content="{{ \App\Models\SiteSetting::get('seo_shop_description', 'Koleksi baju koko premium dengan desain modern dan bahan berkualitas tinggi.') }}">
     <link rel="canonical" href="{{ route('shop.index') }}">
-    <meta property="og:title" content="Belanja — Quro Collection">
-    <meta property="og:description" content="Koleksi baju koko premium dengan desain modern dan bahan berkualitas tinggi.">
+    <meta property="og:title" content="{{ \App\Models\SiteSetting::get('seo_shop_title', 'Belanja — Quro Collection') }}">
+    <meta property="og:description" content="{{ \App\Models\SiteSetting::get('seo_shop_description', 'Koleksi baju koko premium dengan desain modern dan bahan berkualitas tinggi.') }}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ route('shop.index') }}">
     @endpush

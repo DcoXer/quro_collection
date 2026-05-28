@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\FlashSaleItem;
 use App\Models\Product;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -48,10 +49,12 @@ class SchemaOrg
 
     private static function organization(): array
     {
+        $siteName = SiteSetting::get('site_name', 'Quro Collection');
+
         return [
             '@type' => 'Organization',
             '@id'   => url('/') . '/#organization',
-            'name'  => 'Quro Collection',
+            'name'  => $siteName,
             'url'   => url('/'),
             'logo'  => [
                 '@type' => 'ImageObject',
@@ -73,7 +76,7 @@ class SchemaOrg
             '@type'     => 'WebSite',
             '@id'       => url('/') . '/#website',
             'url'       => url('/'),
-            'name'      => 'Quro Collection',
+            'name'      => SiteSetting::get('site_name', 'Quro Collection'),
             'publisher' => ['@id' => url('/') . '/#organization'],
             'potentialAction' => [
                 '@type'  => 'SearchAction',
@@ -108,7 +111,7 @@ class SchemaOrg
             'description' => Str::limit($product->description, 500),
             'image'       => $imageUrl,
             'url'         => route('shop.show', $product),
-            'brand'       => ['@type' => 'Brand', 'name' => 'Quro Collection'],
+            'brand'       => ['@type' => 'Brand', 'name' => SiteSetting::get('site_name', 'Quro Collection')],
             'category'    => $product->category?->name,
             'offers'      => [
                 '@type'         => 'Offer',
@@ -117,7 +120,7 @@ class SchemaOrg
                 'price'         => (string) $price,
                 'availability'  => $availability,
                 'itemCondition' => 'https://schema.org/NewCondition',
-                'seller'        => ['@type' => 'Organization', 'name' => 'Quro Collection'],
+                'seller'        => ['@type' => 'Organization', 'name' => SiteSetting::get('site_name', 'Quro Collection')],
             ],
         ];
 

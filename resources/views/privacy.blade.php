@@ -1,8 +1,11 @@
 <x-app-layout>
 
 @push('seo')
-<title>Kebijakan Privasi — Quro Collection</title>
-<meta name="description" content="Kebijakan privasi Quro Collection — bagaimana kami mengumpulkan, menggunakan, dan melindungi data pribadi Anda.">
+<title>{{ $page?->meta_title ?? 'Kebijakan Privasi — Quro Collection' }}</title>
+<meta name="description" content="{{ $page?->meta_description ?? 'Kebijakan privasi Quro Collection — bagaimana kami mengumpulkan, menggunakan, dan melindungi data pribadi Anda.' }}">
+<meta property="og:title" content="{{ $page?->meta_title ?? 'Kebijakan Privasi — Quro Collection' }}">
+<meta property="og:description" content="{{ $page?->meta_description ?? 'Kebijakan privasi Quro Collection — bagaimana kami mengumpulkan, menggunakan, dan melindungi data pribadi Anda.' }}">
+<meta property="og:url" content="{{ route('privacy') }}">
 @endpush
 
 @push('styles')

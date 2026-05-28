@@ -209,6 +209,46 @@ class SiteSettingsPage extends Page implements HasForms
                                     ]),
                             ]),
 
+                        Tab::make('SEO')
+                            ->icon('heroicon-o-magnifying-glass')
+                            ->schema([
+                                Section::make('Beranda')
+                                    ->columns(2)
+                                    ->schema([
+                                        TextInput::make('seo_home_title')
+                                            ->label('Title Tag Beranda')
+                                            ->placeholder('Quro Collection — Premium Muslim Fashion')
+                                            ->columnSpan(1),
+                                        Textarea::make('seo_home_description')
+                                            ->label('Meta Description Beranda')
+                                            ->placeholder('Temukan koleksi baju koko premium...')
+                                            ->rows(2)
+                                            ->columnSpan(1),
+                                    ]),
+                                Section::make('Toko')
+                                    ->columns(2)
+                                    ->schema([
+                                        TextInput::make('seo_shop_title')
+                                            ->label('Title Tag Toko')
+                                            ->placeholder('Belanja — Quro Collection')
+                                            ->columnSpan(1),
+                                        Textarea::make('seo_shop_description')
+                                            ->label('Meta Description Toko')
+                                            ->placeholder('Jelajahi koleksi lengkap baju koko premium...')
+                                            ->rows(2)
+                                            ->columnSpan(1),
+                                    ]),
+                                Section::make('Default OG')
+                                    ->description('Digunakan sebagai fallback untuk semua halaman yang tidak memiliki meta description sendiri.')
+                                    ->schema([
+                                        Textarea::make('seo_og_description')
+                                            ->label('Deskripsi OG Default')
+                                            ->placeholder('Quro Collection — koleksi baju koko premium...')
+                                            ->rows(2)
+                                            ->columnSpanFull(),
+                                    ]),
+                            ]),
+
                     ])
                     ->columnSpanFull()
                     ->persistTabInQueryString(),

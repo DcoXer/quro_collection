@@ -13,26 +13,32 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon/favicon-16x16.png') }}">
     <link rel="icon" type="image/x-icon" href="{{ asset('images/favicon/favicon.ico') }}">
     <link rel="manifest" href="{{ asset('images/favicon/site.webmanifest') }}">
-    <title>Quro Collection</title>
 
-    {{-- Default OG / Twitter — per-page @push('seo') overrides these --}}
-    <meta property="og:site_name" content="Quro Collection">
+    {{-- Per-page SEO overrides (title, meta desc, OG) — rendered FIRST so they take precedence --}}
+    @stack('seo')
+
+    {{-- Default fallback title & OG — only shown if the page doesn't push its own --}}
+    @php
+        $siteName   = \App\Models\SiteSetting::get('site_name', 'Quro Collection');
+        $ogDesc     = \App\Models\SiteSetting::get('seo_og_description', 'Temukan koleksi baju koko premium di Quro Collection. Kualitas premium, harga terjangkau.');
+    @endphp
+    <title>{{ $siteName }}</title>
+    <meta property="og:site_name" content="{{ $siteName }}">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Quro Collection">
-    <meta property="og:description" content="Temukan koleksi pakaian terbaik di Quro Collection. Kualitas premium, harga terjangkau.">
+    <meta property="og:title" content="{{ $siteName }}">
+    <meta property="og:description" content="{{ $ogDesc }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Quro Collection">
-    <meta name="twitter:description" content="Temukan koleksi pakaian terbaik di Quro Collection. Kualitas premium, harga terjangkau.">
+    <meta name="twitter:title" content="{{ $siteName }}">
+    <meta name="twitter:description" content="{{ $ogDesc }}">
     <meta name="twitter:image" content="{{ asset('images/og-image.jpg') }}">
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
-    @stack('seo')
 
     {{-- JSON-LD: Organization + WebSite (global) --}}
     <script type="application/ld+json">@json(\App\Support\SchemaOrg::site())</script>

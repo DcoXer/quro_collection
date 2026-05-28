@@ -42,6 +42,13 @@ class SiteSettingSeeder extends Seeder
             // CTA
             'cta_headline'          => 'Temukan Koleksi Terbaik untuk Kamu',
             'cta_subtext'           => 'Lebih dari {jumlah} produk siap menemani penampilan elegan kamu sehari-hari.',
+
+            // SEO
+            'seo_home_title'        => 'Quro Collection — Premium Muslim Fashion',
+            'seo_home_description'  => 'Temukan koleksi baju koko premium Quro Collection. Desain modern, bahan berkualitas tinggi, nyaman dipakai kapan saja.',
+            'seo_shop_title'        => 'Belanja — Quro Collection',
+            'seo_shop_description'  => 'Jelajahi koleksi lengkap baju koko premium Quro Collection. Berbagai pilihan desain modern dengan bahan berkualitas tinggi.',
+            'seo_og_description'    => 'Quro Collection — koleksi baju koko premium dengan desain modern dan bahan berkualitas tinggi.',
         ];
 
         foreach ($defaults as $key => $value) {
