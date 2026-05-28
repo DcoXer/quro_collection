@@ -6,6 +6,7 @@ use App\Mail\OrderStatusMail;
 use App\Models\Notification;
 use App\Models\Order;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -29,7 +30,20 @@ class ProcessShippedOrders extends Command
             ->get();
 
         foreach ($orders as $order) {
-            $order->update(['status' => 'delivered']);
+            // lockForUpdate di dalam transaction — cegah double-process jika cron overlap
+            $updated = DB::transaction(function () use ($order) {
+                $fresh = Order::where('id', $order->id)
+                    ->where('status', 'shipped')
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$fresh) return false; // sudah diupdate proses lain
+
+                $fresh->update(['status' => 'delivered']);
+                return true;
+            });
+
+            if (!$updated) continue;
 
             Notification::send(
                 $order->user_id,

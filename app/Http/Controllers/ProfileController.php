@@ -44,7 +44,12 @@ class ProfileController extends Controller
             'village_name'       => $request->village_name,
             'address_detail'     => $request->address_detail,
             'email_verified_at'  => $emailChanged ? null : $user->email_verified_at,
+            'is_verified'        => $emailChanged ? false : $user->is_verified,
         ]);
+
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

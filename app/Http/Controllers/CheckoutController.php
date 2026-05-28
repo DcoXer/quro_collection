@@ -203,12 +203,10 @@ class CheckoutController extends Controller
 
     private function sendOrderEmails(Order $order): void
     {
-        try {
-            Mail::to($order->user->email)->send(new OrderConfirmation($order));
-            Mail::to(config('mail.admin_email'))->send(new NewOrderNotification($order));
-        } catch (\Exception $e) {
-            Log::warning('Failed to send order emails: ' . $e->getMessage());
-        }
+        // Queue agar checkout response tidak diblokir oleh latency mail server.
+        // QUEUE_CONNECTION=database — pastikan queue:work berjalan di production.
+        Mail::to($order->user->email)->queue(new OrderConfirmation($order));
+        Mail::to(config('mail.admin_email'))->queue(new NewOrderNotification($order));
     }
 
     private function redirectToPayment(Order $order)

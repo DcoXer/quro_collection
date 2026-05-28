@@ -77,12 +77,14 @@ class CartController extends Controller
         $price = $variant->effective_price;
         $stock = $variant->stock;
 
-        if ($request->quantity > $stock) {
+        $cart    = session()->get('cart', []);
+        $key     = $product->id . '_' . $request->size;
+        $inCart  = $cart[$key]['quantity'] ?? 0;
+
+        // Cek total (yang sudah di cart + yang baru ditambah) terhadap stok
+        if ($inCart + $request->quantity > $stock) {
             return back()->with('error', 'Stok tidak mencukupi.');
         }
-
-        $cart = session()->get('cart', []);
-        $key  = $product->id . '_' . $request->size;
 
         if (isset($cart[$key])) {
             $cart[$key]['quantity'] += $request->quantity;
@@ -113,6 +115,10 @@ class CartController extends Controller
     public function update(Request $request, $productId)
     {
         $request->validate(['quantity' => 'required|integer|min:1|max:100']);
+
+        if (!preg_match('/^\d+_\S+$/', $productId)) {
+            return response()->json(['success' => false], 400);
+        }
 
         $cart = session()->get('cart', []);
 
@@ -145,6 +151,10 @@ class CartController extends Controller
 
     public function remove($productId)
     {
+        if (!preg_match('/^\d+_\S+$/', $productId)) {
+            return redirect()->route('cart.index');
+        }
+
         $cart = session()->get('cart', []);
         unset($cart[$productId]);
         session()->put('cart', $cart);
@@ -154,6 +164,10 @@ class CartController extends Controller
     public function changeSize(Request $request, $key)
     {
         $request->validate(['size' => 'required|string']);
+
+        if (!preg_match('/^\d+_\S+$/', $key)) {
+            return redirect()->route('cart.index');
+        }
 
         $cart = session()->get('cart', []);
 

@@ -65,6 +65,21 @@
         </tbody>
     </table>
 
+    {{-- Info resi jika status shipped --}}
+    @if($order->status === 'shipped' && $order->tracking_number)
+    <p class="section-title">Info Pengiriman</p>
+    <div class="info-box">
+        <div class="info-row">
+            <span class="info-label">Kurir</span>
+            <span class="info-value">{{ strtoupper($order->courier ?? '-') }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Nomor Resi</span>
+            <span class="info-value" style="font-size:15px;font-weight:700;letter-spacing:1px;">{{ $order->tracking_number }}</span>
+        </div>
+    </div>
+    @endif
+
     {{-- CTA --}}
     @if($order->status === 'delivered')
     <a href="{{ route('orders.show', $order->invoice_number) }}" class="cta-btn">

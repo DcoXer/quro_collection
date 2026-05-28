@@ -22,6 +22,7 @@ tunnel.ps1
 /storage/pail
 /vendor
 Homestead.json
+security_audit_qurocollection.pdf
 Homestead.yaml
 Thumbs.db
 /storage/framework/views/

@@ -8,6 +8,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Get;
 use Filament\Schemas\Schema;
 
 class FlashSaleForm
@@ -22,11 +23,14 @@ class FlashSaleForm
 
                 DateTimePicker::make('starts_at')
                     ->label('Mulai')
-                    ->required(),
+                    ->required()
+                    ->live(),
 
                 DateTimePicker::make('ends_at')
                     ->label('Berakhir')
-                    ->required(),
+                    ->required()
+                    ->after('starts_at')
+                    ->validationMessages(['after' => 'Waktu berakhir harus setelah waktu mulai.']),
 
                 Toggle::make('is_active')
                     ->label('Aktif')
@@ -35,6 +39,7 @@ class FlashSaleForm
                 Repeater::make('items')
                     ->relationship('items')
                     ->label('Produk Flash Sale')
+                    ->distinct()
                     ->schema([
                         Select::make('product_id')
                             ->label('Produk')
@@ -44,6 +49,8 @@ class FlashSaleForm
                             ->options(
                                 Product::where('is_active', true)->pluck('name', 'id')
                             )
+                            ->distinct()
+                            ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                             ->columnSpan(1),
 
                         Select::make('discount_type')

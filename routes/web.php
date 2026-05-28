@@ -66,8 +66,9 @@ Route::get('/terms-of-service', function () {
     return view('terms', compact('page'));
 })->name('terms');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', [SitemapController::class, 'robots']);
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
-Route::get('/shop/search', [ShopController::class, 'search'])->name('shop.search');
+Route::get('/shop/search', [ShopController::class, 'search'])->middleware('throttle:search')->name('shop.search');
 Route::get('/product/{product:slug}', [ShopController::class, 'show'])->name('shop.show');
 Route::get('/product/{product:slug}/quick-view', [ShopController::class, 'quickView'])->name('shop.quick-view');
 Route::get('/category/{category:slug}', [ShopController::class, 'category'])->name('shop.category');
@@ -93,7 +94,6 @@ Route::post('/verify-otp/resend', [OtpController::class, 'resend'])->middleware(
 
 // Webhook
 Route::post('/webhook/midtrans', [MidtransController::class, 'webhook'])->middleware('throttle:midtrans-webhook')->name('webhook.midtrans');
-Route::get('/checkout/payment/{invoice}', [CheckoutController::class, 'payment'])->name('checkout.payment');
 
 // Admin routes
 Route::middleware(['auth:admin'])->group(function () {

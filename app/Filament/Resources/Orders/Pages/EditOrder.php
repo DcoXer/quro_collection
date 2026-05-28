@@ -26,18 +26,6 @@ class EditOrder extends EditRecord
     {
         return [
 
-            // paid → processing
-            Action::make('proses')
-                ->label('Proses Pesanan')
-                ->icon('heroicon-o-arrow-right-circle')
-                ->color('primary')
-                ->requiresConfirmation()
-                ->modalHeading('Proses pesanan ini?')
-                ->modalDescription('Status akan berubah ke "Processing". Pesanan akan mulai disiapkan.')
-                ->modalSubmitActionLabel('Ya, Proses')
-                ->visible(fn () => $this->record->status === 'paid')
-                ->action(fn () => $this->changeStatus('processing')),
-
             // processing → shipped
             Action::make('kirim')
                 ->label('Tandai Dikirim')
@@ -91,8 +79,11 @@ class EditOrder extends EditRecord
         ]);
         $this->record->refresh();
 
-        // Restore stock on cancel
-        if ($previousStatus !== 'cancelled' && $status === 'cancelled') {
+        // Restore stock on cancel — hanya jika stok sudah dikurangi.
+        // Stok dikurangi saat webhook mengonfirmasi pembayaran (status → processing).
+        // Jika cancel dari 'pending', stok belum dikurangi — jangan di-increment.
+        $stockWasDeducted = in_array($previousStatus, ['processing', 'shipped', 'delivered']);
+        if ($status === 'cancelled' && $stockWasDeducted) {
             DB::transaction(function () {
                 foreach ($this->record->items as $item) {
                     $this->restoreStock($item->product_id, $item->size, $item->quantity);
@@ -103,6 +94,8 @@ class EditOrder extends EditRecord
         // Auto-resi via Biteship saat shipped
         if ($previousStatus !== 'shipped' && $status === 'shipped') {
             try {
+                // Eager load product agar buildItems() tidak N+1 query
+                $this->record->load('items.product');
                 $result = app(BiteshipService::class)->createOrder($this->record);
                 $this->record->update([
                     'tracking_number' => $result['tracking_number'],
@@ -124,7 +117,6 @@ class EditOrder extends EditRecord
 
         // Notifikasi in-app + email
         $messages = [
-            'paid'       => 'Pembayaran pesanan ' . $this->record->invoice_number . ' telah dikonfirmasi.',
             'processing' => 'Pesanan ' . $this->record->invoice_number . ' sedang diproses.',
             'shipped'    => 'Pesanan ' . $this->record->invoice_number . ' sudah dikirim. Lacak paketmu sekarang.',
             'delivered'  => 'Pesanan ' . $this->record->invoice_number . ' telah diterima. Jangan lupa beri ulasan!',

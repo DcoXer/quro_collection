@@ -60,6 +60,16 @@ class OrderResource extends Resource
         return false;
     }
 
+    public static function canDelete($record): bool
+    {
+        return false;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return false;
+    }
+
     public static function getPages(): array
     {
         return [

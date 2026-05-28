@@ -43,6 +43,6 @@ class FlashSale extends Model
 
     public function secondsRemaining(): int
     {
-        return (int) $this->ends_at->diffInSeconds(now());
+        return max(0, (int) now()->diffInSeconds($this->ends_at, false));
     }
 }

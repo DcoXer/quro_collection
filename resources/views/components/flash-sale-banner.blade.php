@@ -1,5 +1,7 @@
 @php
-    $flashSale = \App\Models\FlashSale::active()->with(['items.product'])->first();
+    $flashSale = \Illuminate\Support\Facades\Cache::remember('active_flash_sale_with_items', 60, fn() =>
+        \App\Models\FlashSale::active()->with(['items.product'])->first()
+    );
 @endphp
 
 @if($flashSale)

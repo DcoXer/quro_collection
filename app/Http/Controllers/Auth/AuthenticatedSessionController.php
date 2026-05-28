@@ -32,7 +32,7 @@ class AuthenticatedSessionController extends Controller
 
         if (!$user->is_verified) {
             // Generate OTP baru
-            $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $otp = (string) random_int(100000, 999999);
 
             $user->update([
                 'otp_code'       => $otp,

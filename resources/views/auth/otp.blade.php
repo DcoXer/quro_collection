@@ -27,10 +27,10 @@
                     </a>
                     <h1 style="font-family: 'Playfair Display', serif;"
                         class="text-2xl font-semibold text-gray-900 mb-1">
-                        Verifikasi Email
+                        {{ isset($purpose) && $purpose === 'reset_password' ? 'Verifikasi Identitas' : 'Verifikasi Email' }}
                     </h1>
                     <p class="text-sm text-gray-400">
-                        Kode OTP telah dikirim ke email kamu.<br>
+                        {{ isset($purpose) && $purpose === 'reset_password' ? 'Kode OTP reset password telah dikirim ke email kamu.' : 'Kode OTP telah dikirim ke email kamu.' }}<br>
                         Berlaku selama <span class="font-medium text-gray-600" id="countdown" data-seconds="{{ $secondsLeft }}">5:00</span>
                     </p>
                 </div>

@@ -7,6 +7,8 @@ use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\Voucher;
+use App\Models\VoucherUsage;
 use App\Services\FonnteService;
 use App\Services\MidtransService;
 use Illuminate\Http\Request;
@@ -58,6 +60,12 @@ class MidtransController extends Controller
                 'midtrans_amount' => $midtransAmount,
                 'ip'              => $request->ip(),
             ]);
+            $this->fonnteService->notifyAdminFraud(
+                $order->invoice_number,
+                (int) $order->total_amount,
+                $midtransAmount,
+                $request->ip(),
+            );
             return response()->json(['message' => 'Amount mismatch'], 422);
         }
 
@@ -95,6 +103,19 @@ class MidtransController extends Controller
 
         DB::transaction(function () use ($order, $updateData, $newStatus) {
             $order->update($updateData);
+
+            // Kembalikan voucher jika order dibatalkan
+            if ($newStatus === 'cancelled' && $order->voucher_code) {
+                $voucher = Voucher::where('code', $order->voucher_code)->first();
+                if ($voucher) {
+                    $voucher->decrement('used_count');
+                    VoucherUsage::where('voucher_id', $voucher->id)
+                        ->where('user_id', $order->user_id)
+                        ->latest()
+                        ->limit(1)
+                        ->delete();
+                }
+            }
 
             // Kurangi stok atomik setelah pembayaran dikonfirmasi
             if ($newStatus === 'processing') {

@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\FlashSale;
+use App\Models\FlashSaleItem;
+use App\Observers\FlashSaleItemObserver;
+use App\Observers\FlashSaleObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -13,6 +17,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        FlashSale::observe(FlashSaleObserver::class);
+        FlashSaleItem::observe(FlashSaleItemObserver::class);
+
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
         });
@@ -58,6 +65,11 @@ class AppServiceProvider extends ServiceProvider
         // Midtrans webhook: 60x per menit per IP
         RateLimiter::for('midtrans-webhook', function (Request $request) {
             return Limit::perMinute(60)->by($request->ip());
+        });
+
+        // Search: 30x per menit per IP — cegah scraping & spam query DB
+        RateLimiter::for('search', function (Request $request) {
+            return Limit::perMinute(30)->by($request->ip());
         });
     }
 }

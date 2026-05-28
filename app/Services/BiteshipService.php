@@ -31,7 +31,7 @@ class BiteshipService
      */
     public function searchArea(string $query): ?string
     {
-        $response = Http::withHeaders($this->headers())
+        $response = Http::timeout(10)->withHeaders($this->headers())
             ->get(self::BASE_URL . '/maps/areas', [
                 'input' => $query,
                 'type'  => 'single',
@@ -59,7 +59,7 @@ class BiteshipService
      */
     private function getRatesId(Order $order, array $courier, string $destAreaId): string
     {
-        $response = Http::withHeaders($this->headers())
+        $response = Http::timeout(15)->withHeaders($this->headers())
             ->post(self::BASE_URL . '/rates/couriers', [
                 'origin_area_id'      => config('services.biteship.shipper_area_id'),
                 'destination_area_id' => $destAreaId,
@@ -117,7 +117,15 @@ class BiteshipService
     public function createOrder(Order $order): array
     {
         $courierCode = strtolower($order->courier ?? 'jne');
-        $courier     = self::COURIER_MAP[$courierCode] ?? self::COURIER_MAP['jne'];
+
+        if (!isset(self::COURIER_MAP[$courierCode])) {
+            Log::warning('BiteshipService: unknown courier code, falling back to JNE', [
+                'invoice'      => $order->invoice_number,
+                'courier_code' => $courierCode,
+            ]);
+        }
+
+        $courier = self::COURIER_MAP[$courierCode] ?? self::COURIER_MAP['jne'];
 
         // Search destination area using district + city name stored on order
         $areaQuery  = trim(($order->district_name ?? '') . ' ' . ($order->city_name ?? ''));
@@ -158,7 +166,7 @@ class BiteshipService
             'courier_type'         => 'regular',
         ]);
 
-        $response = Http::withHeaders($this->headers())
+        $response = Http::timeout(20)->withHeaders($this->headers())
             ->post(self::BASE_URL . '/orders', $directPayload);
 
         // If direct creation fails, fall back to rates_id flow
@@ -171,7 +179,7 @@ class BiteshipService
             $ratesId = $this->getRatesId($order, $courier, $destAreaId);
             $ratesPayload = array_merge($basePayload, ['rates_id' => $ratesId]);
 
-            $response = Http::withHeaders($this->headers())
+            $response = Http::timeout(20)->withHeaders($this->headers())
                 ->post(self::BASE_URL . '/orders', $ratesPayload);
 
             if ($response->failed()) {

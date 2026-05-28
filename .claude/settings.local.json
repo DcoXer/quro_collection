@@ -35,7 +35,10 @@
       "Bash(php -l app/Filament/Resources/PageContent/Schemas/PageForm.php)",
       "Bash(php -l app/Filament/Resources/PageContent/Tables/PagesTable.php)",
       "Bash(php -l app/Filament/Resources/PageContent/Pages/ListPages.php)",
-      "Bash(php -l app/Filament/Resources/PageContent/Pages/EditPage.php)"
+      "Bash(php -l app/Filament/Resources/PageContent/Pages/EditPage.php)",
+      "Bash(node -e \"require\\('puppeteer'\\)\")",
+      "Bash(php -r \"echo extension_loaded\\('gd'\\) ? 'gd ok' : 'no gd';\")",
+      "Bash(php:*)"
     ]
   }
 }

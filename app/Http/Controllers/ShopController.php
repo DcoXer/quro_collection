@@ -13,6 +13,7 @@ use App\Models\Wishlist;
 use App\Models\Category;
 use App\Support\SchemaOrg;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -44,8 +45,12 @@ class ShopController extends Controller
 
         $wishlistedIds = $this->getWishlistedIds();
 
-        $totalProductsCount = Product::where('is_active', true)->count();
-        $activeFlashSale    = FlashSale::active()->first();
+        $totalProductsCount = Cache::remember('total_active_products', 600, fn() =>
+            Product::where('is_active', true)->count()
+        );
+        $activeFlashSale = Cache::remember('active_flash_sale', 60, fn() =>
+            FlashSale::active()->first()
+        );
         $activeOrdersCount  = 0;
         $wishlistCount      = 0;
 
@@ -65,7 +70,7 @@ class ShopController extends Controller
             ->when($sort === 'harga-asc',   fn($q) => $q->orderBy('price', 'asc'))
             ->when($sort === 'harga-desc',  fn($q) => $q->orderBy('price', 'desc'))
             ->when($sort === 'terpopuler',  fn($q) => $q->orderByDesc('review_count'))
-            ->when($request->search,        fn($q) => $q->where('name', 'like', "%{$request->search}%"))
+            ->when($request->search,        fn($q) => $q->whereFullText('name', $request->search))
             ->paginate(12)
             ->withQueryString();
 
@@ -90,7 +95,9 @@ class ShopController extends Controller
 
         return response()->json([
             'cartCount'          => collect(session('cart', []))->sum('quantity'),
-            'wishlistCount'      => Wishlist::where('user_id', $user->id)->count(),
+            'wishlistCount'      => count(Cache::remember('wishlist_ids_' . $user->id, 3600, fn() =>
+                                        Wishlist::where('user_id', $user->id)->pluck('product_id')->toArray()
+                                    )),
             'activeOrdersCount'  => Order::where('user_id', $user->id)
                                         ->whereIn('status', ['pending', 'processing', 'shipped'])
                                         ->count(),
@@ -201,11 +208,13 @@ class ShopController extends Controller
 
     public function search(Request $request)
     {
+        $request->validate(['search' => 'nullable|string|max:100']);
+
         $products = Product::with(['category', 'media'])
             ->where('is_active', true)
             ->withCount('reviews as review_count')
             ->withAvg('reviews as avg_rating', 'rating')
-            ->when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%"))
+            ->when($request->search, fn($q) => $q->whereFullText('name', $request->search))
             ->when(
                 $request->category && $request->category !== 'semua',
                 fn($q) => $q->whereHas('category', fn($qq) => $qq->where('slug', $request->category))
@@ -239,8 +248,8 @@ class ShopController extends Controller
     {
         if (!auth()->check()) return [];
 
-        return Wishlist::where('user_id', auth()->id())
-            ->pluck('product_id')
-            ->toArray();
+        return Cache::remember('wishlist_ids_' . auth()->id(), 3600, fn() =>
+            Wishlist::where('user_id', auth()->id())->pluck('product_id')->toArray()
+        );
     }
 }

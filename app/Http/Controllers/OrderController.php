@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\ProductReview;
+use App\Models\Voucher;
+use App\Models\VoucherUsage;
 use App\Services\TrackingService;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
+    public function __construct(private TrackingService $trackingService) {}
+
     public function index(Request $request)
     {
         $perPage = in_array((int) $request->input('per_page'), [10, 25, 50]) ? (int) $request->input('per_page') : 10;
@@ -48,6 +52,19 @@ class OrderController extends Controller
         // Stok hanya berkurang setelah pembayaran confirmed via Midtrans webhook.
         $order->update(['status' => 'cancelled']);
 
+        // Kembalikan voucher agar bisa dipakai lagi
+        if ($order->voucher_code) {
+            $voucher = Voucher::where('code', $order->voucher_code)->first();
+            if ($voucher) {
+                $voucher->decrement('used_count');
+                VoucherUsage::where('voucher_id', $voucher->id)
+                    ->where('user_id', $order->user_id)
+                    ->latest()
+                    ->limit(1)
+                    ->delete();
+            }
+        }
+
         return redirect()->route('orders.index')
             ->with('success', 'Pesanan berhasil dibatalkan.');
     }
@@ -79,8 +96,7 @@ class OrderController extends Controller
             ]);
         }
 
-        $tracking = new TrackingService();
-        $result   = $tracking->track($order->courier, $order->tracking_number);
+        $result = $this->trackingService->track($order->courier, $order->tracking_number);
 
         return response()->json($result);
     }

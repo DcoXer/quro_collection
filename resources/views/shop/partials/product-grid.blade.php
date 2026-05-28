@@ -1,7 +1,7 @@
 @php
-    $flashItems = \App\Models\FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())
-        ->get()
-        ->keyBy('product_id');
+    $flashItems = \Illuminate\Support\Facades\Cache::remember('active_flash_sale_items', 60, fn() =>
+        \App\Models\FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())->get()
+    )->keyBy('product_id');
     $flashProductIds = $flashItems->keys()->toArray();
     $isAuth = auth()->check();
 @endphp

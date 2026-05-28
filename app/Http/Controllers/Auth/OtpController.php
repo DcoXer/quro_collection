@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\OtpVerification;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 class OtpController extends Controller
@@ -13,7 +14,10 @@ class OtpController extends Controller
     public function show()
     {
         if (!session('otp_user_id')) {
-            return redirect()->route('register');
+            $fallback = session('otp_purpose') === 'reset_password'
+                ? 'password.request'
+                : 'register';
+            return redirect()->route($fallback);
         }
 
         if (!session('otp_started_at')) {
@@ -21,8 +25,9 @@ class OtpController extends Controller
         }
 
         $secondsLeft = max(0, 300 - (now()->timestamp - session('otp_started_at')));
+        $purpose     = session('otp_purpose', 'register');
 
-        return view('auth.otp', compact('secondsLeft'));
+        return view('auth.otp', compact('secondsLeft', 'purpose'));
     }
 
     public function verify(Request $request)
@@ -31,12 +36,13 @@ class OtpController extends Controller
             'otp' => 'required|string|size:6',
         ]);
 
-        $userId = session('otp_user_id');
-        $otp = trim($request->otp);
+        $userId  = session('otp_user_id');
+        $purpose = session('otp_purpose', 'register');
 
         if (!$userId) {
-            return redirect()->route('register')
-                ->with('error', 'Sesi habis. Silakan daftar ulang.');
+            $fallback = $purpose === 'reset_password' ? 'password.request' : 'register';
+            return redirect()->route($fallback)
+                ->with('error', 'Sesi habis. Silakan coba lagi.');
         }
 
         $user = User::find($userId);
@@ -53,17 +59,29 @@ class OtpController extends Controller
             return back()->withErrors(['otp' => 'Kode OTP tidak valid.']);
         }
 
-        // Verifikasi user
+        // Hapus OTP dari DB setelah berhasil digunakan
         $user->update([
-            'is_verified'      => true,
-            'otp_code'         => null,
-            'otp_expires_at'   => null,
+            'otp_code'       => null,
+            'otp_expires_at' => null,
+        ]);
+
+        session()->forget(['otp_user_id', 'otp_purpose', 'otp_started_at']);
+
+        // --- Reset password flow ---
+        if ($purpose === 'reset_password') {
+            session(['password_reset_user_id' => $user->id]);
+
+            return redirect()->route('password.reset')
+                ->with('success', 'OTP terverifikasi. Silakan buat password baru.');
+        }
+
+        // --- Register / login flow ---
+        $user->update([
+            'is_verified'       => true,
             'email_verified_at' => now(),
         ]);
 
-        session()->forget('otp_user_id');
-
-        \Illuminate\Support\Facades\Auth::login($user);
+        Auth::login($user);
 
         return redirect()->route('shop.index')
             ->with('success', 'Akun berhasil diverifikasi! Selamat berbelanja.');
@@ -72,20 +90,22 @@ class OtpController extends Controller
     public function resend()
     {
         session(['otp_started_at' => now()->timestamp]);
-        $userId = session('otp_user_id');
+
+        $userId  = session('otp_user_id');
+        $purpose = session('otp_purpose', 'register');
 
         if (!$userId) {
-            return redirect()->route('register');
+            $fallback = $purpose === 'reset_password' ? 'password.request' : 'register';
+            return redirect()->route($fallback);
         }
 
         $user = User::find($userId);
 
         if (!$user) {
-            return redirect()->route('register');
+            return redirect()->route($purpose === 'reset_password' ? 'password.request' : 'register');
         }
 
-        // Generate OTP baru
-        $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $otp = (string) random_int(100000, 999999);
 
         $user->update([
             'otp_code'       => $otp,

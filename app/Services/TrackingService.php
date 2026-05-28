@@ -20,24 +20,30 @@ class TrackingService
     {
         $cacheKey = "tracking_{$courier}_{$trackingNumber}";
 
-        // Cache 15 menit biar tidak spam API
-        return Cache::remember($cacheKey, 900, function () use ($courier, $trackingNumber) {
-            try {
-                $response = Http::get($this->baseUrl . '/track', [
-                    'api_key' => $this->apiKey,
-                    'courier' => $courier,
-                    'awb'     => $trackingNumber,
-                ]);
+        // Return dari cache jika ada data valid (bukan error)
+        $cached = Cache::get($cacheKey);
+        if ($cached && ($cached['status'] ?? '') !== 'error') {
+            return $cached;
+        }
 
-                if ($response->successful()) {
-                    return $response->json();
-                }
+        try {
+            $response = Http::timeout(10)->get($this->baseUrl . '/track', [
+                'api_key' => $this->apiKey,
+                'courier' => $courier,
+                'awb'     => $trackingNumber,
+            ]);
 
-                return ['status' => 'error', 'message' => 'Gagal mengambil data tracking.'];
-
-            } catch (\Exception $e) {
-                return ['status' => 'error', 'message' => 'Layanan tracking tidak tersedia.'];
+            if ($response->successful()) {
+                $data = $response->json();
+                // Cache 15 menit untuk data valid — error tidak di-cache agar bisa retry
+                Cache::put($cacheKey, $data, 900);
+                return $data;
             }
-        });
+
+            return ['status' => 'error', 'message' => 'Gagal mengambil data tracking.'];
+
+        } catch (\Exception $e) {
+            return ['status' => 'error', 'message' => 'Layanan tracking tidak tersedia.'];
+        }
     }
 }

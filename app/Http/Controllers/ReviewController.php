@@ -28,15 +28,17 @@ class ReviewController extends Controller
         $hasProduct = $order->items()->where('product_id', $request->product_id)->exists();
         abort_unless($hasProduct, 403, 'Produk tidak ditemukan di pesanan ini.');
 
+        // Key hanya (user_id, product_id) — 1 review per produk per user,
+        // order_id di-update jika user submit ulang dari order berbeda
         ProductReview::updateOrCreate(
             [
                 'user_id'    => auth()->id(),
                 'product_id' => $request->product_id,
-                'order_id'   => $request->order_id,
             ],
             [
-                'rating'  => $request->rating,
-                'comment' => $request->comment,
+                'order_id' => $request->order_id,
+                'rating'   => $request->rating,
+                'comment'  => $request->comment,
             ]
         );
 

@@ -28,6 +28,18 @@ class FonnteService
         $this->send($this->adminPhone, $message);
     }
 
+    public function notifyAdminFraud(string $invoiceNumber, int $dbAmount, int $midtransAmount, string $ip): void
+    {
+        $message = "⚠️ *PERINGATAN FRAUD TERDETEKSI!*\n\n"
+            . "Invoice       : {$invoiceNumber}\n"
+            . "Amount di DB  : Rp " . number_format($dbAmount, 0, ',', '.') . "\n"
+            . "Amount Midtrans: Rp " . number_format($midtransAmount, 0, ',', '.') . "\n"
+            . "IP            : {$ip}\n\n"
+            . "Segera periksa order ini di panel admin.";
+
+        $this->send($this->adminPhone, $message);
+    }
+
     private function send(string $target, string $message): void
     {
         try {

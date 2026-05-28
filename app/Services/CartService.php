@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\FlashSaleItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use Illuminate\Support\Facades\Cache;
 
 class CartService
 {
@@ -19,13 +20,20 @@ class CartService
         $items = [];
         $total = 0;
 
-        // Load active flash sale items once
-        $flashItems = FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())
+        // Batch-load semua products sekaligus — cegah N+1
+        $productIds = array_unique(array_column($cart, 'product_id'));
+        $products   = Product::with('variants')
+            ->whereIn('id', $productIds)
             ->get()
-            ->keyBy('product_id');
+            ->keyBy('id');
+
+        // Load active flash sale items once — cached 60s agar tidak query tiap cart resolve
+        $flashItems = Cache::remember('active_flash_sale_items', 60, fn() =>
+            FlashSaleItem::whereHas('flashSale', fn($q) => $q->active())->get()
+        )->keyBy('product_id');
 
         foreach ($cart as $item) {
-            $product = Product::with('variants')->find($item['product_id']);
+            $product = $products->get($item['product_id']);
 
             if (!$product || !$product->is_active) {
                 throw new \Exception("{$item['name']} tidak tersedia.");
