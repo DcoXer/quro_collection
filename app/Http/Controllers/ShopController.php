@@ -84,6 +84,21 @@ class ShopController extends Controller
         ));
     }
 
+    public function activityCounts()
+    {
+        $user = auth()->user();
+
+        return response()->json([
+            'cartCount'          => collect(session('cart', []))->sum('quantity'),
+            'wishlistCount'      => Wishlist::where('user_id', $user->id)->count(),
+            'activeOrdersCount'  => Order::where('user_id', $user->id)
+                                        ->whereIn('status', ['pending', 'processing', 'shipped'])
+                                        ->count(),
+            'unread'             => $user->unreadNotificationsCount(),
+            'recentCount'        => count(session('recently_viewed', [])),
+        ]);
+    }
+
     public function show(Product $product)
     {
         abort_if(!$product->is_active, 404);

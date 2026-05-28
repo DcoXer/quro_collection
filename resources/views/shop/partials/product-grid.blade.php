@@ -118,7 +118,7 @@
                         fetch('{{ route('wishlist.toggle', $product->id) }}', {
                             method: 'POST',
                             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
-                        }).then(r => r.json()).then(d => on = d.in_wishlist)
+                        }).then(r => r.json()).then(d => { on = d.in_wishlist; window.dispatchEvent(new CustomEvent('activity-updated')); })
                     "
                     :class="on ? 'text-red-500 hover:text-red-600' : 'text-gray-400 hover:text-red-500'"
                     class="w-6 h-6 flex items-center justify-center transition">

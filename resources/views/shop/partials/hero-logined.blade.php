@@ -83,8 +83,23 @@
                 </div>
                 <div>
                     <p class="text-white font-medium text-sm leading-tight">Halo, {{ $user->name }}!</p>
-                    <p class="text-white/60 text-xs mt-0.5">
-                        {{ $activeOrdersCount }} pesanan · {{ $wishlistCount }} wishlist · {{ $cartCount }} keranjang
+                    <p class="text-white/60 text-xs mt-0.5"
+                        x-data="{
+                            orders: {{ $activeOrdersCount }},
+                            wishlist: {{ $wishlistCount }},
+                            cart: {{ $cartCount }},
+                            init() { window.addEventListener('activity-updated', async () => {
+                                try {
+                                    const r = await fetch('{{ route('api.activity-counts') }}', { headers: { 'Accept': 'application/json' } });
+                                    if (!r.ok) return;
+                                    const d = await r.json();
+                                    this.orders = d.activeOrdersCount;
+                                    this.wishlist = d.wishlistCount;
+                                    this.cart = d.cartCount;
+                                } catch {}
+                            }); }
+                        }"
+                        x-text="orders + ' pesanan · ' + wishlist + ' wishlist · ' + cart + ' keranjang'">
                     </p>
                 </div>
             </div>
@@ -107,7 +122,30 @@
         </div>
 
         {{-- ── Right: Activity Sidebar (desktop only) ── --}}
-        <div class="hidden md:flex flex-col border-l border-gray-100 bg-white p-6">
+        <div class="hidden md:flex flex-col border-l border-gray-100 bg-white p-6"
+            x-data="{
+                cart: {{ $cartCount }},
+                orders: {{ $activeOrdersCount }},
+                wishlist: {{ $wishlistCount }},
+                recent: {{ count(session('recently_viewed', [])) }},
+                unread: {{ $unread }},
+                async refresh() {
+                    try {
+                        const r = await fetch('{{ route('api.activity-counts') }}', { headers: { 'Accept': 'application/json' } });
+                        if (!r.ok) return;
+                        const d = await r.json();
+                        this.cart    = d.cartCount;
+                        this.orders  = d.activeOrdersCount;
+                        this.wishlist = d.wishlistCount;
+                        this.recent  = d.recentCount;
+                        this.unread  = d.unread;
+                    } catch {}
+                },
+                init() {
+                    window.addEventListener('activity-updated', () => this.refresh());
+                    setInterval(() => this.refresh(), 60000);
+                }
+            }">
             <p class="text-[10px] tracking-[0.15em] uppercase text-gray-400 mb-4">Aktivitas</p>
 
             <div class="flex flex-col flex-1 justify-between">
@@ -122,11 +160,10 @@
                     </div>
                     <div class="min-w-0 flex-1">
                         <p class="text-xs font-medium text-gray-800 leading-tight">Keranjang</p>
-                        <p class="text-[11px] text-gray-400 leading-tight">{{ $cartCount }} item</p>
+                        <p class="text-[11px] text-gray-400 leading-tight" x-text="cart + ' item'"></p>
                     </div>
-                    @if($cartCount > 0)
-                    <span class="bg-gray-900 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center shrink-0">{{ $cartCount }}</span>
-                    @endif
+                    <span x-show="cart > 0" x-text="cart"
+                        class="bg-gray-900 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center shrink-0"></span>
                 </a>
 
                 {{-- Pesanan --}}
@@ -139,11 +176,10 @@
                     </div>
                     <div class="min-w-0 flex-1">
                         <p class="text-xs font-medium text-gray-800 leading-tight">Pesanan</p>
-                        <p class="text-[11px] text-gray-400 leading-tight">{{ $activeOrdersCount }} aktif</p>
+                        <p class="text-[11px] text-gray-400 leading-tight" x-text="orders + ' aktif'"></p>
                     </div>
-                    @if($activeOrdersCount > 0)
-                    <span class="bg-amber-500 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center shrink-0">{{ $activeOrdersCount }}</span>
-                    @endif
+                    <span x-show="orders > 0" x-text="orders"
+                        class="bg-amber-500 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center shrink-0"></span>
                 </a>
 
                 {{-- Wishlist --}}
@@ -156,15 +192,13 @@
                     </div>
                     <div class="min-w-0 flex-1">
                         <p class="text-xs font-medium text-gray-800 leading-tight">Wishlist</p>
-                        <p class="text-[11px] text-gray-400 leading-tight">{{ $wishlistCount }} produk</p>
+                        <p class="text-[11px] text-gray-400 leading-tight" x-text="wishlist + ' produk'"></p>
                     </div>
-                    @if($wishlistCount > 0)
-                    <span class="bg-red-500 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center shrink-0">{{ $wishlistCount }}</span>
-                    @endif
+                    <span x-show="wishlist > 0" x-text="wishlist"
+                        class="bg-red-500 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center shrink-0"></span>
                 </a>
 
                 {{-- Terakhir Dilihat --}}
-                @php $recentCount = count(session('recently_viewed', [])); @endphp
                 <a href="{{ route('shop.index') }}#products" class="flex items-center gap-3 group">
                     <div class="w-8 h-8 rounded-lg bg-gray-50 group-hover:bg-gray-100 border border-gray-100 flex items-center justify-center shrink-0 transition">
                         <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,7 +210,7 @@
                     </div>
                     <div class="min-w-0 flex-1">
                         <p class="text-xs font-medium text-gray-800 leading-tight">Terakhir Dilihat</p>
-                        <p class="recent-viewed-count text-[11px] text-gray-400 leading-tight">{{ $recentCount }} produk</p>
+                        <p class="recent-viewed-count text-[11px] text-gray-400 leading-tight" x-text="recent + ' produk'"></p>
                     </div>
                 </a>
 
@@ -190,13 +224,11 @@
                     </div>
                     <div class="min-w-0 flex-1">
                         <p class="text-xs font-medium text-gray-800 leading-tight">Notifikasi</p>
-                        <p class="text-[11px] text-gray-400 leading-tight">
-                            {{ $unread > 0 ? $unread.' belum dibaca' : 'Semua terbaca' }}
-                        </p>
+                        <p class="text-[11px] text-gray-400 leading-tight"
+                            x-text="unread > 0 ? unread + ' belum dibaca' : 'Semua terbaca'"></p>
                     </div>
-                    @if($unread > 0)
-                    <span class="bg-blue-500 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center shrink-0">{{ $unread }}</span>
-                    @endif
+                    <span x-show="unread > 0" x-text="unread"
+                        class="bg-blue-500 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center shrink-0"></span>
                 </a>
 
             </div>
@@ -207,7 +239,28 @@
             style="-webkit-overflow-scrolling: touch; scrollbar-width: none;"
             ontouchstart="event.stopPropagation()"
             ontouchmove="event.stopPropagation()"
-            ontouchend="event.stopPropagation()">
+            ontouchend="event.stopPropagation()"
+            x-data="{
+                cart: {{ $cartCount }},
+                orders: {{ $activeOrdersCount }},
+                wishlist: {{ $wishlistCount }},
+                unread: {{ $unread }},
+                async refresh() {
+                    try {
+                        const r = await fetch('{{ route('api.activity-counts') }}', { headers: { 'Accept': 'application/json' } });
+                        if (!r.ok) return;
+                        const d = await r.json();
+                        this.cart    = d.cartCount;
+                        this.orders  = d.activeOrdersCount;
+                        this.wishlist = d.wishlistCount;
+                        this.unread  = d.unread;
+                    } catch {}
+                },
+                init() {
+                    window.addEventListener('activity-updated', () => this.refresh());
+                    setInterval(() => this.refresh(), 60000);
+                }
+            }">
             <div class="flex gap-3 px-4 py-3 whitespace-nowrap">
 
                 <a href="{{ route('cart.index') }}"
@@ -217,9 +270,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
-                        @if($cartCount > 0)
-                        <span class="absolute -top-1 -right-1 bg-gray-900 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{{ $cartCount }}</span>
-                        @endif
+                        <span x-show="cart > 0" x-text="cart"
+                            class="absolute -top-1 -right-1 bg-gray-900 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center"></span>
                     </div>
                     <span class="text-[11px] text-gray-600 font-medium">Keranjang</span>
                 </a>
@@ -231,9 +283,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
-                        @if($activeOrdersCount > 0)
-                        <span class="absolute -top-1 -right-1 bg-amber-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{{ $activeOrdersCount }}</span>
-                        @endif
+                        <span x-show="orders > 0" x-text="orders"
+                            class="absolute -top-1 -right-1 bg-amber-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center"></span>
                     </div>
                     <span class="text-[11px] text-gray-600 font-medium">Pesanan</span>
                 </a>
@@ -245,9 +296,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                 d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                         </svg>
-                        @if($wishlistCount > 0)
-                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{{ $wishlistCount }}</span>
-                        @endif
+                        <span x-show="wishlist > 0" x-text="wishlist"
+                            class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center"></span>
                     </div>
                     <span class="text-[11px] text-gray-600 font-medium">Wishlist</span>
                 </a>
@@ -270,9 +320,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
-                        @if($unread > 0)
-                        <span class="absolute -top-1 -right-1 bg-blue-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{{ $unread }}</span>
-                        @endif
+                        <span x-show="unread > 0" x-text="unread"
+                            class="absolute -top-1 -right-1 bg-blue-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center"></span>
                     </div>
                     <span class="text-[11px] text-gray-600 font-medium">Notifikasi</span>
                 </a>

@@ -209,6 +209,7 @@ window.qvSubmitCart = async function () {
             badge.classList.remove('hidden');
             badge.classList.add('flex');
         });
+        window.dispatchEvent(new CustomEvent('activity-updated'));
         setTimeout(() => {
             closeQuickView();
             showToast('Produk ditambahkan ke keranjang', 'success');
@@ -256,6 +257,7 @@ window.qvToggleWishlist = async function () {
             }
         }
 
+        window.dispatchEvent(new CustomEvent('activity-updated'));
         showToast(qvInWishlist ? 'Ditambahkan ke wishlist' : 'Dihapus dari wishlist', 'success');
     } catch {
         // revert on error

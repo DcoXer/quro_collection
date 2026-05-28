@@ -22,7 +22,7 @@ class HeroSlideResource extends Resource
 
     protected static ?string $navigationLabel = 'Hero Beranda';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Pengaturan';
+    protected static \UnitEnum|string|null $navigationGroup = 'Konten';
 
     protected static ?int $navigationSort = 10;
 

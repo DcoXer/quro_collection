@@ -1,56 +1,163 @@
+/* ====== KEYFRAMES ====== */
 @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(36px); }
+    from { opacity: 0; transform: translateY(40px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeIn {
     from { opacity: 0; }
     to   { opacity: 1; }
 }
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.93); }
+    to   { opacity: 1; transform: scale(1); }
+}
 @keyframes marquee {
     from { transform: translateX(0); }
     to   { transform: translateX(-50%); }
 }
+@keyframes pulseRing {
+    0%   { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.9); opacity: 0; }
+}
+@keyframes scrollHint {
+    0%, 100% { transform: translateX(0); opacity: 1; }
+    60%       { transform: translateX(6px); opacity: 0.5; }
+}
 
-.anim-fade-up { animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) forwards; opacity: 0; }
-.anim-fade-in { animation: fadeIn 0.9s ease forwards; opacity: 0; }
-.delay-1 { animation-delay: 0.12s; }
-.delay-2 { animation-delay: 0.24s; }
-.delay-3 { animation-delay: 0.36s; }
-.delay-4 { animation-delay: 0.48s; }
-.delay-5 { animation-delay: 0.60s; }
+/* ====== HERO ENTRY ====== */
+.anim-fade-up  { animation: fadeUp  1.3s cubic-bezier(0.16,1,0.3,1) forwards; opacity: 0; }
+.anim-fade-in  { animation: fadeIn  1.3s ease forwards; opacity: 0; }
+.anim-scale-in { animation: scaleIn 1.3s cubic-bezier(0.16,1,0.3,1) forwards; opacity: 0; }
 
-.marquee-track        { animation: marquee 24s linear infinite; }
-.marquee-track:hover  { animation-play-state: paused; }
+.delay-1 { animation-delay: 0.20s; }
+.delay-2 { animation-delay: 0.42s; }
+.delay-3 { animation-delay: 0.64s; }
+.delay-4 { animation-delay: 0.86s; }
+.delay-5 { animation-delay: 1.08s; }
 
-/* Scroll reveal variants */
+/* ====== MARQUEE ====== */
+.marquee-track       { animation: marquee 28s linear infinite; }
+.marquee-track:hover { animation-play-state: paused; }
+
+/* ====== SCROLL REVEAL ====== */
 .reveal {
     opacity: 0;
-    transform: translateY(28px);
-    transition: opacity 0.65s ease, transform 0.65s ease;
+    transform: translateY(30px);
+    transition: opacity 0.75s cubic-bezier(0.16,1,0.3,1),
+                transform 0.75s cubic-bezier(0.16,1,0.3,1);
 }
-.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal.visible { opacity: 1; transform: none; }
 
 .reveal-left {
     opacity: 0;
-    transform: translateX(-32px);
-    transition: opacity 0.65s ease, transform 0.65s ease;
+    transform: translateX(-40px);
+    transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1),
+                transform 0.8s cubic-bezier(0.16,1,0.3,1);
 }
-.reveal-left.visible { opacity: 1; transform: translateX(0); }
+.reveal-left.visible { opacity: 1; transform: none; }
 
 .reveal-right {
     opacity: 0;
-    transform: translateX(32px);
-    transition: opacity 0.65s ease, transform 0.65s ease;
+    transform: translateX(40px);
+    transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1),
+                transform 0.8s cubic-bezier(0.16,1,0.3,1);
 }
-.reveal-right.visible { opacity: 1; transform: translateX(0); }
+.reveal-right.visible { opacity: 1; transform: none; }
 
-.stagger-1 { transition-delay: 0.08s; }
-.stagger-2 { transition-delay: 0.16s; }
-.stagger-3 { transition-delay: 0.24s; }
-.stagger-4 { transition-delay: 0.32s; }
-.stagger-5 { transition-delay: 0.40s; }
+.reveal-scale {
+    opacity: 0;
+    transform: scale(0.94);
+    transition: opacity 0.75s cubic-bezier(0.16,1,0.3,1),
+                transform 0.75s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal-scale.visible { opacity: 1; transform: none; }
 
-/* Image hover zoom */
+/* ====== STAGGER ====== */
+.stagger-1 { transition-delay: 0.05s; }
+.stagger-2 { transition-delay: 0.12s; }
+.stagger-3 { transition-delay: 0.19s; }
+.stagger-4 { transition-delay: 0.26s; }
+.stagger-5 { transition-delay: 0.33s; }
+.stagger-6 { transition-delay: 0.40s; }
+
+/* ====== IMAGE HOVER ZOOM ====== */
 .img-hover          { overflow: hidden; }
-.img-hover img      { transition: transform 0.7s cubic-bezier(0.16,1,0.3,1); }
-.img-hover:hover img { transform: scale(1.06); }
+.img-hover img      { transition: transform 0.85s cubic-bezier(0.16,1,0.3,1); }
+.img-hover:hover img { transform: scale(1.07); }
+
+/* ====== PARALLAX ====== */
+.parallax-img { will-change: transform; }
+
+/* ====== PRODUCT CARD (vertical lift) ====== */
+.product-card {
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1),
+                box-shadow 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 40px -10px rgba(0,0,0,0.14);
+}
+
+/* ====== HORIZONTAL SCROLL STRIP ====== */
+.h-scroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* left padding via padding-left on parent */
+}
+.h-scroll::-webkit-scrollbar { display: none; }
+
+.h-scroll-card {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+}
+
+/* swipe hint arrow on mobile */
+.swipe-hint {
+    animation: scrollHint 2s ease-in-out infinite;
+    display: inline-flex;
+}
+
+/* ====== FLASH SALE ====== */
+.countdown-digit {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    min-width: 2ch;
+    display: inline-block;
+    text-align: center;
+}
+.pulse-ring { position: relative; }
+.pulse-ring::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: currentColor;
+    animation: pulseRing 1.5s ease-out infinite;
+}
+
+/* ====== NUMBER COUNTER ====== */
+[data-counter] { font-variant-numeric: tabular-nums; }
+
+/* ====== TESTIMONIAL CARD ====== */
+.testimonial-card {
+    transition: transform 0.35s cubic-bezier(0.16,1,0.3,1),
+                box-shadow 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+.testimonial-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px -8px rgba(0,0,0,0.10);
+}
+
+/* ====== SECTION DIVIDER ====== */
+.section-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}

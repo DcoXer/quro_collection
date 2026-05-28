@@ -21,6 +21,17 @@
     .stagger-3 { transition-delay: 0.15s; }
     .stagger-4 { transition-delay: 0.20s; }
     .stagger-5 { transition-delay: 0.25s; }
+    /* Rich content styling */
+    .rich-content h2 { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 600; color: #fff; margin-bottom: 0.75rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #27272a; }
+    .rich-content h2:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+    .rich-content h3 { font-size: 1rem; font-weight: 600; color: #e4e4e7; margin-bottom: 0.5rem; margin-top: 1.5rem; }
+    .rich-content p { color: #a1a1aa; font-size: 0.875rem; line-height: 1.75; margin-bottom: 0.75rem; }
+    .rich-content ul, .rich-content ol { color: #a1a1aa; font-size: 0.875rem; padding-left: 1.25rem; margin-bottom: 0.75rem; }
+    .rich-content ul { list-style-type: disc; }
+    .rich-content ol { list-style-type: decimal; }
+    .rich-content li { margin-bottom: 0.4rem; line-height: 1.7; }
+    .rich-content strong { color: #e4e4e7; font-weight: 600; }
+    .rich-content a { color: #a1a1aa; text-decoration: underline; }
 </style>
 @endpush
 
@@ -43,9 +54,13 @@
 
         <div class="w-12 h-px bg-zinc-800 mx-auto mb-16"></div>
 
-        <div class="space-y-14">
-
-            {{-- 1 --}}
+        <div class="page-content reveal">
+            @if($page?->content)
+            <div class="rich-content">
+                {!! $page->content !!}
+            </div>
+            @else
+            {{-- Fallback static content --}}
             <div class="reveal stagger-1">
                 <div class="flex items-center gap-3 mb-4">
                     <span class="text-xs font-semibold text-zinc-600 tracking-widest uppercase">01</span>
@@ -208,7 +223,7 @@
                     Syarat dan ketentuan ini diatur berdasarkan hukum Republik Indonesia. Setiap sengketa yang timbul akan diselesaikan secara musyawarah. Apabila tidak tercapai kesepakatan, penyelesaian akan dilakukan melalui jalur hukum yang berlaku di Indonesia.
                 </p>
             </div>
-
+            @endif
         </div>
 
         {{-- Contact CTA --}}

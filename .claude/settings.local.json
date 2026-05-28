@@ -27,7 +27,15 @@
       "Bash(grep -A 20 \"createTable\\\\|index\\\\|unique\" /c/laragon/www/qurocollection/database/migrations/*.php)",
       "Bash(grep -n \"payment_token\\\\|->toJson\\\\|->get\\(\\)\\\\|->pluck\" /c/laragon/www/qurocollection/app/Http/Controllers/*.php)",
       "Bash(grep:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(php -l app/Models/SiteSetting.php)",
+      "Bash(php -l app/Models/Page.php)",
+      "Bash(php -l app/Filament/Pages/SiteSettingsPage.php)",
+      "Bash(php -l app/Filament/Resources/PageContent/PageResource.php)",
+      "Bash(php -l app/Filament/Resources/PageContent/Schemas/PageForm.php)",
+      "Bash(php -l app/Filament/Resources/PageContent/Tables/PagesTable.php)",
+      "Bash(php -l app/Filament/Resources/PageContent/Pages/ListPages.php)",
+      "Bash(php -l app/Filament/Resources/PageContent/Pages/EditPage.php)"
     ]
   }
 }

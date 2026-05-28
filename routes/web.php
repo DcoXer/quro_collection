@@ -29,14 +29,42 @@ Route::get('/', function () {
     $totalSold     = \App\Models\OrderItem::sum('quantity');
     $totalCustomers = \App\Models\User::count();
     $totalProducts = \App\Models\Product::where('is_active', true)->count();
-    return view('welcome', compact('heroSlides', 'categories', 'totalSold', 'totalCustomers', 'totalProducts'));
+
+    $activeFlashSale = \App\Models\FlashSale::active()
+        ->with(['items' => fn($q) => $q->with(['product' => fn($q) => $q->where('is_active', true)->with('variants')])])
+        ->first();
+
+    $latestProducts = \App\Models\Product::where('is_active', true)
+        ->whereNotNull('image')
+        ->withCount('reviews as review_count')
+        ->withAvg('reviews as avg_rating', 'rating')
+        ->latest()
+        ->limit(6)
+        ->get();
+
+    $testimonials = \App\Models\ProductReview::where('is_approved', true)
+        ->where('rating', '>=', 4)
+        ->whereNotNull('comment')
+        ->with(['user', 'product'])
+        ->latest()
+        ->limit(4)
+        ->get();
+
+    return view('welcome', compact('heroSlides', 'categories', 'totalSold', 'totalCustomers', 'totalProducts', 'activeFlashSale', 'latestProducts', 'testimonials'));
 })->name('home');
 Route::get('/about', function () {
     $totalSold = \App\Models\OrderItem::sum('quantity');
-    return view('about', compact('totalSold'));
+    $page = \App\Models\Page::findBySlug('about');
+    return view('about', compact('totalSold', 'page'));
 })->name('about');
-Route::get('/privacy-policy', fn() => view('privacy'))->name('privacy');
-Route::get('/terms-of-service', fn() => view('terms'))->name('terms');
+Route::get('/privacy-policy', function () {
+    $page = \App\Models\Page::findBySlug('privacy-policy');
+    return view('privacy', compact('page'));
+})->name('privacy');
+Route::get('/terms-of-service', function () {
+    $page = \App\Models\Page::findBySlug('terms-of-service');
+    return view('terms', compact('page'));
+})->name('terms');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/shop/search', [ShopController::class, 'search'])->name('shop.search');
@@ -117,6 +145,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/{product}/toggle', [WishlistController::class, 'toggle'])->middleware('throttle:wishlist')->name('wishlist.toggle');
     Route::delete('/wishlist/{wishlist}', [WishlistController::class, 'destroy'])->middleware('throttle:wishlist')->name('wishlist.destroy');
+
+    // Activity counts (for hero real-time update)
+    Route::get('/api/activity-counts', [ShopController::class, 'activityCounts'])->name('api.activity-counts');
 });
 
 require __DIR__ . '/auth.php';

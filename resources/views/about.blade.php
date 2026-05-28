@@ -117,8 +117,13 @@
             </div>
             <h2 style="font-family: 'Playfair Display', serif;"
                 class="text-3xl md:text-4xl font-semibold text-gray-900 leading-tight mb-6">
-                Dibangun dengan passion,<br>dipakai dengan bangga.
+                {{ $page?->title ?? 'Dibangun dengan passion, dipakai dengan bangga.' }}
             </h2>
+            @if($page?->content)
+            <div class="text-gray-500 text-sm leading-relaxed mb-8 space-y-4">
+                {!! $page->content !!}
+            </div>
+            @else
             <p class="text-gray-500 leading-relaxed mb-5">
                 Quro Collection lahir dari kecintaan terhadap fashion muslim yang modern namun tetap
                 menjaga nilai-nilai kesederhanaan dan keanggunan. Kami percaya bahwa tampil rapi
@@ -128,6 +133,7 @@
                 Setiap produk kami dirancang dengan teliti, menggunakan bahan pilihan yang nyaman
                 dipakai sepanjang hari — dari aktivitas sehari-hari hingga momen spesial bersama keluarga.
             </p>
+            @endif
             <a href="{{ route('shop.index') }}"
                 class="inline-flex items-center gap-2 text-sm font-medium text-gray-900 border-b border-gray-900 pb-0.5 hover:gap-3 transition-all">
                 Lihat Koleksi
