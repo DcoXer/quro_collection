@@ -63,13 +63,13 @@
                 </div>
 
                 @foreach($cart as $key => $item)
-                    <div class="item-row grid grid-cols-12 gap-4 items-center p-4 bg-white border border-gray-100 rounded-2xl hover:border-gray-200 hover:shadow-sm transition">
+                    <div class="item-row grid grid-cols-12 gap-4 items-center p-4 bg-white border border-gray-100 rounded-2xl hover:border-gray-200 hover:shadow-sm transition" data-cart-key="{{ $key }}">
 
                         {{-- Image + Name --}}
                         <div class="col-span-12 md:col-span-6 flex items-center gap-4">
                             <div class="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden shrink-0 relative">
                                 @if($item['image'])
-                                    <img src="{{ Storage::url($item['image']) }}" class="w-full h-full object-cover">
+                                    <img src="{{ Storage::url($item['image']) }}" class="w-full h-full object-cover" loading="lazy">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center">
                                         <svg class="w-6 h-6 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,15 +100,14 @@
                                     <p class="text-[10px] text-amber-500 mt-0.5">Hemat Rp {{ number_format($saved, 0, ',', '.') }}</p>
                                 @endif
                                 {{-- Remove button mobile --}}
-                                <form method="POST" action="{{ route('cart.remove', $key) }}" class="md:hidden mt-1">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="text-xs text-red-400 hover:text-red-600 transition flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                        </svg>
-                                        Hapus
-                                    </button>
-                                </form>
+                                <button type="button"
+                                    onclick="removeCartItem('{{ $key }}', '{{ route('cart.remove', $key) }}')"
+                                    class="md:hidden mt-1 text-xs text-red-400 hover:text-red-600 transition flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                    Hapus
+                                </button>
                             </div>
                         </div>
 
@@ -170,15 +169,13 @@
                                     Rp {{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }}
                                 </p>
                             </div>
-                            <form method="POST" action="{{ route('cart.remove', $key) }}" class="hidden md:block">
-                                @csrf @method('DELETE')
-                                <button type="submit"
-                                    class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 transition">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                </button>
-                            </form>
+                            <button type="button"
+                                onclick="removeCartItem('{{ $key }}', '{{ route('cart.remove', $key) }}')"
+                                class="hidden md:flex w-7 h-7 rounded-lg items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
                         </div>
 
                     </div>
@@ -203,8 +200,8 @@
 
                     {{-- Items --}}
                     <div class="space-y-3 mb-5">
-                        @foreach($cart as $item)
-                            <div class="flex justify-between items-start gap-2">
+                        @foreach($cart as $key => $item)
+                            <div class="flex justify-between items-start gap-2" data-summary-key="{{ $key }}">
                                 <div class="flex items-start gap-1.5 min-w-0">
                                     @if($item['flash_sale'])
                                         <span class="mt-0.5 shrink-0 inline-flex items-center justify-center w-4 h-4 bg-amber-400 rounded-full">

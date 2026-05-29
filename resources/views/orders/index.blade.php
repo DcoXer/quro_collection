@@ -65,7 +65,6 @@
                             <span @class([
                                 'text-xs px-2.5 py-1 rounded-full font-medium',
                                 'bg-yellow-50 text-yellow-600'  => $order->status === 'pending',
-                                'bg-blue-50 text-blue-600'      => $order->status === 'paid',
                                 'bg-purple-50 text-purple-600'  => $order->status === 'processing',
                                 'bg-indigo-50 text-indigo-600'  => $order->status === 'shipped',
                                 'bg-green-50 text-green-600'    => $order->status === 'delivered',

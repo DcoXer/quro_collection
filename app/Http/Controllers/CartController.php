@@ -149,15 +149,27 @@ class CartController extends Controller
         ]);
     }
 
-    public function remove($productId)
+    public function remove(Request $request, $productId)
     {
         if (!preg_match('/^\d+_\S+$/', $productId)) {
+            if ($request->expectsJson()) return response()->json(['success' => false], 400);
             return redirect()->route('cart.index');
         }
 
         $cart = session()->get('cart', []);
         unset($cart[$productId]);
         session()->put('cart', $cart);
+
+        if ($request->expectsJson()) {
+            $total = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
+            return response()->json([
+                'success'   => true,
+                'isEmpty'   => empty($cart),
+                'formatted' => 'Rp ' . number_format($total, 0, ',', '.'),
+                'cartCount' => collect($cart)->sum('quantity'),
+            ]);
+        }
+
         return redirect()->route('cart.index')->with('success', 'Produk dihapus dari keranjang.');
     }
 

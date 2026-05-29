@@ -26,7 +26,7 @@ ssh root@IP_VPS_KAMU
 
 Upload dan jalankan setup script:
 ```bash
-curl -o setup.sh https://raw.githubusercontent.com/USERNAME/qurocollection/main/deploy/setup-vps.sh
+curl -o setup.sh https://raw.githubusercontent.com/DcoXer/quro_collection/main/deploy/setup-vps.sh
 bash setup.sh
 ```
 
@@ -40,7 +40,7 @@ Atau copy-paste isi file `deploy/setup-vps.sh` langsung.
 
 ```bash
 cd /var/www/qurocollection
-git clone https://github.com/USERNAME/qurocollection.git .
+git clone https://github.com/DcoXer/quro_collection.git .
 ```
 
 ---
@@ -55,8 +55,13 @@ nano .env
 Isi semua field yang kosong:
 - `APP_KEY` → generate dengan `php artisan key:generate`
 - `DB_PASSWORD` → dari output setup script
-- `MIDTRANS_SERVER_KEY` & `MIDTRANS_CLIENT_KEY` → dari dashboard Midtrans (mode Production)
-- `MAIL_*` → SMTP provider kamu
+- `MIDTRANS_SERVER_KEY` & `MIDTRANS_CLIENT_KEY` → dashboard Midtrans (mode Production)
+- `BITESHIP_API_KEY` → live key dari dashboard Biteship (bukan `biteship_test.*`)
+- `BITESHIP_SHIPPER_*` → data toko/pengirim
+- `FONNTE_TOKEN` & `FONNTE_ADMIN_PHONE` → dashboard Fonnte
+- `APICOIID_KEY`, `BINDERBYTE_API_KEY` → key masing-masing provider
+- `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET` → Google Cloud Console
+- `MAIL_*` → SMTP provider (Mailgun, Resend, SES, dll)
 
 ---
 
@@ -71,6 +76,7 @@ php artisan storage:link
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+php artisan event:cache
 
 sudo chown -R www-data:www-data storage bootstrap/cache
 sudo chmod -R 775 storage bootstrap/cache
@@ -88,7 +94,66 @@ Ikuti instruksi, pilih redirect HTTP → HTTPS.
 
 ---
 
-## Step 6 — Setup GitHub Actions CI/CD
+## Step 6 — Setup Queue Worker (Supervisor)
+
+Queue worker diperlukan untuk **email konfirmasi order, email status shipped, dan email lainnya**.
+
+Install Supervisor:
+```bash
+apt install -y supervisor
+```
+
+Buat config:
+```bash
+nano /etc/supervisor/conf.d/qurocollection-worker.conf
+```
+
+Isi dengan:
+```ini
+[program:qurocollection-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /var/www/qurocollection/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/var/www/qurocollection/storage/logs/worker.log
+stopwaitsecs=3600
+```
+
+Aktifkan:
+```bash
+supervisorctl reread
+supervisorctl update
+supervisorctl start qurocollection-worker:*
+```
+
+Cek status:
+```bash
+supervisorctl status
+```
+
+---
+
+## Step 7 — Setup Laravel Scheduler (Cron)
+
+Scheduler diperlukan untuk **auto-update status order ke `delivered`** setelah beberapa hari shipped.
+
+```bash
+crontab -e -u www-data
+```
+
+Tambahkan baris ini:
+```
+* * * * * cd /var/www/qurocollection && php artisan schedule:run >> /dev/null 2>&1
+```
+
+---
+
+## Step 8 — Setup GitHub Actions CI/CD
 
 Di repository GitHub, masuk ke **Settings → Secrets and variables → Actions**, tambah:
 
@@ -96,7 +161,7 @@ Di repository GitHub, masuk ke **Settings → Secrets and variables → Actions*
 |--------|-------|
 | `VPS_HOST` | IP VPS kamu |
 | `VPS_USER` | `root` atau user lain |
-| `VPS_SSH_KEY` | Private key SSH (isi dari `cat ~/.ssh/id_rsa`) |
+| `VPS_SSH_KEY` | Private key SSH (isi dari `cat ~/.ssh/id_ed25519`) |
 | `VPS_PORT` | `22` |
 
 Cara buat SSH key di VPS:
@@ -123,12 +188,20 @@ bash deploy/deploy-manual.sh
 ## Checklist Final Sebelum Live
 
 - [ ] `APP_DEBUG=false` di .env
-- [ ] `MIDTRANS_IS_PRODUCTION=true` + key production
+- [ ] `MIDTRANS_IS_PRODUCTION=true` + key production (bukan SB-)
+- [ ] `BITESHIP_API_KEY` pakai live key (bukan `biteship_test.*`)
+- [ ] `FONNTE_TOKEN` & `FONNTE_ADMIN_PHONE` sudah diisi
+- [ ] `MAIL_HOST` bukan Mailtrap sandbox
 - [ ] SSL aktif (HTTPS)
 - [ ] `php artisan storage:link` sudah dijalankan
+- [ ] Queue worker running (`supervisorctl status`)
+- [ ] Laravel Scheduler aktif (`crontab -l -u www-data`)
+- [ ] Midtrans Notification URL sudah diset: `https://qurocollection.com/webhook/midtrans`
 - [ ] Test payment dengan kartu uji Midtrans
-- [ ] Test kirim email (register, order confirmation)
+- [ ] Test kirim email (register, order confirmation, shipped dengan resi)
+- [ ] Test notifikasi WhatsApp admin saat order masuk
 - [ ] Cek semua halaman di mobile
+- [ ] Daftar Google Search Console + submit sitemap
 
 ---
 
@@ -137,6 +210,15 @@ bash deploy/deploy-manual.sh
 ```bash
 # Cek log error Laravel
 tail -f /var/www/qurocollection/storage/logs/laravel.log
+
+# Cek log queue worker
+tail -f /var/www/qurocollection/storage/logs/worker.log
+
+# Cek status Supervisor
+supervisorctl status
+
+# Restart queue worker (setelah deploy)
+php artisan queue:restart
 
 # Cek status Nginx
 systemctl status nginx

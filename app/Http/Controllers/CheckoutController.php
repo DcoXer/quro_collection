@@ -46,7 +46,10 @@ class CheckoutController extends Controller
             'price'      => $item['price'],
         ])->values()->all();
 
-        return view('checkout.index', compact('cart', 'total'));
+        // Total weight in kg — 500g per item unit (consistent with BiteshipService::buildItems)
+        $weight = max(0.1, collect($resolved)->sum(fn($item) => $item['quantity'] * 0.5));
+
+        return view('checkout.index', compact('cart', 'total', 'weight'));
     }
 
     public function store(Request $request)

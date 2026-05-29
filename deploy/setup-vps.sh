@@ -137,9 +137,37 @@ ln -sf /etc/nginx/sites-available/qurocollection /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
 
-# ── 9. Install Certbot SSL ───────────────────────────
+# ── 9. Install Supervisor ────────────────────────────
 echo ""
-echo "[9/9] Install Certbot (SSL)..."
+echo "[9/10] Install Supervisor (queue worker)..."
+apt install -y supervisor
+systemctl enable supervisor
+systemctl start supervisor
+
+cat > /etc/supervisor/conf.d/qurocollection-worker.conf <<SUPERVISOR
+[program:qurocollection-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php ${APP_DIR}/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=1
+redirect_stderr=true
+stdout_logfile=${APP_DIR}/storage/logs/worker.log
+stopwaitsecs=3600
+SUPERVISOR
+
+supervisorctl reread
+supervisorctl update
+
+echo "  Queue worker config dibuat. Aktifkan setelah app di-deploy:"
+echo "  supervisorctl start qurocollection-worker:*"
+
+# ── 10. Install Certbot SSL ──────────────────────────
+echo ""
+echo "[10/10] Install Certbot (SSL)..."
 apt install -y certbot python3-certbot-nginx
 echo ""
 echo "  Jalankan ini setelah domain sudah pointing ke VPS:"
@@ -157,9 +185,11 @@ echo "  DB_PASSWORD=${DB_PASS}"
 echo ""
 echo "  Langkah selanjutnya:"
 echo "  1. Clone repo ke ${APP_DIR}"
-echo "  2. Copy .env dan isi kredensial di atas"
+echo "  2. Copy deploy/env.production.example ke .env dan isi semua kredensial"
 echo "  3. php artisan key:generate"
 echo "  4. php artisan migrate --force"
 echo "  5. php artisan storage:link"
-echo "  6. certbot --nginx -d ${DOMAIN} -d www.${DOMAIN}"
+echo "  6. supervisorctl start qurocollection-worker:*"
+echo "  7. crontab -e -u www-data  (tambah Laravel scheduler)"
+echo "  8. certbot --nginx -d ${DOMAIN} -d www.${DOMAIN}"
 echo "=================================================="

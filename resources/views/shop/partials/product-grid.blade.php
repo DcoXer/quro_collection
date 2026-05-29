@@ -45,6 +45,7 @@
                     @if($product->image)
                     <div class="slide-item w-full h-full shrink-0 overflow-hidden">
                         <img src="{{ Storage::url($product->image) }}"
+                            loading="lazy"
                             class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105">
                     </div>
                     @endif
@@ -57,6 +58,7 @@
                         </video>
                         @else
                         <img src="{{ Storage::url($media->path) }}"
+                            loading="lazy"
                             class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105">
                         @endif
                     </div>

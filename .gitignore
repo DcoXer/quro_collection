@@ -5,8 +5,7 @@
 .env.production
 .phpactor.json
 .phpunit.result.cache
-.claude
-tunnel.ps1
+/.claude
 /.fleet
 /.idea
 /.nova
@@ -25,4 +24,5 @@ Homestead.json
 security_audit_qurocollection.pdf
 Homestead.yaml
 Thumbs.db
+tunnel.ps1
 /storage/framework/views/

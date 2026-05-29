@@ -71,6 +71,7 @@
                                     @if($item->product->image)
                                         <img src="{{ Storage::url($item->product->image) }}"
                                             alt="{{ $item->product->name }}"
+                                            loading="lazy"
                                             class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                     @else
                                         <div class="w-full h-full flex items-center justify-center text-gray-200 text-xs">Tidak ada gambar</div>

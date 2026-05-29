@@ -20,27 +20,33 @@ class OngkirService
     {
         $cacheKey = "ongkir_{$originVillageCode}_{$destinationVillageCode}_{$weight}";
 
-        return Cache::remember($cacheKey, 3600, function () use ($originVillageCode, $destinationVillageCode, $weight) {
-            try {
-                $response = Http::timeout(30)
-                    ->withHeaders(['x-api-co-id' => $this->apiKey])
-                    ->get($this->baseUrl . '/expedition/shipping-cost', [
-                        'origin_village_code'      => $originVillageCode,
-                        'destination_village_code' => $destinationVillageCode,
-                        'weight'                   => $weight,
-                    ]);
+        // Return cached result only if it was a success — never cache errors
+        $cached = Cache::get($cacheKey);
+        if ($cached !== null) {
+            return $cached;
+        }
 
-                \Log::info('Ongkir response: ' . $response->body());
+        try {
+            $response = Http::timeout(30)
+                ->withHeaders(['x-api-co-id' => $this->apiKey])
+                ->get($this->baseUrl . '/expedition/shipping-cost', [
+                    'origin_village_code'      => $originVillageCode,
+                    'destination_village_code' => $destinationVillageCode,
+                    'weight'                   => $weight,
+                ]);
 
-                if ($response->successful()) {
-                    return $response->json();
-                }
+            \Log::info('Ongkir response: ' . $response->body());
 
-                return ['status' => 'error', 'result' => []];
-            } catch (\Exception $e) {
-                \Log::error('Ongkir error: ' . $e->getMessage());
-                return ['status' => 'error', 'result' => []];
+            if ($response->successful() && ($response->json('is_success') === true)) {
+                $result = $response->json();
+                Cache::put($cacheKey, $result, 3600);
+                return $result;
             }
-        });
+
+            return ['is_success' => false, 'message' => $response->json('message', 'Gagal mengecek ongkos kirim.')];
+        } catch (\Exception $e) {
+            \Log::error('Ongkir error: ' . $e->getMessage());
+            return ['is_success' => false, 'message' => 'Gagal mengecek ongkos kirim.'];
+        }
     }
 }
